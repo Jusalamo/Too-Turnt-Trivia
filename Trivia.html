@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Too Turned Trivia™</title>
+    <meta name="description" content="Too Turned Trivia™ - A timed multiplayer trivia game with 4 questions per card and real-time scoring">
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Mona Sans Font -->
+    <link href="https://fonts.cdnfonts.com/css/mona-sans" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Game mode colors */
+            --color-30s: #8B5CF6;     /* Purple for 30 Seconds mode */
+            --color-buzzer: #10B981;  /* Green for Buzzer mode */
+            --color-mixed: #3B82F6;   /* Blue for Mixed mode */
+            --color-challenge: #F59E0B; /* Amber for Challenge mode */
+            
+            /* Theme colors */
+            --bg-dark: #121212;
+            --surface-dark: #1F1F1F;
+            --surface-darker: #171717;
+            --card-white: #FFFFFF;
+            --text-light: #F0F0F0;
+            --text-gray: #9CA3AF;
+            --text-dark: #1A1A1A;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            
+            /* Timer colors */
+            --timer-green: #10B981;
+            --timer-yellow: #F59E0B;
+            --timer-red: #EF4444;
+            
+            /* Shadows */
+            --shadow-card: 0 20px 50px rgba(0, 0, 0, 0.5);
+            --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* RAINBOW INTRO SCREEN */
+        #introScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000000 0%, #1a1a2e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease-out;
+        }
+
+        .rainbow-logo {
+            font-family: 'Mona Sans', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(
+                90deg,
+                #8B5CF6,
+                #3B82F6,
+                #10B981,
+                #F59E0B,
+                #8B5CF6
+            );
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientShift 3s ease infinite;
+            letter-spacing: -1px;
+            margin-bottom: 1rem;
+        }
+
+        .intro-subtitle {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 1.5s forwards;
+        }
+
+        .rainbow-progress {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 1.5s forwards;
+        }
+
+        .rainbow-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #8B5CF6, #3B82F6, #10B981);
+            border-radius: 3px;
+            transition: width 2.5s cubic-bezier(0.28, 0.11, 0.32, 1);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* CIRCULAR TIMER */
+        .timer-container {
+            width: 120px;
+            height: 120px;
+            position: relative;
+        }
+
+        .timer-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .timer-circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 8;
+        }
+
+        .timer-circle {
+            fill: none;
+            stroke: var(--timer-green);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
+        }
+
+        .timer-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        /* GAME CARDS */
+        .card-container {
+            background: var(--card-white);
+            border-radius: 20px;
+            box-shadow: var(--shadow-card);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-container.active {
+            box-shadow: var(--shadow-glow);
+        }
+
+        .card-header {
+            background: linear-gradient(90deg, var(--color-30s), var(--color-mixed));
+            padding: 20px;
+            color: white;
+        }
+
+        .question-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .question-item.correct {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--success);
+        }
+
+        .question-item.incorrect {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--danger);
+        }
+
+        .checkbox-custom {
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-custom.checked {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        /* SCOREBOARD */
+        .scoreboard-item {
+            background: var(--surface-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .scoreboard-item.active {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: var(--color-30s);
+            transform: translateX(8px);
+        }
+
+        .score-badge {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--color-30s);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* BUTTONS */
+        .btn-primary {
+            background: linear-gradient(90deg, var(--color-30s), var(--color-mixed));
+            color: white;
+            border-radius: 14px;
+            padding: 16px 32px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--surface-dark);
+            color: var(--text-light);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* GAME MODE SELECTOR */
+        .mode-card {
+            background: var(--surface-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .mode-card.selected {
+            border-color: var(--color-30s);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        /* PLAYER BADGE */
+        .player-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--surface-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ANIMATIONS */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .rainbow-logo {
+                font-size: 2.5rem;
+            }
+            
+            .timer-container {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .timer-text {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- INTRO SCREEN -->
+    <div id="introScreen">
+        <header class="max-w-xl w-full text-center mb-6 px-4">
+            <h1 class="rainbow-logo">Too Turned Trivia™</h1>
+            <div class="intro-subtitle">Timed Multiplayer Trivia Card Game</div>
+        </header>
+        <div class="rainbow-progress">
+            <div class="rainbow-progress-bar" id="rainbowProgressBar"></div>
+        </div>
+    </div>
+
+    <!-- PLAYER SETUP MODAL -->
+    <div id="playerModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2 class="text-3xl font-bold text-white mb-2 text-center font-['Mona_Sans']">Too Turned Trivia™</h2>
+            <p class="text-gray-400 text-center mb-6">Add players to start the game</p>
+            
+            <div class="mb-6">
+                <div class="flex gap-2 mb-4">
+                    <input 
+                        type="text" 
+                        id="playerNameInput" 
+                        class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500"
+                        placeholder="Enter player name"
+                        maxlength="20"
+                    />
+                    <button id="addPlayerBtn" class="btn-primary px-6 whitespace-nowrap">Add</button>
+                </div>
+                
+                <div id="playersList" class="space-y-2 mb-4">
+                    <!-- Player items will be added here -->
+                </div>
+                
+                <p class="text-sm text-gray-400 text-center mb-4">
+                    <span id="playerCount">0</span> players added (minimum 2)
+                </p>
+            </div>
+            
+            <button id="startGameBtn" class="btn-primary w-full text-lg py-3" disabled>
+                Start Game
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN GAME -->
+    <div id="mainGame" class="min-h-screen p-4 md:p-6" style="display: none; opacity: 0;">
+        <!-- HEADER -->
+        <header class="max-w-6xl mx-auto mb-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-white font-['Mona_Sans']">Too Turned Trivia™</h1>
+                    <div class="flex items-center gap-4 mt-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-green-500 pulse"></div>
+                            <span id="gameStatus" class="text-gray-400">Waiting to start</span>
+                        </div>
+                        <button id="managePlayers" class="text-sm text-gray-400 hover:text-white transition-colors">
+                            <span class="flex items-center gap-1">
+                                👤 Manage Players
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-6">
+                    <!-- OVERALL TIMER -->
+                    <div class="text-center">
+                        <p class="text-gray-400 text-sm mb-1">Game Timer</p>
+                        <div class="timer-container">
+                            <svg class="timer-svg" viewBox="0 0 120 120">
+                                <circle class="timer-circle-bg" cx="60" cy="60" r="54"></circle>
+                                <circle class="timer-circle" cx="60" cy="60" r="54" 
+                                        stroke-dasharray="339.292" stroke-dashoffset="0"
+                                        id="overallTimerCircle"></circle>
+                            </svg>
+                            <div class="timer-text" id="overallTimerText">2:00</div>
+                        </div>
+                    </div>
+                    
+                    <!-- SCOREBOARD TOGGLE -->
+                    <button id="toggleScoreboard" class="btn-secondary">
+                        <span class="flex items-center gap-2">
+                            🏆 Scoreboard
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto">
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- LEFT COLUMN: GAME INFO & CONTROLS -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- GAME MODE SELECTOR -->
+                    <div class="bg-surface-dark rounded-2xl p-6 border border-gray-800">
+                        <h3 class="text-xl font-bold text-white mb-4">Game Mode</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="mode-card selected" data-mode="30s">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-8 h-8 rounded-lg bg-purple-900 flex items-center justify-center">
+                                        ⏱️
+                                    </div>
+                                    <span class="font-semibold text-white">30 Seconds</span>
+                                </div>
+                                <p class="text-gray-400 text-sm">Turn-based with team cards</p>
+                            </div>
+                            
+                            <div class="mode-card" data-mode="buzzer">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-8 h-8 rounded-lg bg-green-900 flex items-center justify-center">
+                                        🔔
+                                    </div>
+                                    <span class="font-semibold text-white">Buzzer</span>
+                                </div>
+                                <p class="text-gray-400 text-sm">Fastest answer wins</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DECK SELECTION -->
+                    <div class="bg-surface-dark rounded-2xl p-6 border border-gray-800">
+                        <h3 class="text-xl font-bold text-white mb-4">Decks</h3>
+                        <div class="space-y-3">
+                            <button class="w-full flex items-center justify-between p-3 rounded-xl bg-gray-900 hover:bg-gray-800 transition-colors">
+                                <span class="text-white font-medium">General Knowledge</span>
+                                <span class="text-gray-400 text-sm">90 cards</span>
+                            </button>
+                            <button class="w-full flex items-center justify-between p-3 rounded-xl bg-gray-900 hover:bg-gray-800 transition-colors">
+                                <span class="text-white font-medium">Movies & TV</span>
+                                <span class="text-gray-400 text-sm">75 cards</span>
+                            </button>
+                            <button class="w-full flex items-center justify-between p-3 rounded-xl bg-gray-900 hover:bg-gray-800 transition-colors">
+                                <span class="text-white font-medium">Music</span>
+                                <span class="text-gray-400 text-sm">80 cards</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- GAME CONTROLS -->
+                    <div class="bg-surface-dark rounded-2xl p-6 border border-gray-800">
+                        <h3 class="text-xl font-bold text-white mb-4">Controls</h3>
+                        <div class="space-y-3">
+                            <button id="startRoundBtn" class="btn-primary w-full">
+                                ▶ Start Round
+                            </button>
+                            <button id="nextCardBtn" class="btn-secondary w-full" disabled>
+                                ⏭ Next Card
+                            </button>
+                            <button id="endGameBtn" class="btn-secondary w-full">
+                                ⏹ End Game
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CENTER COLUMN: GAME AREA -->
+                <div class="lg:col-span-2">
+                    <!-- ACTIVE PLAYER DISPLAY -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm mb-1">Active Player</p>
+                                <div class="player-badge" id="activePlayerBadge">
+                                    No active player
+                                </div>
+                            </div>
+                            
+                            <!-- CARD TIMER -->
+                            <div class="text-center">
+                                <p class="text-gray-400 text-sm mb-1">Card Timer</p>
+                                <div class="timer-container">
+                                    <svg class="timer-svg" viewBox="0 0 120 120">
+                                        <circle class="timer-circle-bg" cx="60" cy="60" r="54"></circle>
+                                        <circle class="timer-circle" cx="60" cy="60" r="54" 
+                                                stroke-dasharray="339.292" stroke-dashoffset="0"
+                                                id="cardTimerCircle"></circle>
+                                    </svg>
+                                    <div class="timer-text" id="cardTimerText">0:30</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD DISPLAY -->
+                    <div id="cardContainer" class="card-container slide-in">
+                        <div class="card-header rounded-t-2xl">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-sm opacity-90">Card #1 • General Knowledge</p>
+                                    <h3 class="text-2xl font-bold mt-1">Quick Fire Round</h3>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm">Time Remaining</p>
+                                    <p class="text-2xl font-bold" id="cardTimeDisplay">30s</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6">
+                            <!-- QUESTIONS LIST -->
+                            <div id="questionsList" class="space-y-4">
+                                <!-- Questions will be dynamically inserted here -->
+                            </div>
+                            
+                            <!-- SCORING CONTROLS -->
+                            <div class="mt-8 pt-6 border-t border-gray-200">
+                                <div class="flex justify-between items-center">
+                                    <div class="text-gray-600">
+                                        <span id="correctCount">0</span> correct • 
+                                        <span id="incorrectCount">0</span> strikes
+                                    </div>
+                                    <div class="flex gap-3">
+                                        <button id="markAllCorrect" class="px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors">
+                                            ✓ All Correct
+                                        </button>
+                                        <button id="markAllIncorrect" class="px-4 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors">
+                                            ✗ All Strikes
+                                        </button>
+                                        <button id="submitScore" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                            Submit Score
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SCOREBOARD (COLLAPSIBLE) -->
+                    <div id="scoreboardSection" class="mt-6 slide-in" style="display: none;">
+                        <div class="bg-surface-darker rounded-2xl p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold text-white">Live Scoreboard</h3>
+                                <button id="closeScoreboard" class="text-gray-400 hover:text-white">
+                                    ✕
+                                </button>
+                            </div>
+                            
+                            <div id="scoreboardList" class="space-y-3">
+                                <!-- Scoreboard items will be dynamically inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- LUCIDE ICONS (for future use) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <script>
+        // GAME STATE
+        let gameState = {
+            players: [],
+            currentPlayerIndex: 0,
+            scores: {},
+            gameMode: '30s',
+            gameTimer: 120, // 2 minutes in seconds
+            cardTimer: 30, // 30 seconds per card
+            isGameActive: false,
+            isRoundActive: false,
+            currentCard: null,
+            strikes: {},
+            correctAnswers: 0,
+            incorrectAnswers: 0
+        };
+
+        // SAMPLE QUESTIONS (4 per card)
+        const sampleCards = [
+            {
+                id: 1,
+                category: "General Knowledge",
+                questions: [
+                    "What is the capital of France?",
+                    "How many continents are there?",
+                    "What planet is known as the Red Planet?",
+                    "Who wrote 'Romeo and Juliet'?"
+                ]
+            },
+            {
+                id: 2,
+                category: "Movies & TV",
+                questions: [
+                    "Which actor played Iron Man in the MCU?",
+                    "What is the highest-grossing film of all time?",
+                    "In which city is 'Friends' set?",
+                    "Who directed 'The Dark Knight'?"
+                ]
+            },
+            {
+                id: 3,
+                category: "Music",
+                questions: [
+                    "Who is known as the 'King of Pop'?",
+                    "Which band wrote 'Bohemian Rhapsody'?",
+                    "What instrument does Yo-Yo Ma play?",
+                    "Which singer released the album 'Lemonade'?"
+                ]
+            }
+        ];
+
+        // INTRO ANIMATION
+        function showRainbowIntroScreen() {
+            const introScreen = document.getElementById('introScreen');
+            const progressBar = document.getElementById('rainbowProgressBar');
+            
+            setTimeout(() => {
+                progressBar.style.width = '100%';
+            }, 100);
+            
+            setTimeout(() => {
+                introScreen.style.opacity = '0';
+                setTimeout(() => {
+                    introScreen.style.display = 'none';
+                    showPlayerModal();
+                }, 800);
+            }, 3000);
+        }
+
+        // PLAYER MANAGEMENT
+        function addPlayer(name) {
+            if (name && !gameState.players.includes(name)) {
+                gameState.players.push(name);
+                gameState.scores[name] = 0;
+                gameState.strikes[name] = 0;
+                updatePlayersList();
+                updatePlayerCount();
+                document.getElementById('playerNameInput').value = '';
+            }
+        }
+
+        function removePlayer(name) {
+            gameState.players = gameState.players.filter(p => p !== name);
+            delete gameState.scores[name];
+            delete gameState.strikes[name];
+            updatePlayersList();
+            updatePlayerCount();
+        }
+
+        function updatePlayersList() {
+            const list = document.getElementById('playersList');
+            if (gameState.players.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-4">No players added yet</p>';
+            } else {
+                list.innerHTML = gameState.players.map(player => `
+                    <div class="flex items-center justify-between bg-gray-900 rounded-xl p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                                <span class="text-white font-semibold">${player.charAt(0)}</span>
+                            </div>
+                            <span class="text-white font-medium">${player}</span>
+                        </div>
+                        <button onclick="removePlayer('${player}')" class="text-gray-400 hover:text-red-400 transition-colors">
+                            Remove
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updatePlayerCount() {
+            document.getElementById('playerCount').textContent = gameState.players.length;
+            document.getElementById('startGameBtn').disabled = gameState.players.length < 2;
+        }
+
+        function showPlayerModal() {
+            document.getElementById('playerModal').style.display = 'flex';
+        }
+
+        function hidePlayerModal() {
+            document.getElementById('playerModal').style.display = 'none';
+        }
+
+        // GAME FUNCTIONS
+        function startGame() {
+            if (gameState.players.length < 2) {
+                alert('Need at least 2 players to start!');
+                return;
+            }
+
+            hidePlayerModal();
+            document.getElementById('mainGame').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('mainGame').style.opacity = '1';
+                updateGameStatus('Ready to start round');
+                initializeScoreboard();
+            }, 50);
+        }
+
+        function startRound() {
+            if (!gameState.isGameActive) {
+                gameState.isGameActive = true;
+                startGameTimer();
+            }
+
+            gameState.isRoundActive = true;
+            gameState.currentCard = sampleCards[0];
+            gameState.correctAnswers = 0;
+            gameState.incorrectAnswers = 0;
+
+            updateActivePlayer();
+            loadCard(gameState.currentCard);
+            startCardTimer();
+            updateGameStatus('Round active');
+
+            document.getElementById('startRoundBtn').disabled = true;
+            document.getElementById('nextCardBtn').disabled = false;
+        }
+
+        function loadCard(card) {
+            const container = document.getElementById('questionsList');
+            container.innerHTML = '';
+
+            card.questions.forEach((question, index) => {
+                const questionElement = `
+                    <div class="question-item" data-index="${index}">
+                        <div class="flex items-start gap-4">
+                            <div class="checkbox-custom" onclick="toggleAnswer(${index})">
+                                <span class="text-white text-sm">✓</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-gray-800 font-medium mb-1">${question}</p>
+                                <p class="text-gray-500 text-sm">Tick if correct, leave blank for strike</p>
+                            </div>
+                            <div class="text-sm text-gray-400">
+                                #${index + 1}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += questionElement;
+            });
+
+            updateScoreDisplay();
+        }
+
+        function toggleAnswer(index) {
+            const questionItem = document.querySelector(`.question-item[data-index="${index}"]`);
+            const checkbox = questionItem.querySelector('.checkbox-custom');
+            
+            if (checkbox.classList.contains('checked')) {
+                checkbox.classList.remove('checked');
+                gameState.correctAnswers--;
+            } else {
+                checkbox.classList.add('checked');
+                gameState.correctAnswers++;
+            }
+            
+            updateScoreDisplay();
+        }
+
+        function updateScoreDisplay() {
+            gameState.incorrectAnswers = 4 - gameState.correctAnswers;
+            
+            document.getElementById('correctCount').textContent = gameState.correctAnswers;
+            document.getElementById('incorrectCount').textContent = gameState.incorrectAnswers;
+        }
+
+        function submitScore() {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            gameState.scores[currentPlayer] += gameState.correctAnswers;
+            gameState.strikes[currentPlayer] += gameState.incorrectAnswers;
+
+            updateScoreboard();
+            nextCard();
+        }
+
+        function nextCard() {
+            gameState.isRoundActive = false;
+            gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+            
+            updateActivePlayer();
+            updateGameStatus('Ready for next card');
+            
+            document.getElementById('startRoundBtn').disabled = false;
+            document.getElementById('nextCardBtn').disabled = true;
+        }
+
+        function updateActivePlayer() {
+            const player = gameState.players[gameState.currentPlayerIndex];
+            document.getElementById('activePlayerBadge').innerHTML = `
+                <span class="flex items-center gap-2">
+                    👑 ${player}
+                </span>
+            `;
+        }
+
+        // TIMER FUNCTIONS
+        function startGameTimer() {
+            let timeLeft = gameState.gameTimer;
+            const timerCircle = document.getElementById('overallTimerCircle');
+            const timerText = document.getElementById('overallTimerText');
+            const circumference = 339.292;
+
+            const timerInterval = setInterval(() => {
+                if (!gameState.isGameActive) {
+                    clearInterval(timerInterval);
+                    return;
+                }
+
+                timeLeft--;
+                
+                // Update circular progress
+                const progress = timeLeft / gameState.gameTimer;
+                const offset = circumference * (1 - progress);
+                timerCircle.style.strokeDashoffset = offset;
+                
+                // Update timer color based on time
+                if (timeLeft <= 30) {
+                    timerCircle.style.stroke = 'var(--timer-red)';
+                } else if (timeLeft <= 60) {
+                    timerCircle.style.stroke = 'var(--timer-yellow)';
+                }
+                
+                // Update text
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerText.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // End game when timer reaches 0
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function startCardTimer() {
+            let timeLeft = gameState.cardTimer;
+            const timerCircle = document.getElementById('cardTimerCircle');
+            const timerText = document.getElementById('cardTimerText');
+            const cardTimeDisplay = document.getElementById('cardTimeDisplay');
+            const circumference = 339.292;
+
+            const timerInterval = setInterval(() => {
+                if (!gameState.isRoundActive) {
+                    clearInterval(timerInterval);
+                    return;
+                }
+
+                timeLeft--;
+                
+                // Update circular progress
+                const progress = timeLeft / gameState.cardTimer;
+                const offset = circumference * (1 - progress);
+                timerCircle.style.strokeDashoffset = offset;
+                
+                // Update timer color
+                if (timeLeft <= 10) {
+                    timerCircle.style.stroke = 'var(--timer-red)';
+                } else if (timeLeft <= 20) {
+                    timerCircle.style.stroke = 'var(--timer-yellow)';
+                }
+                
+                // Update text displays
+                timerText.textContent = timeLeft;
+                cardTimeDisplay.textContent = `${timeLeft}s`;
+                
+                // Auto-submit when time runs out
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitScore();
+                }
+            }, 1000);
+        }
+
+        // SCOREBOARD FUNCTIONS
+        function initializeScoreboard() {
+            const scoreboard = document.getElementById('scoreboardList');
+            scoreboard.innerHTML = gameState.players.map(player => `
+                <div class="scoreboard-item" data-player="${player}">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center">
+                                <span class="text-white font-semibold">${player.charAt(0)}</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-white">${player}</p>
+                                <p class="text-sm text-gray-400">${gameState.strikes[player]} strikes</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="score-badge">${gameState.scores[player]} points</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateScoreboard() {
+            const items = document.querySelectorAll('.scoreboard-item');
+            items.forEach(item => {
+                const player = item.dataset.player;
+                const scoreBadge = item.querySelector('.score-badge');
+                const strikesText = item.querySelector('.text-gray-400');
+                
+                scoreBadge.textContent = `${gameState.scores[player]} points`;
+                strikesText.textContent = `${gameState.strikes[player]} strikes`;
+                
+                // Highlight active player
+                if (player === gameState.players[gameState.currentPlayerIndex]) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        function toggleScoreboard() {
+            const scoreboard = document.getElementById('scoreboardSection');
+            if (scoreboard.style.display === 'none') {
+                scoreboard.style.display = 'block';
+                updateScoreboard();
+            } else {
+                scoreboard.style.display = 'none';
+            }
+        }
+
+        // GAME CONTROL FUNCTIONS
+        function updateGameStatus(status) {
+            document.getElementById('gameStatus').textContent = status;
+        }
+
+        function endGame() {
+            gameState.isGameActive = false;
+            gameState.isRoundActive = false;
+            
+            updateGameStatus('Game ended');
+            document.getElementById('startRoundBtn').disabled = true;
+            document.getElementById('nextCardBtn').disabled = true;
+            
+            // Show final scores
+            alert('Game Over! Final scores will be displayed.');
+            toggleScoreboard();
+        }
+
+        // EVENT LISTENERS
+        document.addEventListener('DOMContentLoaded', () => {
+            // Intro animation
+            showRainbowIntroScreen();
+
+            // Player modal
+            document.getElementById('addPlayerBtn').addEventListener('click', () => {
+                const input = document.getElementById('playerNameInput');
+                const name = input.value.trim();
+                if (name) addPlayer(name);
+            });
+
+            document.getElementById('playerNameInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const name = e.target.value.trim();
+                    if (name) addPlayer(name);
+                }
+            });
+
+            document.getElementById('startGameBtn').addEventListener('click', startGame);
+
+            // Game controls
+            document.getElementById('startRoundBtn').addEventListener('click', startRound);
+            document.getElementById('nextCardBtn').addEventListener('click', nextCard);
+            document.getElementById('endGameBtn').addEventListener('click', endGame);
+            document.getElementById('submitScore').addEventListener('click', submitScore);
+            document.getElementById('markAllCorrect').addEventListener('click', () => {
+                gameState.correctAnswers = 4;
+                gameState.incorrectAnswers = 0;
+                updateScoreDisplay();
+                
+                // Update checkboxes
+                document.querySelectorAll('.checkbox-custom').forEach(checkbox => {
+                    checkbox.classList.add('checked');
+                });
+            });
+            document.getElementById('markAllIncorrect').addEventListener('click', () => {
+                gameState.correctAnswers = 0;
+                gameState.incorrectAnswers = 4;
+                updateScoreDisplay();
+                
+                // Update checkboxes
+                document.querySelectorAll('.checkbox-custom').forEach(checkbox => {
+                    checkbox.classList.remove('checked');
+                });
+            });
+
+            // Scoreboard toggle
+            document.getElementById('toggleScoreboard').addEventListener('click', toggleScoreboard);
+            document.getElementById('closeScoreboard').addEventListener('click', () => {
+                document.getElementById('scoreboardSection').style.display = 'none';
+            });
+
+            // Manage players
+            document.getElementById('managePlayers').addEventListener('click', showPlayerModal);
+
+            // Game mode selection
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    gameState.gameMode = card.dataset.mode;
+                });
+            });
+
+            // Add default players for testing
+            addPlayer('Player 1');
+            addPlayer('Player 2');
+        });
+
+        // Make removePlayer globally accessible
+        window.removePlayer = removePlayer;
+    </script>
+</body>
+</html>
