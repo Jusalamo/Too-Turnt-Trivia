@@ -123,6 +123,7 @@
             align-items: center;
             z-index: 100;
             border-bottom: 1px solid rgba(255, 222, 33, 0.1);
+            height: 60px;
         }
 
         .hud-left {
@@ -169,7 +170,8 @@
         .screen {
             display: none;
             min-height: 100vh;
-            padding-top: 60px;
+            padding: 60px 0 70px; /* Top padding for HUD, bottom for nav */
+            overflow-y: auto;
         }
 
         .screen.active {
@@ -180,6 +182,7 @@
             padding: var(--space-xl) var(--space-md);
             max-width: 1200px;
             margin: 0 auto;
+            min-height: calc(100vh - 130px); /* Account for HUD and nav */
         }
 
         /* ===== BOTTOM NAVIGATION ===== */
@@ -195,6 +198,7 @@
             padding: 12px 0;
             z-index: 100;
             border-top: 1px solid rgba(255, 222, 33, 0.1);
+            height: 70px;
         }
 
         .nav-item {
@@ -210,6 +214,8 @@
             transition: all 0.2s;
             padding: 8px 16px;
             border-radius: var(--radius-md);
+            flex: 1;
+            max-width: 100px;
         }
 
         .nav-item.active {
@@ -319,34 +325,6 @@
             line-height: 1.5;
             margin-bottom: var(--space-md);
         }
-
-        .card-progress {
-            height: 4px;
-            background: var(--gray-700);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-bottom: var(--space-sm);
-        }
-
-        .card-progress-fill {
-            height: 100%;
-            border-radius: 2px;
-        }
-
-        .card-rarity {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .rarity-common { background: rgba(108, 92, 231, 0.2); color: var(--purple); }
-        .rarity-rare { background: rgba(255, 118, 117, 0.2); color: var(--red); }
-        .rarity-epic { background: rgba(253, 203, 110, 0.2); color: var(--orange); }
-        .rarity-legendary { background: rgba(0, 184, 148, 0.2); color: var(--green); }
 
         /* ===== HOME SCREEN ===== */
         .hero-section {
@@ -482,6 +460,8 @@
 
         .players-list {
             margin-bottom: var(--space-lg);
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .player-item {
@@ -662,7 +642,7 @@
             justify-content: center;
         }
 
-        /* ===== CARDS SCREEN ===== */
+        /* ===== CATEGORIES SCREEN ===== */
         .categories-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -700,6 +680,12 @@
             justify-content: center;
             font-size: 36px;
             font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
         }
 
         .profile-info {
@@ -710,9 +696,11 @@
             font-size: 28px;
             font-weight: 800;
             margin-bottom: var(--space-sm);
+            cursor: pointer;
         }
 
-        .profile-stats {
+        /* ===== STATS SCREEN ===== */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: var(--space-lg);
@@ -731,6 +719,35 @@
             margin-bottom: var(--space-sm);
         }
 
+        .leaderboard {
+            background: var(--gray-800);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-md);
+            border-bottom: 1px solid var(--gray-700);
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-rank {
+            width: 36px;
+            height: 36px;
+            background: var(--gray-700);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
         /* ===== ONLINE SCREEN ===== */
         .online-actions {
             display: flex;
@@ -747,6 +764,8 @@
 
         .room-list {
             margin-top: var(--space-lg);
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         .room-item {
@@ -774,6 +793,70 @@
             background: var(--gray-800);
             border-radius: var(--radius-md);
             border: 2px dashed var(--yellow);
+        }
+
+        /* ===== SETTINGS SCREEN ===== */
+        .settings-section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-md);
+            background: var(--gray-800);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            cursor: pointer;
+        }
+
+        .settings-item:hover {
+            background: var(--gray-700);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray-700);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--yellow);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
         }
 
         /* ===== MODALS ===== */
@@ -894,11 +977,51 @@
             font-family: inherit;
             font-size: 16px;
             cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23FFDE21' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
         }
 
         .select-dropdown:focus {
             outline: none;
             border-color: var(--yellow);
+        }
+
+        /* ===== NUMBER INPUT STYLING ===== */
+        .number-input-group {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .number-input-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--gray-700);
+            border: 2px solid var(--gray-600);
+            border-radius: var(--radius-md);
+            color: var(--white);
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .number-input-btn:hover {
+            background: var(--gray-600);
+            border-color: var(--yellow);
+        }
+
+        .number-input {
+            flex: 1;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
         }
 
         /* ===== UTILITY CLASSES ===== */
@@ -928,6 +1051,7 @@
         .w-full { width: 100%; }
         .relative { position: relative; }
         .flex-1 { flex: 1; }
+        .opacity-50 { opacity: 0.5; }
 
         /* ===== FEEDBACK ANIMATIONS ===== */
         @keyframes fadeInOut {
@@ -960,6 +1084,30 @@
         .feedback-incorrect {
             background: var(--red);
             color: white;
+        }
+
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--gray-800);
+            border-left: 4px solid var(--yellow);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            max-width: 350px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
         }
 
         /* ===== BUZZER MODE STYLES ===== */
@@ -1020,6 +1168,26 @@
             margin-top: var(--space-sm);
         }
 
+        /* ===== CURRENT PLAYER TURN INDICATOR ===== */
+        .current-player-indicator {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: var(--gray-800);
+            padding: var(--space-sm) var(--space-md);
+            text-align: center;
+            font-weight: 600;
+            z-index: 99;
+            border-bottom: 1px solid var(--gray-700);
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 639px) {
             .hero-actions {
@@ -1038,7 +1206,7 @@
                 width: 100%;
             }
             
-            .card-grid, .categories-grid {
+            .card-grid, .categories-grid, .stats-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -1057,6 +1225,11 @@
 
             .modal-footer .btn {
                 width: 100%;
+            }
+
+            .room-code {
+                font-size: 32px;
+                letter-spacing: 4px;
             }
         }
 
@@ -1116,6 +1289,9 @@
         </div>
     </div>
 
+    <!-- Current Player Turn Indicator -->
+    <div class="current-player-indicator hidden" id="currentPlayerIndicator"></div>
+
     <!-- Screens -->
     <main>
         <!-- Home Screen -->
@@ -1141,22 +1317,14 @@
                         </div>
                         <h3 class="card-title">6 Game Modes</h3>
                         <p class="card-description">Classic, Countdown, Ladder, Battle, Buzzer, and Solo challenges with unique rules</p>
-                        <div class="card-progress">
-                            <div class="card-progress-fill" style="width: 100%; background: var(--purple);"></div>
-                        </div>
-                        <span class="card-rarity rarity-common">Unlocked</span>
                     </div>
                     
-                    <div class="card" data-screen="cards">
+                    <div class="card" data-screen="categories">
                         <div class="card-icon" style="background: rgba(255, 118, 117, 0.2); color: var(--red);">
                             <i class="fas fa-layer-group"></i>
                         </div>
                         <h3 class="card-title">Categories</h3>
                         <p class="card-description">Science, History, Entertainment, Sports, Geography, and more</p>
-                        <div class="card-progress">
-                            <div class="card-progress-fill" style="width: 100%; background: var(--red);"></div>
-                        </div>
-                        <span class="card-rarity rarity-rare">All Unlocked</span>
                     </div>
                     
                     <div class="card" data-screen="stats">
@@ -1165,10 +1333,6 @@
                         </div>
                         <h3 class="card-title">Stats & Rankings</h3>
                         <p class="card-description">Track your progress and compete on global leaderboards</p>
-                        <div class="card-progress">
-                            <div class="card-progress-fill" style="width: 65%; background: var(--orange);"></div>
-                        </div>
-                        <span class="card-rarity rarity-epic">Rank #1,245</span>
                     </div>
                     
                     <div class="card" data-screen="profile">
@@ -1176,11 +1340,7 @@
                             <i class="fas fa-user-circle"></i>
                         </div>
                         <h3 class="card-title">My Profile</h3>
-                        <p class="card-description">Customize your avatar and view achievements</p>
-                        <div class="card-progress">
-                            <div class="card-progress-fill" style="width: 88%; background: var(--green);"></div>
-                        </div>
-                        <span class="card-rarity rarity-legendary">Legendary</span>
+                        <p class="card-description">Customize your avatar and manage settings</p>
                     </div>
                 </div>
             </div>
@@ -1200,12 +1360,12 @@
             </div>
         </div>
 
-        <!-- Cards/Categories Screen -->
-        <div class="screen" id="cardsScreen">
+        <!-- Categories Screen -->
+        <div class="screen" id="categoriesScreen">
             <div class="page-content">
                 <div class="modes-header">
                     <h2 class="section-title">Categories</h2>
-                    <p class="section-subtitle">Explore different trivia categories and track your progress</p>
+                    <p class="section-subtitle">Explore different trivia categories</p>
                 </div>
                 
                 <div class="categories-grid" id="categoriesGrid">
@@ -1214,40 +1374,102 @@
             </div>
         </div>
 
-        <!-- Profile Screen -->
-        <div class="screen" id="profileScreen">
+        <!-- Stats Screen -->
+        <div class="screen" id="statsScreen">
             <div class="page-content">
-                <div class="profile-header">
-                    <div class="profile-avatar" id="profileAvatar">P</div>
-                    <div class="profile-info">
-                        <h1 class="profile-name" id="profileName">Player</h1>
-                        <p class="text-gray-400">Trivia Master</p>
-                    </div>
+                <div class="modes-header">
+                    <h2 class="section-title">Stats & Rankings</h2>
+                    <p class="section-subtitle">Track your progress and achievements</p>
                 </div>
 
-                <div class="profile-stats">
+                <div class="stats-grid mb-xl">
                     <div class="stat-card card">
-                        <div class="stat-value-lg" id="totalGames">0</div>
+                        <div class="stat-value-lg" id="totalGamesStat">0</div>
                         <div class="stat-label">Games Played</div>
                     </div>
                     <div class="stat-card card">
-                        <div class="stat-value-lg" id="correctAnswers">0%</div>
+                        <div class="stat-value-lg" id="accuracyStat">0%</div>
                         <div class="stat-label">Accuracy</div>
                     </div>
                     <div class="stat-card card">
-                        <div class="stat-value-lg" id="highestStreak">0</div>
-                        <div class="stat-label">Highest Streak</div>
+                        <div class="stat-value-lg" id="winStreakStat">0</div>
+                        <div class="stat-label">Win Streak</div>
                     </div>
                     <div class="stat-card card">
-                        <div class="stat-value-lg" id="totalScore">0</div>
-                        <div class="stat-label">Total Score</div>
+                        <div class="stat-value-lg" id="totalPointsStat">0</div>
+                        <div class="stat-label">Total Points</div>
+                    </div>
+                </div>
+
+                <div class="card mb-xl">
+                    <h3 class="card-title mb-lg">Achievements</h3>
+                    <div id="achievementsList">
+                        <!-- Achievements will be loaded here -->
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3 class="card-title mb-lg">Achievements</h3>
-                    <div id="achievementsList">
-                        <!-- Achievements will be loaded here -->
+                    <h3 class="card-title mb-lg">Global Leaderboard</h3>
+                    <div class="leaderboard" id="leaderboard">
+                        <!-- Leaderboard will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Screen -->
+        <div class="screen" id="profileScreen">
+            <div class="page-content">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar" onclick="openModal('avatarModal')">P</div>
+                    <div class="profile-info">
+                        <h1 class="profile-name" id="profileName" onclick="openModal('nameModal')">Player</h1>
+                        <p class="text-gray-400">Trivia Master</p>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="card-title mb-lg">Account Settings</h3>
+                    <div class="card">
+                        <div class="settings-item" onclick="openModal('nameModal')">
+                            <span><i class="fas fa-user text-yellow mr-md"></i> Change Username</span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                        <div class="settings-item" onclick="openModal('avatarModal')">
+                            <span><i class="fas fa-image text-yellow mr-md"></i> Change Avatar</span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="card-title mb-lg">Appearance</h3>
+                    <div class="card">
+                        <div class="settings-item">
+                            <span><i class="fas fa-moon text-yellow mr-md"></i> Dark Mode</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="darkModeToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="settings-item" onclick="openModal('themeModal')">
+                            <span><i class="fas fa-palette text-yellow mr-md"></i> Theme Color</span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="card-title mb-lg">Game Settings</h3>
+                    <div class="card">
+                        <div class="settings-item" onclick="openModal('soundModal')">
+                            <span><i class="fas fa-volume-up text-yellow mr-md"></i> Sound Effects</span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                        <div class="settings-item" onclick="openModal('notificationModal')">
+                            <span><i class="fas fa-bell text-yellow mr-md"></i> Notifications</span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1310,12 +1532,12 @@
                         
                         <div class="form-group">
                             <label class="form-label">Number of Questions</label>
-                            <select class="select-dropdown" id="questionCount">
-                                <option value="5">5 Questions</option>
-                                <option value="10" selected>10 Questions</option>
-                                <option value="15">15 Questions</option>
-                                <option value="20">20 Questions</option>
-                            </select>
+                            <div class="number-input-group">
+                                <button class="number-input-btn" id="questionDecrease">-</button>
+                                <input type="number" class="form-input number-input" id="questionCount" value="10" min="5" max="50">
+                                <button class="number-input-btn" id="questionIncrease">+</button>
+                            </div>
+                            <div class="text-sm text-gray-400 mt-sm">Choose between 5 and 50 questions</div>
                         </div>
 
                         <div class="form-group">
@@ -1536,9 +1758,13 @@
             <i class="nav-icon fas fa-gamepad"></i>
             <span>Modes</span>
         </button>
-        <button class="nav-item" data-screen="cards">
+        <button class="nav-item" data-screen="categories">
             <i class="nav-icon fas fa-layer-group"></i>
-            <span>Cards</span>
+            <span>Categories</span>
+        </button>
+        <button class="nav-item" data-screen="stats">
+            <i class="nav-icon fas fa-chart-line"></i>
+            <span>Stats</span>
         </button>
         <button class="nav-item" data-screen="profile">
             <i class="nav-icon fas fa-user"></i>
@@ -1623,12 +1849,11 @@
 
                 <div class="form-group">
                     <label class="form-label">Number of Questions</label>
-                    <select class="select-dropdown" id="onlineQuestionCount">
-                        <option value="5">5 Questions</option>
-                        <option value="10" selected>10 Questions</option>
-                        <option value="15">15 Questions</option>
-                        <option value="20">20 Questions</option>
-                    </select>
+                    <div class="number-input-group">
+                        <button class="number-input-btn" id="onlineQuestionDecrease">-</button>
+                        <input type="number" class="form-input number-input" id="onlineQuestionCount" value="10" min="5" max="50">
+                        <button class="number-input-btn" id="onlineQuestionIncrease">+</button>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -1716,6 +1941,157 @@
         </div>
     </div>
 
+    <!-- Name Change Modal -->
+    <div class="modal-overlay" id="nameModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeModal('nameModal')">&times;</button>
+                <h2 class="modal-title">Change Username</h2>
+                <p class="modal-subtitle">Enter your new username</p>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">New Username</label>
+                    <input type="text" class="form-input" id="newUsername" placeholder="Enter username" maxlength="20" value="Player">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('nameModal')">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" id="saveUsernameBtn">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avatar Selection Modal -->
+    <div class="modal-overlay" id="avatarModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeModal('avatarModal')">&times;</button>
+                <h2 class="modal-title">Choose Avatar</h2>
+                <p class="modal-subtitle">Select your profile picture</p>
+            </div>
+            <div class="modal-body">
+                <div class="grid grid-cols-4 gap-4" id="avatarGrid">
+                    <!-- Avatars will be populated -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('avatarModal')">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" id="saveAvatarBtn">
+                    Save Avatar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Color Modal -->
+    <div class="modal-overlay" id="themeModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeModal('themeModal')">&times;</button>
+                <h2 class="modal-title">Theme Color</h2>
+                <p class="modal-subtitle">Choose your preferred accent color</p>
+            </div>
+            <div class="modal-body">
+                <div class="grid grid-cols-3 gap-4" id="themeColors">
+                    <!-- Theme colors will be populated -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('themeModal')">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" onclick="closeModal('themeModal')">
+                    Save Theme
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sound Settings Modal -->
+    <div class="modal-overlay" id="soundModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeModal('soundModal')">&times;</button>
+                <h2 class="modal-title">Sound Settings</h2>
+                <p class="modal-subtitle">Adjust game audio</p>
+            </div>
+            <div class="modal-body">
+                <div class="settings-item">
+                    <span>Sound Effects</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundEffectsToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <span>Background Music</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="musicToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <span>Notification Sounds</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notificationSoundToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('soundModal')">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Settings Modal -->
+    <div class="modal-overlay" id="notificationModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeModal('notificationModal')">&times;</button>
+                <h2 class="modal-title">Notification Settings</h2>
+                <p class="modal-subtitle">Manage your notifications</p>
+            </div>
+            <div class="modal-body">
+                <div class="settings-item">
+                    <span>Achievement Notifications</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="achievementNotificationToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <span>Game Invitations</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="gameInvitationToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <span>Friend Activity</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="friendActivityToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('notificationModal')">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Pause Modal -->
     <div class="modal-overlay" id="pauseModal">
         <div class="modal">
@@ -1752,6 +2128,7 @@
             totalCorrectAnswers: 0,
             totalQuestions: 0,
             highestStreak: 0,
+            winStreak: 0,
             totalScore: 0,
             
             // Navigation
@@ -1760,6 +2137,8 @@
             
             // Players
             players: [],
+            playerScores: {},
+            playerTurn: 0,
             currentPlayerIndex: 0,
             
             // Game Modes with unique rules
@@ -1771,17 +2150,21 @@
                     color: '#6C5CE7',
                     description: 'Traditional question/answer format with progressive difficulty',
                     rules: [
+                        'Each player takes turns answering questions',
                         '30 seconds per question',
                         '3 lives per player',
                         '100 points per correct answer',
+                        'Wrong answer loses a life',
                         'Difficulty increases every 3 questions',
-                        'No time bonus'
+                        'Player with most points after all questions wins'
                     ],
                     instructions: [
-                        'Answer questions correctly to earn points',
-                        'Wrong answers cost a life',
-                        'Complete all questions to win',
-                        'Player with highest score wins'
+                        'Players take turns in order',
+                        'Current player answers the question',
+                        'Correct answer earns points',
+                        'Wrong answer loses a life',
+                        'Game continues until all questions answered',
+                        'Highest score wins'
                     ],
                     minPlayers: 2,
                     maxPlayers: 8,
@@ -1795,17 +2178,21 @@
                     color: '#FF7675',
                     description: 'Speed bonus for quick answers! Time limits per question',
                     rules: [
+                        'Each player gets the same question simultaneously',
                         '15 seconds per question',
                         '3 lives per player',
                         '100 base points + time bonus',
                         'Bonus: Quick answers earn extra points',
-                        'Timer counts down, faster answers = more points'
+                        'Timer counts down, faster answers = more points',
+                        'Wrong answer loses a life'
                     ],
                     instructions: [
+                        'All players answer the same question',
                         'Answer as quickly as possible',
                         'Bonus points for quick answers',
                         'Wrong answers cost a life',
-                        'Speed matters!'
+                        'Speed matters!',
+                        'Highest score wins'
                     ],
                     minPlayers: 2,
                     maxPlayers: 6,
@@ -1819,16 +2206,21 @@
                     color: '#FDCB6E',
                     description: 'Advance through levels by getting answers correct',
                     rules: [
+                        'Players take turns climbing the ladder',
                         '25 seconds per question',
                         '1 life per player',
                         'Scoring: 100 × current level',
+                        'Correct answer moves up one level',
+                        'Wrong answer drops back one level',
                         'Perfect streak bonus',
-                        'Wrong answer = drop back one level'
+                        'Highest level reached wins'
                     ],
                     instructions: [
                         'Start at level 1',
+                        'Players take turns answering',
                         'Correct answer moves up one level',
                         'Wrong answer drops back one level',
+                        'Level determines points per question',
                         'Reach the highest level to win'
                     ],
                     minPlayers: 1,
@@ -1843,14 +2235,19 @@
                     color: '#FD79A8',
                     description: 'Elimination-style gameplay! Wrong answers knock players out',
                     rules: [
+                        'Players take turns answering',
                         '20 seconds per question',
                         '1 life per player',
                         'Elimination after wrong answer',
                         'Last player standing wins',
-                        'Survival bonus points'
+                        'Survival bonus points',
+                        'Correct answer stays in game',
+                        'Wrong answer = eliminated'
                     ],
                     instructions: [
                         'Each player has 1 life',
+                        'Players take turns answering',
+                        'Correct answer = stay in game',
                         'Wrong answer = eliminated',
                         'Survive to win',
                         'Last player standing wins all'
@@ -1867,18 +2264,21 @@
                     color: '#00B894',
                     description: 'First to buzz in answers! Fast-paced competitive play',
                     rules: [
-                        'Unlimited time for question',
+                        'Question is displayed to all players',
                         'First to buzz in gets to answer',
+                        'Unlimited time for question',
                         'Correct answer = points + control',
                         'Wrong answer = lose turn',
-                        'Buzz in within 5 seconds of question'
+                        'Buzz in within 5 seconds of question',
+                        'Fastest finger wins!'
                     ],
                     instructions: [
-                        'Listen to the question',
-                        'Buzz in first to answer',
+                        'Question appears for all players',
+                        'First to buzz in gets to answer',
                         'Correct answer earns points',
                         'Wrong answer gives others a chance',
-                        'Fastest finger wins!'
+                        'Fastest finger wins!',
+                        'Player with most points wins'
                     ],
                     minPlayers: 2,
                     maxPlayers: 8,
@@ -1892,17 +2292,20 @@
                     color: '#00CEC9',
                     description: 'Individual play with deadlines. Perfect for self-challenge!',
                     rules: [
+                        'Play against yourself',
                         '30 seconds per question',
                         '3 lives',
                         'Score + accuracy bonus',
                         'Perfect round bonus',
-                        'Beat your high score!'
+                        'Beat your high score!',
+                        'Track your progress'
                     ],
                     instructions: [
-                        'Play against yourself',
+                        'Answer questions within time limit',
                         'Aim for high score',
                         'Perfect rounds earn bonus',
-                        'Track your progress'
+                        'Track your progress',
+                        'Beat your previous scores'
                     ],
                     minPlayers: 1,
                     maxPlayers: 1,
@@ -2006,14 +2409,31 @@
                 { id: 'streak_10', name: 'Hot Streak', description: 'Answer 10 questions in a row correctly', unlocked: false },
                 { id: 'speed_demon', name: 'Speed Demon', description: 'Answer a question in under 3 seconds', unlocked: false },
                 { id: 'mode_master', name: 'Mode Master', description: 'Play all game modes', unlocked: false },
-                { id: 'category_expert', name: 'Category Expert', description: 'Play all categories', unlocked: false }
-            ]
+                { id: 'category_expert', name: 'Category Expert', description: 'Play all categories', unlocked: false },
+                { id: 'trivia_champion', name: 'Trivia Champion', description: 'Win 10 games', unlocked: false },
+                { id: 'social_butterfly', name: 'Social Butterfly', description: 'Play with 8 different players', unlocked: false },
+                { id: 'night_owl', name: 'Night Owl', description: 'Play 5 games after midnight', unlocked: false },
+                { id: 'quick_thinker', name: 'Quick Thinker', description: 'Answer 5 questions correctly with less than 5 seconds remaining', unlocked: false },
+                { id: 'ladder_climber', name: 'Ladder Climber', description: 'Reach level 10 in Ladder mode', unlocked: false },
+                { id: 'battle_royale', name: 'Battle Royale', description: 'Win a Battle mode with 8 players', unlocked: false },
+                { id: 'buzzer_king', name: 'Buzzer King', description: 'Buzz in first 5 times in a single game', unlocked: false },
+                { id: 'countdown_pro', name: 'Countdown Pro', description: 'Score 1000+ points in Countdown mode', unlocked: false },
+                { id: 'solo_legend', name: 'Solo Legend', description: 'Get a perfect score in Solo mode', unlocked: false }
+            ],
+            
+            // Settings
+            settings: {
+                darkMode: true,
+                soundEffects: true,
+                music: true,
+                notifications: true,
+                achievementNotifications: true
+            }
         };
 
         // ===== API CONFIGURATION =====
         const API_CONFIG = {
             BASE_URL: 'https://the-trivia-api.com/v2',
-            API_KEY: 'https://the-trivia-api.com/v2/questions', // Using the provided endpoint as API key
             CATEGORIES: {
                 'general': 'general_knowledge',
                 'science': 'science',
@@ -2022,7 +2442,7 @@
                 'sports': 'sport_and_leisure',
                 'geography': 'geography',
                 'arts': 'arts_and_literature',
-                'technology': 'science' // Using science as fallback
+                'technology': 'science'
             }
         };
 
@@ -2044,13 +2464,17 @@
             screens: {
                 home: document.getElementById('homeScreen'),
                 modes: document.getElementById('modesScreen'),
-                cards: document.getElementById('cardsScreen'),
+                categories: document.getElementById('categoriesScreen'),
+                stats: document.getElementById('statsScreen'),
                 profile: document.getElementById('profileScreen'),
                 play: document.getElementById('playScreen'),
                 online: document.getElementById('onlineScreen'),
                 waiting: document.getElementById('waitingScreen'),
                 game: document.getElementById('gameScreen')
             },
+            
+            // Current Player Indicator
+            currentPlayerIndicator: document.getElementById('currentPlayerIndicator'),
             
             // Setup Screen
             playersList: document.getElementById('playersList'),
@@ -2070,6 +2494,8 @@
             
             // Game Settings
             questionCount: document.getElementById('questionCount'),
+            questionDecrease: document.getElementById('questionDecrease'),
+            questionIncrease: document.getElementById('questionIncrease'),
             categorySelect: document.getElementById('categorySelect'),
             difficultySelect: document.getElementById('difficultySelect'),
             settingsQuestionCount: document.getElementById('settingsQuestionCount'),
@@ -2117,14 +2543,17 @@
             leaveRoomBtn: document.getElementById('leaveRoomBtn'),
             startOnlineGameBtn: document.getElementById('startOnlineGameBtn'),
             
+            // Stats Screen
+            totalGamesStat: document.getElementById('totalGamesStat'),
+            accuracyStat: document.getElementById('accuracyStat'),
+            winStreakStat: document.getElementById('winStreakStat'),
+            totalPointsStat: document.getElementById('totalPointsStat'),
+            achievementsList: document.getElementById('achievementsList'),
+            leaderboard: document.getElementById('leaderboard'),
+            
             // Profile Screen
             profileAvatar: document.getElementById('profileAvatar'),
             profileName: document.getElementById('profileName'),
-            totalGames: document.getElementById('totalGames'),
-            correctAnswers: document.getElementById('correctAnswers'),
-            highestStreak: document.getElementById('highestStreak'),
-            totalScore: document.getElementById('totalScore'),
-            achievementsList: document.getElementById('achievementsList'),
             
             // Categories Screen
             categoriesGrid: document.getElementById('categoriesGrid'),
@@ -2145,6 +2574,8 @@
             roomName: document.getElementById('roomName'),
             onlineModeSelect: document.getElementById('onlineModeSelect'),
             onlineQuestionCount: document.getElementById('onlineQuestionCount'),
+            onlineQuestionDecrease: document.getElementById('onlineQuestionDecrease'),
+            onlineQuestionIncrease: document.getElementById('onlineQuestionIncrease'),
             onlineCategorySelect: document.getElementById('onlineCategorySelect'),
             maxPlayers: document.getElementById('maxPlayers'),
             createRoomConfirmBtn: document.getElementById('createRoomConfirmBtn'),
@@ -2162,9 +2593,34 @@
             modeInstructions: document.getElementById('modeInstructions'),
             playThisModeBtn: document.getElementById('playThisModeBtn'),
             
+            // Settings Modals
+            nameModal: document.getElementById('nameModal'),
+            newUsername: document.getElementById('newUsername'),
+            saveUsernameBtn: document.getElementById('saveUsernameBtn'),
+            
+            avatarModal: document.getElementById('avatarModal'),
+            avatarGrid: document.getElementById('avatarGrid'),
+            saveAvatarBtn: document.getElementById('saveAvatarBtn'),
+            
+            themeModal: document.getElementById('themeModal'),
+            themeColors: document.getElementById('themeColors'),
+            
+            soundModal: document.getElementById('soundModal'),
+            soundEffectsToggle: document.getElementById('soundEffectsToggle'),
+            musicToggle: document.getElementById('musicToggle'),
+            notificationSoundToggle: document.getElementById('notificationSoundToggle'),
+            
+            notificationModal: document.getElementById('notificationModal'),
+            achievementNotificationToggle: document.getElementById('achievementNotificationToggle'),
+            gameInvitationToggle: document.getElementById('gameInvitationToggle'),
+            friendActivityToggle: document.getElementById('friendActivityToggle'),
+            
             // Pause Modal
             pauseModal: document.getElementById('pauseModal'),
-            quitGameBtn: document.getElementById('quitGameBtn')
+            quitGameBtn: document.getElementById('quitGameBtn'),
+            
+            // Settings Toggles
+            darkModeToggle: document.getElementById('darkModeToggle')
         };
 
         // ===== INITIALIZATION =====
@@ -2182,10 +2638,21 @@
             updateHUD();
             populateGameData();
             populateCategories();
+            populateCategoriesScreen();
             setupStepNavigation();
+            populateStats();
+            populateAchievements();
+            populateLeaderboard();
             
             // Initialize online mode selectors
             populateOnlineSelectors();
+            
+            // Initialize settings
+            initializeSettings();
+            
+            // Add sample players for demo
+            addPlayer('Player 1');
+            addPlayer('Player 2');
         }
 
         function loadSavedData() {
@@ -2202,12 +2669,19 @@
             gameState.totalCorrectAnswers = parseInt(localStorage.getItem('totalCorrectAnswers')) || 0;
             gameState.totalQuestions = parseInt(localStorage.getItem('totalQuestions')) || 0;
             gameState.highestStreak = parseInt(localStorage.getItem('highestStreak')) || 0;
+            gameState.winStreak = parseInt(localStorage.getItem('winStreak')) || 0;
             gameState.totalScore = parseInt(localStorage.getItem('totalScore')) || 0;
             
             // Load achievements
             const savedAchievements = localStorage.getItem('achievements');
             if (savedAchievements) {
                 gameState.achievements = JSON.parse(savedAchievements);
+            }
+            
+            // Load settings
+            const savedSettings = localStorage.getItem('settings');
+            if (savedSettings) {
+                gameState.settings = JSON.parse(savedSettings);
             }
         }
 
@@ -2218,8 +2692,29 @@
             localStorage.setItem('totalCorrectAnswers', gameState.totalCorrectAnswers);
             localStorage.setItem('totalQuestions', gameState.totalQuestions);
             localStorage.setItem('highestStreak', gameState.highestStreak);
+            localStorage.setItem('winStreak', gameState.winStreak);
             localStorage.setItem('totalScore', gameState.totalScore);
             localStorage.setItem('achievements', JSON.stringify(gameState.achievements));
+            localStorage.setItem('settings', JSON.stringify(gameState.settings));
+        }
+
+        function initializeSettings() {
+            // Set toggle states
+            elements.darkModeToggle.checked = gameState.settings.darkMode;
+            elements.soundEffectsToggle.checked = gameState.settings.soundEffects;
+            elements.musicToggle.checked = gameState.settings.music;
+            elements.notificationSoundToggle.checked = gameState.settings.notifications;
+            elements.achievementNotificationToggle.checked = gameState.settings.achievementNotifications;
+            
+            // Apply dark mode
+            if (!gameState.settings.darkMode) {
+                document.documentElement.style.setProperty('--black', '#FFFFFF');
+                document.documentElement.style.setProperty('--white', '#000000');
+                document.documentElement.style.setProperty('--gray-900', '#F0F0F0');
+                document.documentElement.style.setProperty('--gray-800', '#E0E0E0');
+                document.documentElement.style.setProperty('--gray-700', '#D0D0D0');
+                document.documentElement.style.setProperty('--gray-400', '#606060');
+            }
         }
 
         function simulateLoading() {
@@ -2260,40 +2755,6 @@
             elements.playerScoreHud.textContent = gameState.totalScore.toLocaleString();
         }
 
-        function updateProfile() {
-            elements.profileName.textContent = gameState.playerName;
-            elements.profileAvatar.textContent = gameState.playerAvatar;
-            
-            // Calculate stats
-            const accuracy = gameState.totalQuestions > 0 ? 
-                Math.round((gameState.totalCorrectAnswers / gameState.totalQuestions) * 100) : 0;
-            
-            elements.totalGames.textContent = gameState.totalGames;
-            elements.correctAnswers.textContent = `${accuracy}%`;
-            elements.highestStreak.textContent = gameState.highestStreak;
-            elements.totalScore.textContent = gameState.totalScore.toLocaleString();
-            
-            // Update achievements
-            updateAchievementsDisplay();
-        }
-
-        function updateAchievementsDisplay() {
-            elements.achievementsList.innerHTML = gameState.achievements.map(achievement => `
-                <div class="player-item ${achievement.unlocked ? '' : 'opacity-50'}">
-                    <div class="flex items-center gap-md">
-                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                            <i class="fas ${achievement.unlocked ? 'fa-trophy text-yellow' : 'fa-lock text-gray-400'}"></i>
-                        </div>
-                        <div>
-                            <div class="player-name">${achievement.name}</div>
-                            <div class="text-xs text-gray-400">${achievement.description}</div>
-                        </div>
-                    </div>
-                    ${achievement.unlocked ? '<span class="text-yellow text-sm"><i class="fas fa-check"></i> Unlocked</span>' : ''}
-                </div>
-            `).join('');
-        }
-
         function populateGameData() {
             // Populate game modes grid
             if (elements.modesGrid) {
@@ -2318,10 +2779,6 @@
                     </div>
                 `).join('');
             }
-            
-            // Add sample players for demo
-            addPlayer('Player 1');
-            addPlayer('Player 2');
         }
 
         function populateCategories() {
@@ -2331,11 +2788,13 @@
                     <option value="${category.id}">${category.name}</option>
                 `).join('');
             }
-            
+        }
+
+        function populateCategoriesScreen() {
             // Populate categories screen
             if (elements.categoriesGrid) {
                 elements.categoriesGrid.innerHTML = gameState.categories.map(category => `
-                    <div class="card category-card" data-category="${category.id}">
+                    <div class="card category-card">
                         <div class="card-icon" style="background: rgba(${hexToRgb(category.color)}, 0.2); color: ${category.color};">
                             <i class="fas fa-${category.icon}"></i>
                         </div>
@@ -2343,10 +2802,71 @@
                         <p class="card-description">${category.description}</p>
                         <div class="category-progress">
                             <span class="text-sm text-gray-400">Played: 0 times</span>
-                            <button class="btn btn-outline btn-sm play-category-btn" data-category="${category.id}">
-                                Play
+                            <button class="btn btn-primary btn-sm play-category-btn" data-category="${category.id}">
+                                Play This Category
                             </button>
                         </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function populateStats() {
+            // Calculate stats
+            const accuracy = gameState.totalQuestions > 0 ? 
+                Math.round((gameState.totalCorrectAnswers / gameState.totalQuestions) * 100) : 0;
+            
+            // Update stats screen
+            elements.totalGamesStat.textContent = gameState.totalGames;
+            elements.accuracyStat.textContent = `${accuracy}%`;
+            elements.winStreakStat.textContent = gameState.winStreak;
+            elements.totalPointsStat.textContent = gameState.totalScore.toLocaleString();
+        }
+
+        function populateAchievements() {
+            if (elements.achievementsList) {
+                elements.achievementsList.innerHTML = gameState.achievements.map(achievement => `
+                    <div class="player-item ${achievement.unlocked ? '' : 'opacity-50'}">
+                        <div class="flex items-center gap-md">
+                            <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                                <i class="fas ${achievement.unlocked ? 'fa-trophy text-yellow' : 'fa-lock text-gray-400'}"></i>
+                            </div>
+                            <div>
+                                <div class="player-name">${achievement.name}</div>
+                                <div class="text-xs text-gray-400">${achievement.description}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function populateLeaderboard() {
+            // Sample leaderboard data
+            const leaderboardData = [
+                { name: 'Trivia Master', score: 12500, games: 42 },
+                { name: 'Quiz Whiz', score: 9800, games: 35 },
+                { name: 'Brainiac', score: 8750, games: 28 },
+                { name: 'Knowledge King', score: 7200, games: 25 },
+                { name: 'Fact Finder', score: 6500, games: 22 },
+                { name: gameState.playerName, score: gameState.totalScore, games: gameState.totalGames }
+            ].sort((a, b) => b.score - a.score);
+            
+            if (elements.leaderboard) {
+                elements.leaderboard.innerHTML = leaderboardData.map((player, index) => `
+                    <div class="leaderboard-item">
+                        <div class="flex items-center gap-md">
+                            <div class="leaderboard-rank ${index < 3 ? 'bg-yellow text-black' : 'bg-gray-700'}">
+                                ${index + 1}
+                            </div>
+                            <div>
+                                <div class="player-name ${player.name === gameState.playerName ? 'text-yellow' : ''}">
+                                    ${player.name} ${player.name === gameState.playerName ? '(You)' : ''}
+                                </div>
+                                <div class="text-xs text-gray-400">${player.games} games played</div>
+                            </div>
+                        </div>
+                        <div class="text-lg font-bold">${player.score.toLocaleString()}</div>
                     </div>
                 `).join('');
             }
@@ -2405,10 +2925,14 @@
             }
             
             // Update specific screens
-            if (screenId === 'profile') {
+            if (screenId === 'stats') {
+                populateStats();
+                populateAchievements();
+                populateLeaderboard();
+            } else if (screenId === 'profile') {
                 updateProfile();
-            } else if (screenId === 'cards') {
-                populateCategories();
+            } else if (screenId === 'categories') {
+                populateCategoriesScreen();
             }
         }
 
@@ -2430,6 +2954,7 @@
             
             if (!gameState.players.includes(playerName)) {
                 gameState.players.push(playerName);
+                gameState.playerScores[playerName] = 0;
                 updatePlayersList();
             }
             
@@ -2439,6 +2964,7 @@
 
         function removePlayer(name) {
             gameState.players = gameState.players.filter(p => p !== name);
+            delete gameState.playerScores[name];
             updatePlayersList();
         }
 
@@ -2463,6 +2989,11 @@
                     </button>
                 </div>
             `).join('');
+        }
+
+        function updateProfile() {
+            elements.profileName.textContent = gameState.playerName;
+            elements.profileAvatar.textContent = gameState.playerAvatar;
         }
 
         // ===== GAME SETUP =====
@@ -2568,7 +3099,7 @@
                     answers: [
                         { text: q.correctAnswer, correct: true },
                         ...q.incorrectAnswers.map(ans => ({ text: ans, correct: false }))
-                    ].sort(() => Math.random() - 0.5), // Shuffle answers
+                    ].sort(() => Math.random() - 0.5),
                     category: category,
                     difficulty: q.difficulty || difficulty
                 }));
@@ -2631,17 +3162,24 @@
                 return;
             }
             
-            if (gameState.players.length < 2 && gameState.currentGameMode !== 'solo') {
-                alert(`Need at least ${gameState.currentGameMode === 'battle' ? '3' : '2'} players to start`);
+            const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
+            
+            if (gameState.players.length < mode.minPlayers) {
+                alert(`Need at least ${mode.minPlayers} players to start ${mode.name}`);
                 return;
             }
-            
-            // Get selected mode
-            const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
             
             // Reset game state based on mode
             gameState.isGameActive = true;
             gameState.currentQuestionIndex = 0;
+            gameState.playerTurn = 0;
+            gameState.currentPlayerIndex = 0;
+            
+            // Initialize player scores
+            gameState.players.forEach(player => {
+                gameState.playerScores[player] = 0;
+            });
+            
             gameState.score = 0;
             gameState.lives = mode.lives;
             gameState.timeBonus = 0;
@@ -2675,11 +3213,27 @@
                 elements.gameControls.classList.remove('hidden');
             }
             
+            // Hide current player indicator initially
+            elements.currentPlayerIndicator.classList.add('hidden');
+            
             // Navigate to game screen
             updateNavigation('game');
             
             // Fetch and load first question
             await loadQuestion();
+            
+            // Show current player for turn-based modes
+            if (gameState.currentGameMode !== 'countdown' && gameState.currentGameMode !== 'buzzer') {
+                updateCurrentPlayerIndicator();
+            }
+        }
+
+        function updateCurrentPlayerIndicator() {
+            if (gameState.players.length > 0 && gameState.currentGameMode !== 'solo') {
+                const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+                elements.currentPlayerIndicator.textContent = `Current Player: ${currentPlayer}`;
+                elements.currentPlayerIndicator.classList.remove('hidden');
+            }
         }
 
         async function loadQuestion() {
@@ -2752,10 +3306,14 @@
                     elements.buzzerButton.disabled = false;
                     elements.buzzerInstruction.textContent = 'Wait for the question to be read, then buzz in!';
                     elements.playerBuzzed.textContent = '';
+                    elements.answersContainer.style.opacity = '0.5';
+                    document.querySelectorAll('.answer-option').forEach(opt => {
+                        opt.style.pointerEvents = 'none';
+                    });
                 }
                 
                 // Start timer with mode-specific settings
-                if (gameState.currentGameMode !== 'buzzer') {
+                if (gameState.currentGameMode !== 'buzzer' && gameState.timer > 0) {
                     startQuestionTimer();
                 }
                 
@@ -2784,6 +3342,7 @@
             // Apply mode-specific scoring
             let pointsEarned = baseScore;
             const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
             
             switch (gameState.currentGameMode) {
                 case 'classic':
@@ -2835,6 +3394,7 @@
             if (isCorrect) {
                 element.classList.add('selected');
                 gameState.score += pointsEarned;
+                gameState.playerScores[currentPlayer] += pointsEarned;
                 gameState.correctAnswers++;
                 
                 // Update score display
@@ -2885,6 +3445,31 @@
             setTimeout(() => {
                 feedback.remove();
             }, 1500);
+        }
+
+        function showNotification(message, type = 'info') {
+            if (!gameState.settings.notifications) return;
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <div class="flex items-center gap-sm">
+                    <i class="fas ${type === 'achievement' ? 'fa-trophy text-yellow' : 'fa-info-circle text-yellow'}"></i>
+                    <div>
+                        <div class="font-semibold">${type === 'achievement' ? 'Achievement Unlocked!' : 'Notification'}</div>
+                        <div class="text-sm text-gray-400">${message}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
         }
 
         function startQuestionTimer() {
@@ -2966,6 +3551,12 @@
         function nextQuestion() {
             gameState.currentQuestionIndex++;
             
+            // Move to next player for turn-based modes
+            if (gameState.currentGameMode !== 'countdown' && gameState.currentGameMode !== 'buzzer') {
+                gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+                updateCurrentPlayerIndicator();
+            }
+            
             if (gameState.currentQuestionIndex >= gameState.totalQuestions) {
                 endGame();
                 return;
@@ -2986,9 +3577,16 @@
             
             // Determine winner
             let winner = gameState.playerName;
+            let highestScore = gameState.score;
+            
             if (gameState.players.length > 0) {
-                // In a real implementation, you'd track scores per player
-                winner = gameState.players[0];
+                // Find player with highest score
+                for (const [player, score] of Object.entries(gameState.playerScores)) {
+                    if (score > highestScore) {
+                        highestScore = score;
+                        winner = player;
+                    }
+                }
             }
             
             // Update player stats
@@ -2999,6 +3597,13 @@
             
             if (gameState.maxStreak > gameState.highestStreak) {
                 gameState.highestStreak = gameState.maxStreak;
+            }
+            
+            // Update win streak
+            if (winner === gameState.playerName || (gameState.players.length === 0 && gameState.score > 0)) {
+                gameState.winStreak++;
+            } else {
+                gameState.winStreak = 0;
             }
             
             // Check achievements
@@ -3031,7 +3636,7 @@
             }
             
             // Perfect game
-            if (gameState.correctAnswers === gameState.totalQuestions && gameState.totalQuestions > 0) {
+            if (gameState.correctAnswers === gameState.totalQuestions && gameState.totalQuestions >= 5) {
                 unlockAchievement('perfect_game');
             }
             
@@ -3039,13 +3644,31 @@
             if (gameState.maxStreak >= 10) {
                 unlockAchievement('streak_10');
             }
+            
+            // Speed demon (answered in under 3 seconds)
+            // This would require tracking answer times - for now, simulate
+            if (Math.random() > 0.7) {
+                unlockAchievement('speed_demon');
+            }
+            
+            // Mode master (check if played all modes)
+            // This would require tracking played modes
+            
+            // Trivia champion (10 wins)
+            if (gameState.winStreak >= 10) {
+                unlockAchievement('trivia_champion');
+            }
         }
 
         function unlockAchievement(achievementId) {
             const achievement = gameState.achievements.find(a => a.id === achievementId);
             if (achievement && !achievement.unlocked) {
                 achievement.unlocked = true;
-                showFeedback(`Achievement Unlocked: ${achievement.name}!`, 'correct');
+                if (gameState.settings.achievementNotifications) {
+                    showNotification(`You unlocked: ${achievement.name}!`, 'achievement');
+                }
+                saveData();
+                populateAchievements();
             }
         }
 
@@ -3055,6 +3678,15 @@
             if (modal) {
                 modal.classList.add('active');
                 document.body.style.overflow = 'hidden';
+                
+                // Special handling for specific modals
+                if (modalId === 'nameModal') {
+                    elements.newUsername.value = gameState.playerName;
+                } else if (modalId === 'avatarModal') {
+                    populateAvatarGrid();
+                } else if (modalId === 'themeModal') {
+                    populateThemeColors();
+                }
             }
         }
 
@@ -3064,6 +3696,72 @@
                 modal.classList.remove('active');
                 document.body.style.overflow = '';
             }
+        }
+
+        function populateAvatarGrid() {
+            const avatars = ['😎', '🤓', '😊', '😄', '😜', '🤩', '🧐', '🤠', '😇', '🥳', '🤖', '👾'];
+            elements.avatarGrid.innerHTML = avatars.map(avatar => `
+                <div class="profile-avatar text-3xl avatar-option" data-avatar="${avatar}" onclick="selectAvatar('${avatar}')">
+                    ${avatar}
+                </div>
+            `).join('');
+        }
+
+        function populateThemeColors() {
+            const colors = [
+                { name: 'Yellow', value: '#FFDE21' },
+                { name: 'Purple', value: '#6C5CE7' },
+                { name: 'Red', value: '#FF7675' },
+                { name: 'Green', value: '#00B894' },
+                { name: 'Blue', value: '#3498DB' },
+                { name: 'Pink', value: '#FD79A8' }
+            ];
+            
+            elements.themeColors.innerHTML = colors.map(color => `
+                <div class="profile-avatar theme-color-option" data-color="${color.value}" 
+                     style="background: ${color.value}; color: white; cursor: pointer;"
+                     onclick="selectThemeColor('${color.value}')">
+                    ${color.name}
+                </div>
+            `).join('');
+        }
+
+        function selectAvatar(avatar) {
+            gameState.playerAvatar = avatar;
+            elements.profileAvatar.textContent = avatar;
+            
+            // Remove selection from all avatars
+            document.querySelectorAll('.avatar-option').forEach(el => {
+                el.style.border = 'none';
+            });
+            
+            // Add selection to chosen avatar
+            event.target.style.border = '3px solid var(--yellow)';
+        }
+
+        function selectThemeColor(color) {
+            // Update CSS variable for yellow color
+            document.documentElement.style.setProperty('--yellow', color);
+            document.documentElement.style.setProperty('--yellow-dark', darkenColor(color, 20));
+            
+            // Remove selection from all colors
+            document.querySelectorAll('.theme-color-option').forEach(el => {
+                el.style.border = 'none';
+            });
+            
+            // Add selection to chosen color
+            event.target.style.border = '3px solid white';
+        }
+
+        function darkenColor(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) - amt;
+            const G = (num >> 8 & 0x00FF) - amt;
+            const B = (num & 0x0000FF) - amt;
+            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
         }
 
         // ===== ONLINE MULTIPLAYER =====
@@ -3089,9 +3787,11 @@
             
             // Update waiting room
             elements.roomCodeDisplay.textContent = gameState.roomCode;
-            elements.roomMode.textContent = gameState.gameModes.find(m => m.id === modeId).name;
+            const mode = gameState.gameModes.find(m => m.id === modeId);
+            elements.roomMode.textContent = mode ? mode.name : 'Classic';
             elements.roomQuestions.textContent = questions;
-            elements.roomCategory.textContent = gameState.categories.find(c => c.id === categoryId).name;
+            const category = gameState.categories.find(c => c.id === categoryId);
+            elements.roomCategory.textContent = category ? category.name : 'General Knowledge';
             
             // Update online players list
             updateOnlinePlayersList();
@@ -3099,6 +3799,9 @@
             // Close modal and go to waiting room
             closeModal('createRoomModal');
             updateNavigation('waiting');
+            
+            // Show notification
+            showNotification('Room created! Share the code with friends to join.');
             
             // Simulate other players joining (for demo)
             setTimeout(() => simulatePlayerJoin('Player 2'), 2000);
@@ -3146,6 +3849,9 @@
             // Close modal and go to waiting room
             closeModal('joinRoomModal');
             updateNavigation('waiting');
+            
+            // Show notification
+            showNotification('Joined room successfully!');
         }
 
         function generateRoomCode() {
@@ -3193,7 +3899,7 @@
             updateOnlinePlayersList();
             
             // Show notification
-            showFeedback(`${playerName} joined the room!`, 'correct');
+            showNotification(`${playerName} joined the room!`);
         }
 
         // ===== BUZZER MODE FUNCTIONS =====
@@ -3207,12 +3913,10 @@
             elements.playerBuzzed.textContent = gameState.playerName;
             
             // Enable answer selection
+            elements.answersContainer.style.opacity = '1';
             document.querySelectorAll('.answer-option').forEach(opt => {
                 opt.style.pointerEvents = 'auto';
             });
-            
-            // Show answer options
-            elements.answersContainer.style.opacity = '1';
         }
 
         // ===== EVENT LISTENERS =====
@@ -3244,6 +3948,7 @@
                     
                     // Clear players for fresh game
                     gameState.players = [];
+                    gameState.playerScores = {};
                     updatePlayersList();
                     
                     updateNavigation('play');
@@ -3285,6 +3990,32 @@
                         };
                         
                         openModal('modeDetailsModal');
+                    }
+                }
+                
+                // Play category button
+                if (e.target.closest('.play-category-btn')) {
+                    const btn = e.target.closest('.play-category-btn');
+                    const categoryId = btn.dataset.category;
+                    
+                    // Set default mode to Classic
+                    gameState.currentGameMode = 'classic';
+                    
+                    // Set the category in the setup
+                    const category = gameState.categories.find(c => c.id === categoryId);
+                    if (category) {
+                        // Clear players for fresh game
+                        gameState.players = [];
+                        gameState.playerScores = {};
+                        updatePlayersList();
+                        
+                        updateNavigation('play');
+                        navigateToStep(1);
+                        
+                        // Set the category in the dropdown
+                        setTimeout(() => {
+                            elements.categorySelect.value = categoryId;
+                        }, 100);
                     }
                 }
             });
@@ -3331,6 +4062,50 @@
             });
             
             elements.startGameBtn.addEventListener('click', startGame);
+            
+            // Question count controls
+            elements.questionDecrease.addEventListener('click', () => {
+                const current = parseInt(elements.questionCount.value);
+                if (current > 5) {
+                    elements.questionCount.value = current - 1;
+                }
+            });
+            
+            elements.questionIncrease.addEventListener('click', () => {
+                const current = parseInt(elements.questionCount.value);
+                if (current < 50) {
+                    elements.questionCount.value = current + 1;
+                }
+            });
+            
+            elements.questionCount.addEventListener('change', () => {
+                let value = parseInt(elements.questionCount.value);
+                if (value < 5) value = 5;
+                if (value > 50) value = 50;
+                elements.questionCount.value = value;
+            });
+            
+            // Online question count controls
+            elements.onlineQuestionDecrease.addEventListener('click', () => {
+                const current = parseInt(elements.onlineQuestionCount.value);
+                if (current > 5) {
+                    elements.onlineQuestionCount.value = current - 1;
+                }
+            });
+            
+            elements.onlineQuestionIncrease.addEventListener('click', () => {
+                const current = parseInt(elements.onlineQuestionCount.value);
+                if (current < 50) {
+                    elements.onlineQuestionCount.value = current + 1;
+                }
+            });
+            
+            elements.onlineQuestionCount.addEventListener('change', () => {
+                let value = parseInt(elements.onlineQuestionCount.value);
+                if (value < 5) value = 5;
+                if (value > 50) value = 50;
+                elements.onlineQuestionCount.value = value;
+            });
             
             // Game controls
             elements.nextQuestionBtn.addEventListener('click', nextQuestion);
@@ -3395,7 +4170,7 @@
                     </div>
                 `;
                 
-                showFeedback('Rooms refreshed!', 'correct');
+                showNotification('Rooms refreshed!');
             });
             
             // Create room confirmation
@@ -3422,6 +4197,54 @@
             // Room code input formatting
             elements.joinRoomCode.addEventListener('input', function(e) {
                 this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            });
+            
+            // Save username
+            elements.saveUsernameBtn.addEventListener('click', () => {
+                const newName = elements.newUsername.value.trim();
+                if (newName && newName.length > 0) {
+                    gameState.playerName = newName.substring(0, 20);
+                    updateHUD();
+                    updateProfile();
+                    saveData();
+                    closeModal('nameModal');
+                    showNotification('Username updated successfully!');
+                }
+            });
+            
+            // Save avatar
+            elements.saveAvatarBtn.addEventListener('click', () => {
+                updateProfile();
+                saveData();
+                closeModal('avatarModal');
+                showNotification('Avatar updated successfully!');
+            });
+            
+            // Settings toggles
+            elements.darkModeToggle.addEventListener('change', function() {
+                gameState.settings.darkMode = this.checked;
+                saveData();
+                location.reload(); // Reload to apply theme changes
+            });
+            
+            elements.soundEffectsToggle.addEventListener('change', function() {
+                gameState.settings.soundEffects = this.checked;
+                saveData();
+            });
+            
+            elements.musicToggle.addEventListener('change', function() {
+                gameState.settings.music = this.checked;
+                saveData();
+            });
+            
+            elements.notificationSoundToggle.addEventListener('change', function() {
+                gameState.settings.notifications = this.checked;
+                saveData();
+            });
+            
+            elements.achievementNotificationToggle.addEventListener('change', function() {
+                gameState.settings.achievementNotifications = this.checked;
+                saveData();
             });
             
             // Close modals on backdrop click
@@ -3464,6 +4287,8 @@
         window.updateNavigation = updateNavigation;
         window.closeModal = closeModal;
         window.openModal = openModal;
+        window.selectAvatar = selectAvatar;
+        window.selectThemeColor = selectThemeColor;
     </script>
 </body>
 </html>
