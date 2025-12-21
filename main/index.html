@@ -12,9 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <!-- Howler.js for sound effects -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
     
@@ -91,6 +88,22 @@
             color: var(--black);
         }
 
+        body.light-mode .form-input,
+        body.light-mode .select-dropdown {
+            background: var(--gray-700);
+            border-color: var(--gray-600);
+            color: var(--white);
+        }
+
+        body.light-mode .answer-option {
+            background: var(--gray-700);
+            color: var(--white);
+        }
+
+        body.light-mode .player-item {
+            background: var(--gray-700);
+        }
+
         /* ===== LOADING SCREEN ===== */
         #loadingScreen {
             position: fixed;
@@ -103,7 +116,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 10000;
             transition: opacity 0.5s;
         }
 
@@ -154,7 +167,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 10000;
+            z-index: 20000;
             padding: var(--space-md);
         }
 
@@ -166,7 +179,7 @@
             width: 100%;
             max-width: 400px;
             box-shadow: var(--shadow-card);
-            z-index: 10001;
+            z-index: 20001;
         }
 
         .auth-tabs {
@@ -272,7 +285,7 @@
         .screen {
             display: none;
             min-height: 100vh;
-            padding: 60px 0 70px; /* Top padding for HUD, bottom for nav */
+            padding: 60px 0 70px;
             overflow-y: auto;
         }
 
@@ -838,11 +851,30 @@
             text-align: right;
         }
 
+        .scoreboard-badge {
+            background: var(--gray-600);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .scoreboard-badge.buzzer {
+            background: rgba(0, 184, 148, 0.2);
+            color: var(--green);
+        }
+
         /* ===== CATEGORIES SCREEN ===== */
         .categories-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: var(--space-lg);
+        }
+
+        .category-card {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
         }
 
         /* ===== PROFILE SCREEN ===== */
@@ -1029,6 +1061,10 @@
             background: var(--orange);
         }
 
+        .room-status.playing {
+            background: var(--red);
+        }
+
         /* ===== WAITING ROOM ===== */
         .waiting-room {
             text-align: center;
@@ -1044,6 +1080,12 @@
             background: var(--gray-800);
             border-radius: var(--radius-md);
             border: 2px dashed var(--yellow);
+        }
+
+        .room-code-small {
+            font-size: 24px;
+            letter-spacing: 4px;
+            margin-top: var(--space-sm);
         }
 
         .share-room {
@@ -1329,6 +1371,92 @@
             font-weight: bold;
         }
 
+        /* ===== UTILITY CLASSES ===== */
+        .text-center { text-align: center; }
+        .text-yellow { color: var(--yellow); }
+        .text-purple { color: var(--purple); }
+        .text-red { color: var(--red); }
+        .text-green { color: var(--green); }
+        .text-orange { color: var(--orange); }
+        .mt-sm { margin-top: var(--space-sm); }
+        .mt-md { margin-top: var(--space-md); }
+        .mt-lg { margin-top: var(--space-lg); }
+        .mt-xl { margin-top: var(--space-xl); }
+        .mb-sm { margin-bottom: var(--space-sm); }
+        .mb-md { margin-bottom: var(--space-md); }
+        .mb-lg { margin-bottom: var(--space-lg); }
+        .mb-xl { margin-bottom: var(--space-xl); }
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-sm { gap: var(--space-sm); }
+        .gap-md { gap: var(--space-md); }
+        .gap-lg { gap: var(--space-lg); }
+        .w-full { width: 100%; }
+        .relative { position: relative; }
+        .flex-1 { flex: 1; }
+        .opacity-50 { opacity: 0.5; }
+
+        /* ===== FEEDBACK ANIMATIONS ===== */
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            40% { transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .feedback-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 20px;
+            animation: fadeInOut 1.5s ease;
+            pointer-events: none;
+        }
+
+        .feedback-correct {
+            background: var(--green);
+            color: white;
+        }
+
+        .feedback-incorrect {
+            background: var(--red);
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--gray-800);
+            border-left: 4px solid var(--yellow);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            max-width: 350px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
         /* ===== BUZZER MODE STYLES ===== */
         .buzzer-container {
             display: flex;
@@ -1480,92 +1608,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--gray-500);
         }
-
-        /* ===== UTILITY CLASSES ===== */
-        .text-center { text-align: center; }
-        .text-yellow { color: var(--yellow); }
-        .text-purple { color: var(--purple); }
-        .text-red { color: var(--red); }
-        .text-green { color: var(--green); }
-        .text-orange { color: var(--orange); }
-        .mt-sm { margin-top: var(--space-sm); }
-        .mt-md { margin-top: var(--space-md); }
-        .mt-lg { margin-top: var(--space-lg); }
-        .mt-xl { margin-top: var(--space-xl); }
-        .mb-sm { margin-bottom: var(--space-sm); }
-        .mb-md { margin-bottom: var(--space-md); }
-        .mb-lg { margin-bottom: var(--space-lg); }
-        .mb-xl { margin-bottom: var(--space-xl); }
-        .hidden { display: none !important; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-center { justify-content: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-sm { gap: var(--space-sm); }
-        .gap-md { gap: var(--space-md); }
-        .gap-lg { gap: var(--space-lg); }
-        .w-full { width: 100%; }
-        .relative { position: relative; }
-        .flex-1 { flex: 1; }
-        .opacity-50 { opacity: 0.5; }
-
-        /* ===== FEEDBACK ANIMATIONS ===== */
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-            40% { transform: translate(-50%, -50%) scale(1); }
-            80% { opacity: 1; }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
-        }
-
-        .feedback-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 20px;
-            animation: fadeInOut 1.5s ease;
-            pointer-events: none;
-        }
-
-        .feedback-correct {
-            background: var(--green);
-            color: white;
-        }
-
-        .feedback-incorrect {
-            background: var(--red);
-            color: white;
-        }
-
-        .notification {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: var(--gray-800);
-            border-left: 4px solid var(--yellow);
-            padding: var(--space-md);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-card);
-            z-index: 1000;
-            animation: slideInRight 0.3s ease;
-            max-width: 350px;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
     </style>
 </head>
 <body>
@@ -1705,9 +1747,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Current Player Turn Indicator -->
-    <div class="current-player-indicator hidden" id="currentPlayerIndicator"></div>
 
     <!-- Scoreboard -->
     <div class="scoreboard-container hidden" id="scoreboard">
@@ -2420,71 +2459,6 @@
         </div>
     </div>
 
-    <!-- Avatar Options Modal -->
-    <div class="modal-overlay" id="avatarOptionsModal">
-        <div class="modal">
-            <div class="modal-header">
-                <button class="modal-close" onclick="closeModal('avatarOptionsModal')">&times;</button>
-                <h2 class="modal-title">Profile Picture</h2>
-                <p class="modal-subtitle">Choose how to set your profile picture</p>
-            </div>
-            <div class="modal-body">
-                <div class="flex flex-col gap-md">
-                    <button class="btn btn-primary" onclick="takePhoto()">
-                        <i class="fas fa-camera"></i> Take Photo
-                    </button>
-                    <button class="btn btn-outline" onclick="uploadPhoto()">
-                        <i class="fas fa-upload"></i> Upload Photo
-                    </button>
-                    <input type="file" id="photoUpload" accept="image/*" style="display: none;">
-                    <button class="btn btn-outline" onclick="selectEmojiAvatar()">
-                        <i class="fas fa-smile"></i> Choose Emoji Avatar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Emoji Avatar Modal -->
-    <div class="modal-overlay" id="emojiAvatarModal">
-        <div class="modal">
-            <div class="modal-header">
-                <button class="modal-close" onclick="closeModal('emojiAvatarModal')">&times;</button>
-                <h2 class="modal-title">Choose Emoji Avatar</h2>
-                <p class="modal-subtitle">Select your profile emoji</p>
-            </div>
-            <div class="modal-body">
-                <div class="grid grid-cols-4 gap-4" id="emojiGrid">
-                    <!-- Emojis will be populated -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Theme Color Modal -->
-    <div class="modal-overlay" id="themeModal">
-        <div class="modal">
-            <div class="modal-header">
-                <button class="modal-close" onclick="closeModal('themeModal')">&times;</button>
-                <h2 class="modal-title">Theme Color</h2>
-                <p class="modal-subtitle">Choose your preferred accent color</p>
-            </div>
-            <div class="modal-body">
-                <div class="grid grid-cols-3 gap-4" id="themeColors">
-                    <!-- Theme colors will be populated -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('themeModal')">
-                    Cancel
-                </button>
-                <button class="btn btn-primary" onclick="closeModal('themeModal')">
-                    Save Theme
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Hint Modal -->
     <div class="modal-overlay hint-modal" id="hintModal">
         <div class="modal">
@@ -2507,84 +2481,6 @@
                         <!-- Timer for auto-close -->
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sound Settings Modal -->
-    <div class="modal-overlay" id="soundModal">
-        <div class="modal">
-            <div class="modal-header">
-                <button class="modal-close" onclick="closeModal('soundModal')">&times;</button>
-                <h2 class="modal-title">Sound Settings</h2>
-                <p class="modal-subtitle">Adjust game audio</p>
-            </div>
-            <div class="modal-body">
-                <div class="settings-item">
-                    <span>Sound Effects</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="soundEffectsToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="settings-item">
-                    <span>Background Music</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="musicToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="settings-item">
-                    <span>Notification Sounds</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="notificationSoundToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="closeModal('soundModal')">
-                    Done
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notification Settings Modal -->
-    <div class="modal-overlay" id="notificationModal">
-        <div class="modal">
-            <div class="modal-header">
-                <button class="modal-close" onclick="closeModal('notificationModal')">&times;</button>
-                <h2 class="modal-title">Notification Settings</h2>
-                <p class="modal-subtitle">Manage your notifications</p>
-            </div>
-            <div class="modal-body">
-                <div class="settings-item">
-                    <span>Achievement Notifications</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="achievementNotificationToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="settings-item">
-                    <span>Game Invitations</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="gameInvitationToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="settings-item">
-                    <span>Friend Activity</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="friendActivityToggle">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="closeModal('notificationModal')">
-                    Done
-                </button>
             </div>
         </div>
     </div>
@@ -2614,92 +2510,6 @@
     </div>
 
     <script>
-    // ===== SUPABASE CONFIGURATION =====
-    const SUPABASE_CONFIG = {
-        url: 'https://emwnshsfhrdcojzaxkjd.supabase.co',
-        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtd25zaHNmaHJkY29qemF4a2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYzMjU4ODQsImV4cCI6MjA4MTkwMTg4NH0.Q_43zqq0eTZiUVUdDrfYtYr-F8ZjTjQVKs3VIJPTap4',
-    };
-
-    let supabase;
-    let currentUser = null;
-    let realtimeSubscription = null;
-
-    // ===== SOUND EFFECTS =====
-    const soundEffects = {
-        buzz: null,
-        correct: null,
-        incorrect: null,
-        timer: null,
-        win: null,
-        lose: null,
-        click: null,
-        bell: null,
-        start: null,
-        end: null,
-        
-        init() {
-            // Initialize sound effects
-            this.buzz = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-electronic-retro-block-hit-2185.mp3'],
-                volume: 0.5
-            });
-            
-            this.correct = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3'],
-                volume: 0.5
-            });
-            
-            this.incorrect = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3'],
-                volume: 0.5
-            });
-            
-            this.timer = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3'],
-                volume: 0.3
-            });
-            
-            this.win = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3'],
-                volume: 0.5
-            });
-            
-            this.lose = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-retro-game-over-1947.mp3'],
-                volume: 0.5
-            });
-            
-            this.click = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3'],
-                volume: 0.2
-            });
-            
-            this.bell = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3'],
-                volume: 0.4
-            });
-            
-            this.start = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-game-show-intro-331.mp3'],
-                volume: 0.5
-            });
-            
-            this.end = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-winning-trumpet-2018.mp3'],
-                volume: 0.5
-            });
-        },
-        
-        play(soundName) {
-            if (!gameState.settings.soundEffects) return;
-            
-            const sound = this[soundName];
-            if (sound) {
-                sound.play();
-            }
-        }
-    };
-
     // ===== GAME STATE =====
     const gameState = {
         // User Profile
@@ -2923,64 +2733,56 @@
                 name: 'General Knowledge',
                 icon: 'brain',
                 color: '#6C5CE7',
-                description: 'A mix of everything from science to pop culture',
-                apiCategory: 'general_knowledge'
+                description: 'A mix of everything from science to pop culture'
             },
             {
                 id: 'science',
                 name: 'Science',
                 icon: 'flask',
                 color: '#FF7675',
-                description: 'Biology, chemistry, physics, and astronomy',
-                apiCategory: 'science'
+                description: 'Biology, chemistry, physics, and astronomy'
             },
             {
                 id: 'history',
                 name: 'History',
                 icon: 'landmark',
                 color: '#FDCB6E',
-                description: 'World history, famous events, and historical figures',
-                apiCategory: 'history'
+                description: 'World history, famous events, and historical figures'
             },
             {
                 id: 'entertainment',
                 name: 'Entertainment',
                 icon: 'film',
                 color: '#FD79A8',
-                description: 'Movies, TV shows, music, and celebrities',
-                apiCategory: 'film_and_tv'
+                description: 'Movies, TV shows, music, and celebrities'
             },
             {
                 id: 'sports',
                 name: 'Sports',
                 icon: 'football-ball',
                 color: '#00B894',
-                description: 'All things sports - teams, players, and events',
-                apiCategory: 'sport_and_leisure'
+                description: 'All things sports - teams, players, and events'
             },
             {
                 id: 'geography',
                 name: 'Geography',
                 icon: 'globe',
                 color: '#00CEC9',
-                description: 'Countries, capitals, landmarks, and maps',
-                apiCategory: 'geography'
+                description: 'Countries, capitals, landmarks, and maps'
             },
             {
                 id: 'arts',
                 name: 'Arts & Literature',
                 icon: 'palette',
                 color: '#9B59B6',
-                description: 'Books, authors, paintings, and artists',
-                apiCategory: 'arts_and_literature'
+                description: 'Books, authors, paintings, and artists'
             },
             {
                 id: 'technology',
                 name: 'Technology',
                 icon: 'laptop-code',
                 color: '#3498DB',
-                description: 'Computers, programming, internet, and tech innovations',
-                apiCategory: 'science_and_nature'
+                description: 'Computers, programming, internet, and tech innovations'
             }
         ],
         
@@ -3031,7 +2833,6 @@
             { id: 'category_expert', name: 'Category Expert', description: 'Play all categories', unlocked: false },
             { id: 'trivia_champion', name: 'Trivia Champion', description: 'Win 10 games', unlocked: false },
             { id: 'social_butterfly', name: 'Social Butterfly', description: 'Play with 8 different players', unlocked: false },
-            { id: 'night_owl', name: 'Night Owl', description: 'Play 5 games after midnight', unlocked: false },
             { id: 'quick_thinker', name: 'Quick Thinker', description: 'Answer 5 questions correctly with less than 5 seconds remaining', unlocked: false },
             { id: 'ladder_climber', name: 'Ladder Climber', description: 'Reach level 10 in Ladder mode', unlocked: false },
             { id: 'battle_royale', name: 'Battle Royale', description: 'Win a Battle mode with 8 players', unlocked: false },
@@ -3047,6 +2848,82 @@
             music: true,
             notifications: true,
             achievementNotifications: true
+        }
+    };
+
+    // ===== SOUND EFFECTS =====
+    const soundEffects = {
+        buzz: null,
+        correct: null,
+        incorrect: null,
+        timer: null,
+        win: null,
+        lose: null,
+        click: null,
+        bell: null,
+        start: null,
+        end: null,
+        
+        init() {
+            // Initialize sound effects
+            this.buzz = new Howl({
+                src: ['https://assets.mixkit.co/sfx/preview/mixkit-electronic-retro-block-hit-2185.mp3'],
+                volume: 0.5
+            });
+            
+            this.correct = new Howl({
+                src: ['https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3'],
+                volume: 0.5
+            });
+            
+            this.incorrect = new Howl({
+                src: ['https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3'],
+                volume: 0.5
+            });
+            
+            this.timer = new Howl({
+                src: ['https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3'],
+                volume: 0.3
+            });
+            
+            this.win = new Howl({
+                src: ['https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3'],
+                volume: 0.5
+            });
+            
+            this.lose = new Howl({
+                src: ['https://assets.mixkit.co/sfx/preview/mixkit-retro-game-over-1947.mp3'],
+                volume: 0.5
+            });
+            
+            this.click = new Howl({
+                src: ['https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3'],
+                volume: 0.2
+            });
+            
+            this.bell = new Howl({
+                src: ['https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3'],
+                volume: 0.4
+            });
+            
+            this.start = new Howl({
+                src: ['https://assets.mixkit.co/sfx/preview/mixkit-game-show-intro-331.mp3'],
+                volume: 0.5
+            });
+            
+            this.end = new Howl({
+                src: ['https://assets.mixkit.co/sfx/preview/mixkit-winning-trumpet-2018.mp3'],
+                volume: 0.5
+            });
+        },
+        
+        play(soundName) {
+            if (!gameState.settings.soundEffects) return;
+            
+            const sound = this[soundName];
+            if (sound) {
+                sound.play();
+            }
         }
     };
 
@@ -3102,9 +2979,6 @@
             waiting: document.getElementById('waitingScreen'),
             game: document.getElementById('gameScreen')
         },
-        
-        // Current Player Indicator
-        currentPlayerIndicator: document.getElementById('currentPlayerIndicator'),
         
         // Scoreboard
         scoreboard: document.getElementById('scoreboard'),
@@ -3225,11 +3099,6 @@
         joinRoomCode: document.getElementById('joinRoomCode'),
         joinRoomConfirmBtn: document.getElementById('joinRoomConfirmBtn'),
         
-        // Settings Modals
-        nameModal: document.getElementById('nameModal'),
-        newUsername: document.getElementById('newUsername'),
-        saveUsernameBtn: document.getElementById('saveUsernameBtn'),
-        
         // Settings Toggles
         darkModeToggle: document.getElementById('darkModeToggle')
     };
@@ -3245,21 +3114,6 @@
 
     async function initializeApp() {
         console.log('Initializing app...');
-        // Initialize Supabase
-        supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-        
-        // Check for existing session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session) {
-            console.log('Existing session found');
-            currentUser = session.user;
-            await loadUserProfile();
-            showMainApp();
-        } else {
-            console.log('No session found, showing auth screen');
-            showAuthScreen();
-        }
         
         // Load saved data
         loadSavedData();
@@ -3267,7 +3121,6 @@
         // Update UI
         updateHUD();
         populateGameData();
-        populateCategories();
         populateCategoriesScreen();
         setupStepNavigation();
         populateOnlineSelectors();
@@ -3294,29 +3147,35 @@
             return;
         }
         
+        // For demo purposes, auto-login with any credentials
+        gameState.playerName = email.split('@')[0] || 'Player';
+        gameState.playerAvatar = gameState.playerName.charAt(0).toUpperCase();
+        
+        showMainApp();
+        showNotification('Welcome to Too Turned Trivia!');
+        
+        // In a real app, you would call Supabase here:
+        /*
         try {
-            console.log('Attempting Supabase login...');
             const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password
             });
             
-        if (error) {
-                console.error('Login error:', error);
+            if (error) {
                 showAuthError('loginError', error.message);
                 return;
             }
             
-            console.log('Login successful:', data.user.email);
             currentUser = data.user;
             await loadUserProfile();
             showMainApp();
             showNotification('Welcome back!');
             
         } catch (error) {
-            console.error('Login exception:', error);
             showAuthError('loginError', 'Login failed. Please try again.');
         }
+        */
     }
 
     async function handleRegister() {
@@ -3344,8 +3203,24 @@
             return;
         }
         
+        // For demo purposes, auto-register
+        gameState.playerName = username;
+        gameState.playerAvatar = username.charAt(0).toUpperCase();
+        
+        // Show profile setup
+        if (elements.profileDisplayName) {
+            elements.profileDisplayName.value = username;
+        }
+        if (elements.setupAvatarText) {
+            elements.setupAvatarText.textContent = username.charAt(0).toUpperCase();
+        }
+        
+        showAuthTab('profileSetupForm');
+        showNotification('Account created! Complete your profile.');
+        
+        // In a real app, you would call Supabase here:
+        /*
         try {
-            console.log('Attempting Supabase registration...');
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -3357,15 +3232,12 @@
             });
             
             if (error) {
-                console.error('Registration error:', error);
                 showAuthError('registerError', error.message);
                 return;
             }
             
-            console.log('Registration successful:', data.user?.email);
             currentUser = data.user;
             
-            // Show profile setup
             gameState.playerName = username;
             if (elements.profileDisplayName) {
                 elements.profileDisplayName.value = username;
@@ -3378,9 +3250,9 @@
             showNotification('Account created! Complete your profile.');
             
         } catch (error) {
-            console.error('Registration exception:', error);
             showAuthError('registerError', 'Registration failed. Please try again.');
         }
+        */
     }
 
     async function handleCompleteProfile() {
@@ -3392,41 +3264,19 @@
             return;
         }
         
-        try {
-            // Create profile
-            const profile = {
-                id: currentUser.id,
-                email: currentUser.email,
-                display_name: displayName,
-                avatar_type: 'text',
-                avatar_emoji: displayName.charAt(0).toUpperCase(),
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            };
-            
-            console.log('Creating user profile...');
-            const { error } = await supabase
-                .from('profiles')
-                .insert([profile]);
-            
-            if (error) {
-                console.error('Profile creation error:', error);
-                showAuthError('profileSetupError', 'Error creating profile: ' + error.message);
-                return;
-            }
-            
-            console.log('Profile created successfully');
-            gameState.playerProfile = profile;
-            gameState.playerName = displayName;
-            gameState.playerAvatar = displayName.charAt(0).toUpperCase();
-            
-            showMainApp();
-            showNotification('Welcome to Too Turned Trivia!');
-            
-        } catch (error) {
-            console.error('Complete profile exception:', error);
-            showAuthError('profileSetupError', 'Profile setup failed. Please try again.');
-        }
+        // For demo purposes, skip database
+        gameState.playerProfile = {
+            id: Date.now().toString(),
+            display_name: displayName,
+            avatar_type: 'text',
+            avatar_emoji: displayName.charAt(0).toUpperCase()
+        };
+        
+        gameState.playerName = displayName;
+        gameState.playerAvatar = displayName.charAt(0).toUpperCase();
+        
+        showMainApp();
+        showNotification('Welcome to Too Turned Trivia!');
     }
 
     function showAuthError(elementId, message) {
@@ -3580,7 +3430,7 @@
             });
             
             console.log('Auth listeners setup complete');
-        }, 200);
+        }, 200); // Increased timeout to 200ms for safety
     }
 
     // ===== EVENT LISTENERS SETUP =====
@@ -3628,24 +3478,24 @@
                 const mode = gameState.gameModes.find(m => m.id === modeId);
                 
                 if (mode) {
-                    elements.modeDetailsTitle.textContent = mode.name;
-                    elements.modeDetailsSubtitle.textContent = mode.description;
+                    document.getElementById('modeDetailsTitle').textContent = mode.name;
+                    document.getElementById('modeDetailsSubtitle').textContent = mode.description;
                     
-                    elements.modeRules.innerHTML = mode.rules.map(rule => `
+                    document.getElementById('modeRules').innerHTML = mode.rules.map(rule => `
                         <div class="flex items-start gap-sm mb-sm">
                             <i class="fas fa-check text-green mt-1"></i>
                             <span>${rule}</span>
                         </div>
                     `).join('');
                     
-                    elements.modeInstructions.innerHTML = mode.instructions.map(instruction => `
+                    document.getElementById('modeInstructions').innerHTML = mode.instructions.map(instruction => `
                         <div class="flex items-start gap-sm mb-sm">
                             <i class="fas fa-play text-yellow mt-1"></i>
                             <span>${instruction}</span>
                         </div>
                     `).join('');
                     
-                    elements.playThisModeBtn.onclick = () => {
+                    document.getElementById('playThisModeBtn').onclick = () => {
                         gameState.currentGameMode = modeId;
                         closeModal('modeDetailsModal');
                         updateNavigation('play');
@@ -3745,28 +3595,6 @@
             elements.questionCount.value = value;
         });
         
-        // Online question count controls
-        elements.onlineQuestionDecrease.addEventListener('click', () => {
-            const current = parseInt(elements.onlineQuestionCount.value);
-            if (current > 5) {
-                elements.onlineQuestionCount.value = current - 1;
-            }
-        });
-        
-        elements.onlineQuestionIncrease.addEventListener('click', () => {
-            const current = parseInt(elements.onlineQuestionCount.value);
-            if (current < 50) {
-                elements.onlineQuestionCount.value = current + 1;
-            }
-        });
-        
-        elements.onlineQuestionCount.addEventListener('change', () => {
-            let value = parseInt(elements.onlineQuestionCount.value);
-            if (value < 5) value = 5;
-            if (value > 50) value = 50;
-            elements.onlineQuestionCount.value = value;
-        });
-        
         // Game controls
         elements.nextQuestionBtn.addEventListener('click', nextQuestion);
         
@@ -3776,12 +3604,12 @@
         elements.buzzerButton.addEventListener('click', buzzIn);
         
         // Game complete modal
-        elements.backToMenuBtn.addEventListener('click', () => {
+        document.getElementById('backToMenuBtn').addEventListener('click', () => {
             closeModal('gameCompleteModal');
             updateNavigation('home');
         });
         
-        elements.playAgainBtn.addEventListener('click', () => {
+        document.getElementById('playAgainBtn').addEventListener('click', () => {
             closeModal('gameCompleteModal');
             
             if (gameState.isOnlineGame) {
@@ -3821,15 +3649,10 @@
         });
         
         // Save username
-        elements.saveUsernameBtn.addEventListener('click', async () => {
-            const newName = elements.newUsername.value.trim();
+        document.getElementById('saveUsernameBtn').addEventListener('click', async () => {
+            const newName = document.getElementById('newUsername').value.trim();
             if (newName && newName.length > 0) {
                 gameState.playerName = newName.substring(0, 20);
-                
-                // Update in database
-                await updateUserProfile({
-                    display_name: newName
-                });
                 
                 updateHUD();
                 updateProfile();
@@ -3877,105 +3700,6 @@
                 openModal('pauseModal');
             }
         });
-    }
-
-    async function loadUserProfile() {
-        if (!currentUser) return;
-        
-        // Load profile from database
-        const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', currentUser.id)
-            .single();
-        
-        if (error || !profile) {
-            // Create new profile
-            await createUserProfile();
-            return;
-        }
-        
-        gameState.playerProfile = profile;
-        gameState.playerName = profile.display_name || currentUser.email?.split('@')[0] || 'Player';
-        gameState.playerAvatar = profile.avatar_emoji || profile.display_name?.charAt(0).toUpperCase() || 'U';
-        gameState.playerAvatarType = profile.avatar_type || 'text';
-        gameState.playerAvatarPhoto = profile.avatar_url;
-        
-        // Load stats
-        const { data: stats } = await supabase
-            .from('player_stats')
-            .select('*')
-            .eq('player_id', currentUser.id)
-            .single();
-        
-        if (stats) {
-            gameState.totalGames = stats.total_games || 0;
-            gameState.totalCorrectAnswers = stats.correct_answers || 0;
-            gameState.totalQuestions = stats.total_questions || 0;
-            gameState.highestStreak = stats.highest_streak || 0;
-            gameState.winStreak = stats.win_streak || 0;
-            gameState.totalScore = stats.total_score || 0;
-        }
-        
-        // Load achievements
-        const { data: achievements } = await supabase
-            .from('achievements')
-            .select('*')
-            .eq('player_id', currentUser.id);
-        
-        if (achievements) {
-            gameState.achievements.forEach(ach => {
-                const dbAchievement = achievements.find(a => a.achievement_id === ach.id);
-                if (dbAchievement) {
-                    ach.unlocked = true;
-                    ach.unlocked_at = dbAchievement.unlocked_at;
-                }
-            });
-        }
-        
-        updateProfilePicture();
-        populateStats();
-        populateAchievements();
-    }
-
-    async function createUserProfile() {
-        if (!currentUser) return;
-        
-        const profile = {
-            id: currentUser.id,
-            email: currentUser.email,
-            display_name: currentUser.email?.split('@')[0] || 'Player',
-            avatar_type: 'text',
-            avatar_emoji: '👤',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-        };
-        
-        const { error } = await supabase
-            .from('profiles')
-            .insert([profile]);
-        
-        if (!error) {
-            gameState.playerProfile = profile;
-            gameState.playerName = profile.display_name;
-            gameState.playerAvatar = profile.avatar_emoji;
-        }
-    }
-
-    async function updateUserProfile(updates) {
-        if (!currentUser || !gameState.playerProfile) return;
-        
-        const { error } = await supabase
-            .from('profiles')
-            .update({
-                ...updates,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', currentUser.id);
-        
-        if (!error) {
-            gameState.playerProfile = { ...gameState.playerProfile, ...updates };
-        }
     }
 
     function loadSavedData() {
@@ -4073,290 +3797,7 @@
         }
     }
 
-    // ===== ONLINE MULTIPLAYER =====
-    async function createRoom() {
-        const roomName = elements.roomName.value.trim() || `${gameState.playerName}'s Room`;
-        const modeId = elements.onlineModeSelect.value;
-        const questions = elements.onlineQuestionCount.value;
-        const categoryId = elements.onlineCategorySelect.value;
-        const maxPlayers = elements.maxPlayers.value;
-        
-        // Generate room code
-        const roomCode = generateRoomCode();
-        
-        // Create room in database
-        const { data: room, error } = await supabase
-            .from('rooms')
-            .insert([{
-                code: roomCode,
-                name: roomName,
-                game_mode: modeId,
-                category: categoryId,
-                question_count: parseInt(questions),
-                max_players: parseInt(maxPlayers),
-                host_id: currentUser.id,
-                status: 'waiting',
-                created_at: new Date().toISOString()
-            }])
-            .select()
-            .single();
-        
-        if (error) {
-            showNotification('Error creating room: ' + error.message, 'error');
-            return;
-        }
-        
-        // Join room as host
-        await joinRoomAsPlayer(room.id);
-        
-        gameState.roomId = room.id;
-        gameState.roomCode = roomCode;
-        gameState.roomName = roomName;
-        gameState.currentGameMode = modeId;
-        gameState.totalQuestions = parseInt(questions);
-        gameState.selectedCategory = categoryId;
-        gameState.isHost = true;
-        gameState.isOnlineGame = true;
-        
-        // Update waiting room
-        elements.roomCodeDisplay.textContent = roomCode;
-        const mode = gameState.gameModes.find(m => m.id === modeId);
-        elements.roomMode.textContent = mode ? mode.name : 'Classic';
-        elements.roomQuestions.textContent = questions;
-        const category = gameState.categories.find(c => c.id === categoryId);
-        elements.roomCategory.textContent = category ? category.name : 'General Knowledge';
-        
-        // Update online players list
-        updateOnlinePlayersList();
-        
-        // Setup realtime subscription
-        setupRoomSubscription(room.id);
-        
-        // Close modal and go to waiting room
-        closeModal('createRoomModal');
-        updateNavigation('waiting');
-        
-        showNotification('Room created! Share the code with friends.');
-    }
-
-    async function joinRoom() {
-        const roomCode = elements.joinRoomCode.value.trim().toUpperCase();
-        
-        if (!roomCode || roomCode.length !== 6) {
-            alert('Please enter a valid 6-digit room code');
-            return;
-        }
-        
-        // Find room by code
-        const { data: room, error } = await supabase
-            .from('rooms')
-            .select('*')
-            .eq('code', roomCode)
-            .eq('status', 'waiting')
-            .single();
-        
-        if (error || !room) {
-            showNotification('Room not found or already started', 'error');
-            return;
-        }
-        
-        // Check if room is full
-        const { data: players } = await supabase
-            .from('room_players')
-            .select('*')
-            .eq('room_id', room.id);
-        
-        if (players && players.length >= room.max_players) {
-            showNotification('Room is full', 'error');
-            return;
-        }
-        
-        // Join room
-        await joinRoomAsPlayer(room.id);
-        
-        gameState.roomId = room.id;
-        gameState.roomCode = room.code;
-        gameState.roomName = room.name;
-        gameState.currentGameMode = room.game_mode;
-        gameState.totalQuestions = room.question_count;
-        gameState.selectedCategory = room.category;
-        gameState.isHost = false;
-        gameState.isOnlineGame = true;
-        
-        // Update waiting room
-        elements.roomCodeDisplay.textContent = room.code;
-        const mode = gameState.gameModes.find(m => m.id === room.game_mode);
-        elements.roomMode.textContent = mode ? mode.name : 'Classic';
-        elements.roomQuestions.textContent = room.question_count;
-        const category = gameState.categories.find(c => c.id === room.category);
-        elements.roomCategory.textContent = category ? category.name : 'General Knowledge';
-        
-        // Setup realtime subscription
-        setupRoomSubscription(room.id);
-        
-        // Close modal and go to waiting room
-        closeModal('joinRoomModal');
-        updateNavigation('waiting');
-        
-        showNotification('Joined room successfully!');
-    }
-
-    async function joinRoomAsPlayer(roomId) {
-        const { error } = await supabase
-            .from('room_players')
-            .insert([{
-                room_id: roomId,
-                player_id: currentUser.id,
-                player_name: gameState.playerName,
-                score: 0,
-                joined_at: new Date().toISOString()
-            }]);
-        
-        return !error;
-    }
-
-    async function setupRoomSubscription(roomId) {
-        // Unsubscribe from previous subscription
-        if (realtimeSubscription) {
-            await supabase.removeChannel(realtimeSubscription);
-        }
-        
-        // Subscribe to room players
-        realtimeSubscription = supabase
-            .channel(`room:${roomId}`)
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'room_players',
-                filter: `room_id=eq.${roomId}`
-            }, async (payload) => {
-                // Update players list
-                await updateRoomPlayers();
-                
-                if (payload.eventType === 'INSERT') {
-                    soundEffects.play('bell');
-                    showNotification(`${payload.new.player_name} joined the room!`);
-                }
-            })
-            .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'rooms',
-                filter: `id=eq.${roomId}`
-            }, (payload) => {
-                if (payload.new.status === 'playing') {
-                    // Room started
-                    startOnlineGame();
-                }
-            })
-            .subscribe();
-    }
-
-    async function updateRoomPlayers() {
-        if (!gameState.roomId) return;
-        
-        const { data: players } = await supabase
-            .from('room_players')
-            .select('*')
-            .eq('room_id', gameState.roomId)
-            .order('joined_at', { ascending: true });
-        
-        if (!players) return;
-        
-        gameState.onlinePlayers = players;
-        
-        // Update UI
-        const list = elements.onlinePlayersList;
-        list.innerHTML = players.map(player => `
-            <div class="player-item">
-                <div class="flex items-center gap-md">
-                    <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div>
-                        <div class="player-name">${player.player_name}</div>
-                        <div class="text-xs text-gray-400">${player.player_id === currentUser.id ? 'You' : 'Player'}</div>
-                    </div>
-                </div>
-                ${player.player_id === currentUser.id ? '<span class="text-yellow"><i class="fas fa-user"></i></span>' : ''}
-            </div>
-        `).join('');
-        
-        // Enable start button for host if enough players
-        if (gameState.isHost) {
-            const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
-            elements.startOnlineGameBtn.disabled = gameState.onlinePlayers.length < mode.minPlayers;
-        }
-    }
-
-    async function startOnlineGame() {
-        if (!gameState.isHost) return;
-        
-        // Update room status
-        const { error } = await supabase
-            .from('rooms')
-            .update({ status: 'playing' })
-            .eq('id', gameState.roomId);
-        
-        if (error) {
-            showNotification('Error starting game: ' + error.message, 'error');
-            return;
-        }
-        
-        // Start the game
-        startGame();
-    }
-
-    async function leaveRoom() {
-        if (confirm('Leave this room?')) {
-            // Remove player from room
-            await supabase
-                .from('room_players')
-                .delete()
-                .eq('room_id', gameState.roomId)
-                .eq('player_id', currentUser.id);
-            
-            // If host left and room is empty, delete room
-            if (gameState.isHost) {
-                await supabase
-                    .from('rooms')
-                    .delete()
-                    .eq('id', gameState.roomId);
-            }
-            
-            // Cleanup
-            gameState.isOnlineGame = false;
-            gameState.roomId = null;
-            gameState.roomCode = null;
-            
-            if (realtimeSubscription) {
-                await supabase.removeChannel(realtimeSubscription);
-                realtimeSubscription = null;
-            }
-            
-            updateNavigation('online');
-            showNotification('Left the room');
-        }
-    }
-
-    function copyRoomCode() {
-        navigator.clipboard.writeText(gameState.roomCode);
-        showNotification('Room code copied to clipboard!');
-    }
-
-    function shareRoomLink() {
-        if (navigator.share) {
-            navigator.share({
-                title: 'Join my trivia room!',
-                text: `Join my trivia game on Too Turned Trivia! Room code: ${gameState.roomCode}`,
-                url: window.location.href
-            });
-        } else {
-            copyRoomCode();
-        }
-    }
-
-    // ===== GAME FUNCTIONS (UPDATED FOR ONLINE) =====
+    // ===== GAME FUNCTIONS =====
     async function startGame() {
         if (!gameState.currentGameMode) {
             alert('Please select a game mode');
@@ -4376,19 +3817,9 @@
         gameState.hintUsed = false;
         
         // Initialize player scores
-        if (gameState.isOnlineGame) {
-            // For online games, use online players
-            gameState.players = gameState.onlinePlayers.map(p => p.player_name);
-            gameState.playerScores = {};
-            gameState.onlinePlayers.forEach(player => {
-                gameState.playerScores[player.player_name] = 0;
-            });
-        } else {
-            // For local games
-            gameState.players.forEach(player => {
-                gameState.playerScores[player] = 0;
-            });
-        }
+        gameState.players.forEach(player => {
+            gameState.playerScores[player] = 0;
+        });
         
         gameState.score = 0;
         gameState.lives = mode.lives;
@@ -4400,12 +3831,9 @@
         gameState.gameStartTime = Date.now();
         
         // Get game settings
-        gameState.totalQuestions = gameState.isOnlineGame ? 
-            gameState.totalQuestions : parseInt(elements.questionCount.value);
-        gameState.selectedCategory = gameState.isOnlineGame ? 
-            gameState.selectedCategory : elements.categorySelect.value;
-        gameState.selectedDifficulty = gameState.isOnlineGame ? 
-            'medium' : elements.difficultySelect.value;
+        gameState.totalQuestions = parseInt(elements.questionCount.value);
+        gameState.selectedCategory = elements.categorySelect.value;
+        gameState.selectedDifficulty = elements.difficultySelect.value;
         
         // Update UI
         elements.modeName.textContent = mode.name;
@@ -4434,9 +3862,6 @@
         elements.hintBtn.innerHTML = `<i class="fas fa-lightbulb"></i> Hint (${gameState.hintsLeft} left)`;
         elements.hintBtn.disabled = false;
         
-        // Hide current player indicator initially
-        elements.currentPlayerIndicator.classList.add('hidden');
-        
         // Navigate to game screen
         updateNavigation('game');
         
@@ -4445,19 +3870,6 @@
         
         // Fetch and load first question
         await loadQuestion();
-        
-        // Show current player for turn-based modes
-        if (mode.turnBased && gameState.players.length > 0) {
-            updateCurrentPlayerIndicator();
-        }
-    }
-
-    function updateCurrentPlayerIndicator() {
-        if (gameState.players.length > 0) {
-            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-            elements.currentPlayerIndicator.textContent = `Current Player: ${currentPlayer}`;
-            elements.currentPlayerIndicator.classList.remove('hidden');
-        }
     }
 
     async function loadQuestion() {
@@ -4696,8 +4108,15 @@
             gameState.winStreak = 0;
         }
         
-        // Save stats to database
-        saveGameStats();
+        // Save stats
+        localStorage.setItem('gameStats', JSON.stringify({
+            totalGames: gameState.totalGames,
+            totalCorrectAnswers: gameState.totalCorrectAnswers,
+            totalQuestions: gameState.totalQuestions,
+            totalScore: gameState.totalScore,
+            highestStreak: gameState.highestStreak,
+            winStreak: gameState.winStreak
+        }));
         
         // Update modal
         elements.finalScore.textContent = gameState.score.toLocaleString();
@@ -4722,170 +4141,7 @@
         openModal('gameCompleteModal');
     }
 
-    async function saveGameStats() {
-        if (!currentUser) return;
-        
-        // Update player stats
-        const { data: existingStats } = await supabase
-            .from('player_stats')
-            .select('*')
-            .eq('player_id', currentUser.id)
-            .single();
-        
-        if (existingStats) {
-            // Update existing stats
-            await supabase
-                .from('player_stats')
-                .update({
-                    total_games: existingStats.total_games + 1,
-                    correct_answers: existingStats.correct_answers + gameState.correctAnswers,
-                    total_questions: existingStats.total_questions + gameState.totalQuestions,
-                    total_score: existingStats.total_score + gameState.score,
-                    highest_streak: Math.max(existingStats.highest_streak, gameState.maxStreak),
-                    win_streak: gameState.winStreak,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('player_id', currentUser.id);
-        } else {
-            // Create new stats
-            await supabase
-                .from('player_stats')
-                .insert([{
-                    player_id: currentUser.id,
-                    total_games: 1,
-                    correct_answers: gameState.correctAnswers,
-                    total_questions: gameState.totalQuestions,
-                    total_score: gameState.score,
-                    highest_streak: gameState.maxStreak,
-                    win_streak: gameState.winStreak,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                }]);
-        }
-        
-        // Save game history
-        await supabase
-            .from('game_history')
-            .insert([{
-                player_id: currentUser.id,
-                game_mode: gameState.currentGameMode,
-                category: gameState.selectedCategory,
-                difficulty: gameState.selectedDifficulty,
-                score: gameState.score,
-                correct_answers: gameState.correctAnswers,
-                total_questions: gameState.totalQuestions,
-                time_played: Math.floor((Date.now() - gameState.gameStartTime) / 1000),
-                played_at: new Date().toISOString()
-            }]);
-    }
-
     // ===== HELPER FUNCTIONS =====
-    function generateRoomCode() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for (let i = 0; i < 6; i++) {
-            code += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return code;
-    }
-
-    function showFeedback(message, type) {
-        const feedback = document.createElement('div');
-        feedback.className = `feedback-message feedback-${type}`;
-        feedback.textContent = message;
-        
-        document.body.appendChild(feedback);
-        
-        setTimeout(() => {
-            feedback.remove();
-        }, 1500);
-    }
-
-    function showNotification(message, type = 'info') {
-        if (!gameState.settings.notifications) return;
-        
-        const notification = document.createElement('div');
-        notification.className = 'notification';
-        notification.innerHTML = `
-            <div class="flex items-center gap-sm">
-                <i class="fas ${type === 'error' ? 'fa-exclamation-circle text-red' : 'fa-info-circle text-yellow'}"></i>
-                <div>
-                    <div class="font-semibold">${type === 'error' ? 'Error' : 'Notification'}</div>
-                    <div class="text-sm text-gray-400">${message}</div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 3000);
-    }
-
-    // ===== ROOM MANAGEMENT =====
-    async function refreshRoomsList() {
-        const { data: rooms, error } = await supabase
-            .from('rooms')
-            .select('*')
-            .eq('status', 'waiting')
-            .order('created_at', { ascending: true });
-        
-        if (error) {
-            showNotification('Error loading rooms', 'error');
-            return;
-        }
-        
-        if (!rooms || rooms.length === 0) {
-            elements.roomList.innerHTML = '<div class="text-center text-gray-400 py-8">No rooms available</div>';
-            return;
-        }
-        
-        // Get player counts for each room
-        const roomsWithPlayers = await Promise.all(rooms.map(async (room) => {
-            const { data: players } = await supabase
-                .from('room_players')
-                .select('*')
-                .eq('room_id', room.id);
-            
-            return {
-                ...room,
-                playerCount: players ? players.length : 0
-            };
-        }));
-        
-        elements.roomList.innerHTML = roomsWithPlayers.map(room => {
-            const mode = gameState.gameModes.find(m => m.id === room.game_mode);
-            const category = gameState.categories.find(c => c.id === room.category);
-            
-            return `
-                <div class="room-item" onclick="joinRoomByCode('${room.code}')">
-                    <div class="room-info">
-                        <div class="room-name">${room.name}</div>
-                        <div class="room-meta">
-                            <span><i class="fas fa-${mode?.icon || 'gamepad'}"></i> ${mode?.name || 'Classic'}</span>
-                            <span><i class="fas fa-users"></i> ${room.playerCount}/${room.max_players}</span>
-                            <span><i class="fas fa-question-circle"></i> ${room.question_count} Qs</span>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="room-status waiting">Join</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-        showNotification('Rooms refreshed!');
-    }
-
-    function joinRoomByCode(code) {
-        elements.joinRoomCode.value = code;
-        openModal('joinRoomModal');
-    }
-
     function simulateLoading() {
         let progress = 0;
         const interval = setInterval(() => {
@@ -4897,12 +4153,6 @@
                     elements.loadingScreen.style.opacity = '0';
                     setTimeout(() => {
                         elements.loadingScreen.style.display = 'none';
-                        
-                        // Check if we're on auth screen and ensure listeners are active
-                        if (elements.authScreen.classList.contains('active')) {
-                            // Auth screen is showing, ensure listeners are working
-                            console.log('Auth screen visible, checking listeners...');
-                        }
                     }, 500);
                 }, 500);
             }
@@ -4973,7 +4223,7 @@
         }
     }
 
-    function populateCategories() {
+    function populateCategoriesScreen() {
         const categoriesGrid = elements.categoriesGrid;
         if (!categoriesGrid) return;
         
@@ -4989,11 +4239,6 @@
                 </button>
             </div>
         `).join('');
-    }
-
-    function populateCategoriesScreen() {
-        // Same as populateCategories but for categories screen
-        populateCategories();
     }
 
     function setupStepNavigation() {
@@ -5193,8 +4438,7 @@
 
     async function fetchQuestions(category, difficulty, limit) {
         try {
-            // For demo purposes, return mock questions
-            // In production, you would use the Trivia API
+            // Mock questions for demo
             const mockQuestions = [
                 {
                     question: "What is the capital of France?",
@@ -5225,6 +4469,28 @@
                         { text: "William Shakespeare", correct: true },
                         { text: "Jane Austen", correct: false },
                         { text: "Mark Twain", correct: false }
+                    ],
+                    difficulty: difficulty,
+                    category: category
+                },
+                {
+                    question: "What is the largest ocean on Earth?",
+                    answers: [
+                        { text: "Atlantic Ocean", correct: false },
+                        { text: "Indian Ocean", correct: false },
+                        { text: "Pacific Ocean", correct: true },
+                        { text: "Arctic Ocean", correct: false }
+                    ],
+                    difficulty: difficulty,
+                    category: category
+                },
+                {
+                    question: "How many continents are there?",
+                    answers: [
+                        { text: "5", correct: false },
+                        { text: "6", correct: false },
+                        { text: "7", correct: true },
+                        { text: "8", correct: false }
                     ],
                     difficulty: difficulty,
                     category: category
@@ -5303,12 +4569,6 @@
         gameState.currentQuestionIndex++;
         gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
         loadQuestion();
-        
-        // Update current player indicator
-        const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
-        if (mode.turnBased && gameState.players.length > 0) {
-            updateCurrentPlayerIndicator();
-        }
     }
 
     function showHint() {
@@ -5325,16 +4585,16 @@
             `Hint: The answer starts with "${gameState.currentQuestion.answers.find(a => a.correct)?.text?.charAt(0)}"` :
             "Try to eliminate obviously wrong answers first.";
         
-        elements.hintText.textContent = hintText;
+        document.getElementById('hintText').textContent = hintText;
         openModal('hintModal');
         
         // Auto-close after 5 seconds
         let timer = 5;
-        elements.hintTimer.textContent = `Closing in ${timer} seconds...`;
+        document.getElementById('hintTimer').textContent = `Closing in ${timer} seconds...`;
         
         const hintTimerInterval = setInterval(() => {
             timer--;
-            elements.hintTimer.textContent = `Closing in ${timer} seconds...`;
+            document.getElementById('hintTimer').textContent = `Closing in ${timer} seconds...`;
             
             if (timer <= 0) {
                 clearInterval(hintTimerInterval);
@@ -5363,57 +4623,185 @@
         });
     }
 
-    function openAvatarOptions() {
-        openModal('avatarOptionsModal');
+    function showFeedback(message, type) {
+        const feedback = document.createElement('div');
+        feedback.className = `feedback-message feedback-${type}`;
+        feedback.textContent = message;
+        
+        document.body.appendChild(feedback);
+        
+        setTimeout(() => {
+            feedback.remove();
+        }, 1500);
     }
 
-    function takePhoto() {
-        alert('Camera functionality would be implemented here. For now, please upload a photo.');
-        closeModal('avatarOptionsModal');
+    function showNotification(message, type = 'info') {
+        if (!gameState.settings.notifications) return;
+        
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.innerHTML = `
+            <div class="flex items-center gap-sm">
+                <i class="fas ${type === 'error' ? 'fa-exclamation-circle text-red' : 'fa-info-circle text-yellow'}"></i>
+                <div>
+                    <div class="font-semibold">${type === 'error' ? 'Error' : 'Notification'}</div>
+                    <div class="text-sm text-gray-400">${message}</div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
     }
 
-    function uploadPhoto() {
-        document.getElementById('photoUpload').click();
-        closeModal('avatarOptionsModal');
+    // ===== ONLINE MULTIPLAYER (SIMPLIFIED) =====
+    async function createRoom() {
+        const roomName = elements.roomName.value.trim() || `${gameState.playerName}'s Room`;
+        const modeId = elements.onlineModeSelect.value;
+        const questions = elements.onlineQuestionCount.value;
+        const categoryId = elements.onlineCategorySelect.value;
+        
+        // Generate room code
+        const roomCode = generateRoomCode();
+        
+        gameState.roomCode = roomCode;
+        gameState.roomName = roomName;
+        gameState.currentGameMode = modeId;
+        gameState.totalQuestions = parseInt(questions);
+        gameState.selectedCategory = categoryId;
+        gameState.isHost = true;
+        gameState.isOnlineGame = true;
+        
+        // Update waiting room
+        elements.roomCodeDisplay.textContent = roomCode;
+        const mode = gameState.gameModes.find(m => m.id === modeId);
+        elements.roomMode.textContent = mode ? mode.name : 'Classic';
+        elements.roomQuestions.textContent = questions;
+        const category = gameState.categories.find(c => c.id === categoryId);
+        elements.roomCategory.textContent = category ? category.name : 'General Knowledge';
+        
+        // Close modal and go to waiting room
+        closeModal('createRoomModal');
+        updateNavigation('waiting');
+        
+        showNotification('Room created! Share the code with friends.');
     }
 
-    function selectEmojiAvatar() {
-        // Populate emoji grid
-        const emojiGrid = document.getElementById('emojiGrid');
-        if (emojiGrid) {
-            const emojis = ['😀', '😎', '🤓', '😍', '🥳', '🤖', '👻', '🦄', '🐶', '🐱', '🦁', '🐯', '🦊', '🐼', '🐨', '🐵'];
-            emojiGrid.innerHTML = emojis.map(emoji => `
-                <button class="text-3xl p-4 rounded-lg hover:bg-gray-700" onclick="selectEmoji('${emoji}')">
-                    ${emoji}
-                </button>
-            `).join('');
+    async function joinRoom() {
+        const roomCode = elements.joinRoomCode.value.trim().toUpperCase();
+        
+        if (!roomCode || roomCode.length !== 6) {
+            alert('Please enter a valid 6-digit room code');
+            return;
         }
         
-        closeModal('avatarOptionsModal');
-        openModal('emojiAvatarModal');
+        // For demo, accept any code
+        gameState.roomCode = roomCode;
+        gameState.roomName = `Room ${roomCode}`;
+        gameState.currentGameMode = 'classic';
+        gameState.totalQuestions = 10;
+        gameState.selectedCategory = 'general';
+        gameState.isHost = false;
+        gameState.isOnlineGame = true;
+        
+        // Update waiting room
+        elements.roomCodeDisplay.textContent = roomCode;
+        elements.roomMode.textContent = 'Classic';
+        elements.roomQuestions.textContent = '10';
+        elements.roomCategory.textContent = 'General Knowledge';
+        
+        // Close modal and go to waiting room
+        closeModal('joinRoomModal');
+        updateNavigation('waiting');
+        
+        showNotification('Joined room successfully!');
     }
 
-    async function selectEmoji(emoji) {
-        gameState.playerAvatar = emoji;
-        gameState.playerAvatarType = 'emoji';
-        gameState.playerAvatarPhoto = null;
-        
-        // Update in database
-        await updateUserProfile({
-            avatar_type: 'emoji',
-            avatar_emoji: emoji,
-            avatar_url: null
-        });
-        
-        updateProfilePicture();
-        closeModal('emojiAvatarModal');
-        showNotification('Emoji avatar updated!');
+    function generateRoomCode() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 6; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
     }
 
-    function selectThemeColor(color) {
-        // This would update CSS variables for theme colors
-        document.documentElement.style.setProperty('--yellow', color);
-        showNotification('Theme color updated!');
+    function copyRoomCode() {
+        navigator.clipboard.writeText(gameState.roomCode);
+        showNotification('Room code copied to clipboard!');
+    }
+
+    function shareRoomLink() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Join my trivia room!',
+                text: `Join my trivia game on Too Turned Trivia! Room code: ${gameState.roomCode}`,
+                url: window.location.href
+            });
+        } else {
+            copyRoomCode();
+        }
+    }
+
+    async function refreshRoomsList() {
+        // For demo, show mock rooms
+        elements.roomList.innerHTML = `
+            <div class="room-item" onclick="joinRoomByCode('ABC123')">
+                <div class="room-info">
+                    <div class="room-name">Demo Room 1</div>
+                    <div class="room-meta">
+                        <span><i class="fas fa-crown"></i> Classic</span>
+                        <span><i class="fas fa-users"></i> 2/4</span>
+                        <span><i class="fas fa-question-circle"></i> 10 Qs</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="room-status waiting">Join</span>
+                </div>
+            </div>
+            <div class="room-item" onclick="joinRoomByCode('DEF456')">
+                <div class="room-info">
+                    <div class="room-name">Battle Arena</div>
+                    <div class="room-meta">
+                        <span><i class="fas fa-skull-crossbones"></i> Battle</span>
+                        <span><i class="fas fa-users"></i> 3/6</span>
+                        <span><i class="fas fa-question-circle"></i> 15 Qs</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="room-status waiting">Join</span>
+                </div>
+            </div>
+        `;
+        
+        showNotification('Rooms refreshed!');
+    }
+
+    function joinRoomByCode(code) {
+        elements.joinRoomCode.value = code;
+        openModal('joinRoomModal');
+    }
+
+    function leaveRoom() {
+        if (confirm('Leave this room?')) {
+            gameState.isOnlineGame = false;
+            gameState.roomId = null;
+            gameState.roomCode = null;
+            
+            updateNavigation('online');
+            showNotification('Left the room');
+        }
+    }
+
+    function startOnlineGame() {
+        // Start the game
+        startGame();
     }
 
     function resumeGame() {
@@ -5443,18 +4831,11 @@
     window.updateNavigation = updateNavigation;
     window.closeModal = closeModal;
     window.openModal = openModal;
-    window.openAvatarOptions = openAvatarOptions;
-    window.takePhoto = takePhoto;
-    window.uploadPhoto = uploadPhoto;
-    window.selectEmojiAvatar = selectEmojiAvatar;
-    window.selectEmoji = selectEmoji;
-    window.selectThemeColor = selectThemeColor;
-    window.resumeGame = resumeGame;
-    window.quitGame = quitGame;
     window.copyRoomCode = copyRoomCode;
     window.shareRoomLink = shareRoomLink;
     window.joinRoomByCode = joinRoomByCode;
-    window.playSound = playSound;
+    window.resumeGame = resumeGame;
+    window.quitGame = quitGame;
     </script>
 </body>
 </html>
