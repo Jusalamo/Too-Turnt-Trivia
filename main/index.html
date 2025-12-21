@@ -2666,8 +2666,8 @@
     <script>
         // ===== SUPABASE CONFIGURATION =====
         const SUPABASE_CONFIG = {
-            url: 'https://emwnshsfhrdcojzaxkjd.supabase.co', // Replace with your Supabase URL
-            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtd25zaHNmaHJkY29qemF4a2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYzMjU4ODQsImV4cCI6MjA4MTkwMTg4NH0.Q_43zqq0eTZiUVUdDrfYtYr-F8ZjTjQVKs3VIJPTap4', // Replace with your Supabase anon key
+            url: 'https://emwnshsfhrdcojzaxkjd.supabase.co',
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtd25zaHNmaHJkY29qemF4a2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYzMjU4ODQsImV4cCI6MjA4MTkwMTg4NH0.Q_43zqq0eTZiUVUdDrfYtYr-F8ZjTjQVKs3VIJPTap4',
         };
 
         let supabase;
@@ -4819,9 +4819,551 @@
             openModal('joinRoomModal');
         }
 
-        // ===== OTHER FUNCTIONS =====
-        // ... (Keep all other functions from previous code: updateNavigation, goBack, populateGameData, populateCategories, etc.)
-        // These functions remain the same as in the previous implementation
+        // ===== MISSING FUNCTIONS - ADDED =====
+        function simulateLoading() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        elements.loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            elements.loadingScreen.style.display = 'none';
+                        }, 500);
+                    }, 500);
+                }
+                elements.loadingProgress.style.width = `${progress}%`;
+                
+                if (progress < 30) {
+                    elements.loadingText.textContent = 'Initializing...';
+                } else if (progress < 60) {
+                    elements.loadingText.textContent = 'Loading game data...';
+                } else if (progress < 90) {
+                    elements.loadingText.textContent = 'Preparing interface...';
+                } else {
+                    elements.loadingText.textContent = 'Ready!';
+                }
+            }, 100);
+        }
+
+        function updateHUD() {
+            elements.playerName.textContent = gameState.playerName;
+            elements.playerScoreHud.textContent = gameState.totalScore;
+        }
+
+        function populateGameData() {
+            // Populate game modes grid
+            const modesGrid = elements.modesGrid;
+            if (modesGrid) {
+                modesGrid.innerHTML = gameState.gameModes.map(mode => `
+                    <div class="card">
+                        <div class="card-icon" style="background: ${mode.color}20; color: ${mode.color};">
+                            <i class="fas fa-${mode.icon}"></i>
+                        </div>
+                        <h3 class="card-title">${mode.name}</h3>
+                        <p class="card-description">${mode.description}</p>
+                        <div class="flex gap-sm mt-md">
+                            <button class="btn btn-primary flex-1 play-mode-btn" data-mode="${mode.id}">
+                                <i class="fas fa-play"></i> Play
+                            </button>
+                            <button class="btn btn-outline view-mode-btn" data-mode="${mode.id}">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Populate categories dropdown
+            const categorySelect = elements.categorySelect;
+            const onlineCategorySelect = elements.onlineCategorySelect;
+            
+            if (categorySelect) {
+                categorySelect.innerHTML = gameState.categories.map(cat => `
+                    <option value="${cat.id}">${cat.name}</option>
+                `).join('');
+            }
+            
+            if (onlineCategorySelect) {
+                onlineCategorySelect.innerHTML = gameState.categories.map(cat => `
+                    <option value="${cat.id}">${cat.name}</option>
+                `).join('');
+            }
+            
+            // Populate online mode select
+            const onlineModeSelect = elements.onlineModeSelect;
+            if (onlineModeSelect) {
+                onlineModeSelect.innerHTML = gameState.gameModes.map(mode => `
+                    <option value="${mode.id}">${mode.name}</option>
+                `).join('');
+            }
+        }
+
+        function populateCategories() {
+            const categoriesGrid = elements.categoriesGrid;
+            if (!categoriesGrid) return;
+            
+            categoriesGrid.innerHTML = gameState.categories.map(cat => `
+                <div class="category-card card">
+                    <div class="card-icon" style="background: ${cat.color}20; color: ${cat.color};">
+                        <i class="fas fa-${cat.icon}"></i>
+                    </div>
+                    <h3 class="card-title">${cat.name}</h3>
+                    <p class="card-description">${cat.description}</p>
+                    <button class="btn btn-primary btn-full mt-md play-category-btn" data-category="${cat.id}">
+                        <i class="fas fa-play"></i> Play This Category
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function populateCategoriesScreen() {
+            // Same as populateCategories but for categories screen
+            populateCategories();
+        }
+
+        function setupStepNavigation() {
+            // Navigation is handled by event listeners
+        }
+
+        function populateOnlineSelectors() {
+            // Already handled in populateGameData
+        }
+
+        function initializeSettings() {
+            // Set dark mode toggle
+            if (elements.darkModeToggle) {
+                elements.darkModeToggle.checked = gameState.settings.darkMode;
+                if (!gameState.settings.darkMode) {
+                    document.body.classList.add('light-mode');
+                }
+            }
+        }
+
+        function updatePlayersList() {
+            const playersList = elements.playersList;
+            const finalPlayersList = elements.finalPlayersList;
+            
+            if (playersList) {
+                playersList.innerHTML = gameState.players.map(player => `
+                    <div class="player-item">
+                        <div class="flex items-center gap-md">
+                            <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="player-name">${player}</div>
+                        </div>
+                        <button class="btn btn-sm btn-outline remove-player-btn" data-player="${player}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+            
+            if (finalPlayersList) {
+                finalPlayersList.innerHTML = gameState.players.map(player => `
+                    <div class="player-item">
+                        <div class="flex items-center gap-md">
+                            <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="player-name">${player}</div>
+                        </div>
+                        <div class="text-yellow font-bold">${gameState.playerScores[player] || 0} pts</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateProfilePicture() {
+            const profileAvatarImg = elements.profileAvatarImg;
+            const profileAvatarText = elements.profileAvatarText;
+            
+            if (gameState.playerAvatarPhoto) {
+                profileAvatarImg.src = gameState.playerAvatarPhoto;
+                profileAvatarImg.style.display = 'block';
+                profileAvatarText.style.display = 'none';
+            } else {
+                profileAvatarImg.style.display = 'none';
+                profileAvatarText.style.display = 'flex';
+                profileAvatarText.textContent = gameState.playerAvatar;
+            }
+        }
+
+        function populateStats() {
+            elements.totalGamesStat.textContent = gameState.totalGames;
+            
+            const accuracy = gameState.totalQuestions > 0 ? 
+                Math.round((gameState.totalCorrectAnswers / gameState.totalQuestions) * 100) : 0;
+            elements.accuracyStat.textContent = `${accuracy}%`;
+            
+            elements.winStreakStat.textContent = gameState.winStreak;
+            elements.totalPointsStat.textContent = gameState.totalScore.toLocaleString();
+        }
+
+        function populateAchievements() {
+            const achievementsList = elements.achievementsList;
+            if (!achievementsList) return;
+            
+            achievementsList.innerHTML = gameState.achievements.map(ach => `
+                <div class="leaderboard-item ${ach.unlocked ? 'opacity-100' : 'opacity-50'}">
+                    <div class="flex items-center gap-md">
+                        <div class="leaderboard-rank">
+                            ${ach.unlocked ? '✓' : '?'}
+                        </div>
+                        <div>
+                            <div class="font-semibold">${ach.name}</div>
+                            <div class="text-sm text-gray-400">${ach.description}</div>
+                        </div>
+                    </div>
+                    ${ach.unlocked ? '<span class="text-yellow"><i class="fas fa-trophy"></i></span>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateProfile() {
+            elements.profileName.textContent = gameState.playerName;
+            elements.profileTitle.textContent = gameState.rank;
+        }
+
+        function navigateToStep(step) {
+            // Update stepper
+            document.querySelectorAll('.step').forEach(stepEl => {
+                stepEl.classList.remove('active');
+            });
+            document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+            
+            // Update sections
+            document.querySelectorAll('.setup-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelector(`.setup-section[data-step="${step}"]`).classList.add('active');
+            
+            // Update mode info if we're on step 3
+            if (step === 3) {
+                const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
+                if (mode) {
+                    elements.selectedModeName.textContent = mode.name;
+                    elements.selectedModeDescription.textContent = mode.description;
+                }
+                
+                // Update settings display
+                elements.settingsQuestionCount.textContent = elements.questionCount.value;
+                const category = gameState.categories.find(c => c.id === elements.categorySelect.value);
+                elements.settingsCategory.textContent = category ? category.name : 'General Knowledge';
+                elements.settingsDifficulty.textContent = elements.difficultySelect.value.charAt(0).toUpperCase() + elements.difficultySelect.value.slice(1);
+            }
+        }
+
+        function updateNavigation(screen) {
+            // Update screen history
+            if (gameState.currentScreen !== screen) {
+                gameState.screenHistory.push(screen);
+                gameState.currentScreen = screen;
+            }
+            
+            // Hide all screens
+            Object.values(elements.screens).forEach(screenEl => {
+                screenEl.classList.remove('active');
+            });
+            
+            // Show current screen
+            if (elements.screens[screen]) {
+                elements.screens[screen].classList.add('active');
+            }
+            
+            // Update bottom navigation
+            elements.navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.screen === screen) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Update HUD visibility
+            if (screen === 'home' || screen === 'modes' || screen === 'categories' || screen === 'stats' || screen === 'profile') {
+                elements.playerHud.classList.remove('hidden');
+                elements.bottomNav.classList.remove('hidden');
+            } else if (screen === 'game') {
+                elements.playerHud.classList.remove('hidden');
+                elements.bottomNav.classList.add('hidden');
+            } else {
+                elements.playerHud.classList.add('hidden');
+                elements.bottomNav.classList.add('hidden');
+            }
+        }
+
+        function goBack() {
+            if (gameState.screenHistory.length > 1) {
+                gameState.screenHistory.pop(); // Remove current
+                const previousScreen = gameState.screenHistory[gameState.screenHistory.length - 1];
+                updateNavigation(previousScreen);
+            }
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        async function fetchQuestions(category, difficulty, limit) {
+            try {
+                // For demo purposes, return mock questions
+                // In production, you would use the Trivia API
+                const mockQuestions = [
+                    {
+                        question: "What is the capital of France?",
+                        answers: [
+                            { text: "London", correct: false },
+                            { text: "Paris", correct: true },
+                            { text: "Berlin", correct: false },
+                            { text: "Madrid", correct: false }
+                        ],
+                        difficulty: difficulty,
+                        category: category
+                    },
+                    {
+                        question: "Which planet is known as the Red Planet?",
+                        answers: [
+                            { text: "Venus", correct: false },
+                            { text: "Mars", correct: true },
+                            { text: "Jupiter", correct: false },
+                            { text: "Saturn", correct: false }
+                        ],
+                        difficulty: difficulty,
+                        category: category
+                    },
+                    {
+                        question: "Who wrote 'Romeo and Juliet'?",
+                        answers: [
+                            { text: "Charles Dickens", correct: false },
+                            { text: "William Shakespeare", correct: true },
+                            { text: "Jane Austen", correct: false },
+                            { text: "Mark Twain", correct: false }
+                        ],
+                        difficulty: difficulty,
+                        category: category
+                    }
+                ];
+                
+                return mockQuestions.slice(0, limit);
+                
+            } catch (error) {
+                console.error('Error fetching questions:', error);
+                return [];
+            }
+        }
+
+        function startQuestionTimer() {
+            clearInterval(gameState.timerInterval);
+            
+            const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
+            gameState.timer = mode.timePerQuestion;
+            elements.gameTimer.textContent = `${gameState.timer}s`;
+            
+            gameState.timerInterval = setInterval(() => {
+                gameState.timer--;
+                elements.gameTimer.textContent = `${gameState.timer}s`;
+                
+                // Play timer sound when time is low
+                if (gameState.timer === 5) {
+                    soundEffects.play('timer');
+                }
+                
+                if (gameState.timer <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        function timeUp() {
+            if (!gameState.isGameActive || gameState.gamePaused) return;
+            
+            // Time's up - mark as incorrect
+            soundEffects.play('incorrect');
+            gameState.lives--;
+            elements.playerLives.textContent = gameState.lives;
+            
+            // Disable all answers
+            document.querySelectorAll('.answer-option').forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+            
+            // Mark correct answer
+            if (gameState.currentQuestion) {
+                const correctAnswer = gameState.currentQuestion.answers.find(a => a.correct);
+                if (correctAnswer) {
+                    document.querySelectorAll('.answer-option').forEach(opt => {
+                        const answerText = opt.querySelector('.flex-1').textContent;
+                        if (answerText === correctAnswer.text) {
+                            opt.classList.add('selected');
+                        }
+                    });
+                }
+            }
+            
+            showFeedback('Time\'s up!', 'incorrect');
+            
+            // Enable next button
+            elements.nextQuestionBtn.disabled = false;
+            
+            // Check if game over
+            if (gameState.lives <= 0) {
+                setTimeout(() => endGame(), 1500);
+            }
+        }
+
+        function nextQuestion() {
+            gameState.currentQuestionIndex++;
+            gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+            loadQuestion();
+            
+            // Update current player indicator
+            const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
+            if (mode.turnBased && gameState.players.length > 0) {
+                updateCurrentPlayerIndicator();
+            }
+        }
+
+        function showHint() {
+            if (gameState.hintsLeft <= 0 || gameState.hintUsed) return;
+            
+            gameState.hintsLeft--;
+            gameState.hintUsed = true;
+            
+            elements.hintBtn.innerHTML = `<i class="fas fa-lightbulb"></i> Hint (${gameState.hintsLeft} left)`;
+            elements.hintBtn.disabled = true;
+            
+            // Show hint modal
+            const hintText = gameState.currentQuestion ? 
+                `Hint: The answer starts with "${gameState.currentQuestion.answers.find(a => a.correct)?.text?.charAt(0)}"` :
+                "Try to eliminate obviously wrong answers first.";
+            
+            elements.hintText.textContent = hintText;
+            openModal('hintModal');
+            
+            // Auto-close after 5 seconds
+            let timer = 5;
+            elements.hintTimer.textContent = `Closing in ${timer} seconds...`;
+            
+            const hintTimerInterval = setInterval(() => {
+                timer--;
+                elements.hintTimer.textContent = `Closing in ${timer} seconds...`;
+                
+                if (timer <= 0) {
+                    clearInterval(hintTimerInterval);
+                    closeModal('hintModal');
+                }
+            }, 1000);
+        }
+
+        function buzzIn() {
+            if (!gameState.isGameActive || gameState.buzzedPlayer) return;
+            
+            soundEffects.play('buzz');
+            
+            // Player buzzed in
+            gameState.buzzedPlayer = gameState.playerName;
+            
+            // Update UI
+            elements.buzzerButton.className = 'buzzer-button buzzer-buzzed';
+            elements.buzzerInstruction.textContent = 'You buzzed in! Select your answer.';
+            elements.playerBuzzed.textContent = `${gameState.playerName} buzzed in!`;
+            
+            // Enable answers
+            elements.answersContainer.style.opacity = '1';
+            document.querySelectorAll('.answer-option').forEach(opt => {
+                opt.style.pointerEvents = 'auto';
+            });
+        }
+
+        function openAvatarOptions() {
+            openModal('avatarOptionsModal');
+        }
+
+        function takePhoto() {
+            alert('Camera functionality would be implemented here. For now, please upload a photo.');
+            closeModal('avatarOptionsModal');
+        }
+
+        function uploadPhoto() {
+            document.getElementById('photoUpload').click();
+            closeModal('avatarOptionsModal');
+        }
+
+        function selectEmojiAvatar() {
+            // Populate emoji grid
+            const emojiGrid = document.getElementById('emojiGrid');
+            if (emojiGrid) {
+                const emojis = ['😀', '😎', '🤓', '😍', '🥳', '🤖', '👻', '🦄', '🐶', '🐱', '🦁', '🐯', '🦊', '🐼', '🐨', '🐵'];
+                emojiGrid.innerHTML = emojis.map(emoji => `
+                    <button class="text-3xl p-4 rounded-lg hover:bg-gray-700" onclick="selectEmoji('${emoji}')">
+                        ${emoji}
+                    </button>
+                `).join('');
+            }
+            
+            closeModal('avatarOptionsModal');
+            openModal('emojiAvatarModal');
+        }
+
+        async function selectEmoji(emoji) {
+            gameState.playerAvatar = emoji;
+            gameState.playerAvatarType = 'emoji';
+            gameState.playerAvatarPhoto = null;
+            
+            // Update in database
+            await updateUserProfile({
+                avatar_type: 'emoji',
+                avatar_emoji: emoji,
+                avatar_url: null
+            });
+            
+            updateProfilePicture();
+            closeModal('emojiAvatarModal');
+            showNotification('Emoji avatar updated!');
+        }
+
+        function selectThemeColor(color) {
+            // This would update CSS variables for theme colors
+            document.documentElement.style.setProperty('--yellow', color);
+            showNotification('Theme color updated!');
+        }
+
+        function resumeGame() {
+            gameState.gamePaused = false;
+            gameState.pauseResolved = true;
+            closeModal('pauseModal');
+            
+            // Restart timer if game is active
+            if (gameState.isGameActive && gameState.timerInterval) {
+                startQuestionTimer();
+            }
+        }
+
+        function quitGame() {
+            if (confirm('Are you sure you want to quit? Your progress will be lost.')) {
+                gameState.isGameActive = false;
+                gameState.gamePaused = false;
+                clearInterval(gameState.timerInterval);
+                closeModal('pauseModal');
+                updateNavigation('home');
+            }
+        }
 
         // Make functions globally accessible
         window.removePlayer = removePlayer;
