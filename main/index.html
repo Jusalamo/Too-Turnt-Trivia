@@ -91,22 +91,6 @@
             color: var(--black);
         }
 
-        body.light-mode .form-input,
-        body.light-mode .select-dropdown {
-            background: var(--gray-700);
-            border-color: var(--gray-600);
-            color: var(--white);
-        }
-
-        body.light-mode .answer-option {
-            background: var(--gray-700);
-            color: var(--white);
-        }
-
-        body.light-mode .player-item {
-            background: var(--gray-700);
-        }
-
         /* ===== LOADING SCREEN ===== */
         #loadingScreen {
             position: fixed;
@@ -170,17 +154,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
+            z-index: 10000;
             padding: var(--space-md);
         }
 
         .auth-container {
+            position: relative;
             background: var(--gray-800);
             border-radius: var(--radius-lg);
             padding: var(--space-xl);
             width: 100%;
             max-width: 400px;
             box-shadow: var(--shadow-card);
+            z-index: 10001;
         }
 
         .auth-tabs {
@@ -298,7 +284,7 @@
             padding: var(--space-xl) var(--space-md);
             max-width: 1200px;
             margin: 0 auto;
-            min-height: calc(100vh - 130px); /* Account for HUD and nav */
+            min-height: calc(100vh - 130px);
         }
 
         /* ===== BOTTOM NAVIGATION ===== */
@@ -852,37 +838,11 @@
             text-align: right;
         }
 
-        .scoreboard-badge {
-            background: var(--gray-600);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .scoreboard-badge.buzzer {
-            background: rgba(0, 184, 148, 0.2);
-            color: var(--green);
-        }
-
         /* ===== CATEGORIES SCREEN ===== */
         .categories-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: var(--space-lg);
-        }
-
-        .category-card {
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .category-progress {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: var(--space-md);
         }
 
         /* ===== PROFILE SCREEN ===== */
@@ -1069,10 +1029,6 @@
             background: var(--orange);
         }
 
-        .room-status.playing {
-            background: var(--red);
-        }
-
         /* ===== WAITING ROOM ===== */
         .waiting-room {
             text-align: center;
@@ -1088,12 +1044,6 @@
             background: var(--gray-800);
             border-radius: var(--radius-md);
             border: 2px dashed var(--yellow);
-        }
-
-        .room-code-small {
-            font-size: 24px;
-            letter-spacing: 4px;
-            margin-top: var(--space-sm);
         }
 
         .share-room {
@@ -1379,92 +1329,6 @@
             font-weight: bold;
         }
 
-        /* ===== UTILITY CLASSES ===== */
-        .text-center { text-align: center; }
-        .text-yellow { color: var(--yellow); }
-        .text-purple { color: var(--purple); }
-        .text-red { color: var(--red); }
-        .text-green { color: var(--green); }
-        .text-orange { color: var(--orange); }
-        .mt-sm { margin-top: var(--space-sm); }
-        .mt-md { margin-top: var(--space-md); }
-        .mt-lg { margin-top: var(--space-lg); }
-        .mt-xl { margin-top: var(--space-xl); }
-        .mb-sm { margin-bottom: var(--space-sm); }
-        .mb-md { margin-bottom: var(--space-md); }
-        .mb-lg { margin-bottom: var(--space-lg); }
-        .mb-xl { margin-bottom: var(--space-xl); }
-        .hidden { display: none !important; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-center { justify-content: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-sm { gap: var(--space-sm); }
-        .gap-md { gap: var(--space-md); }
-        .gap-lg { gap: var(--space-lg); }
-        .w-full { width: 100%; }
-        .relative { position: relative; }
-        .flex-1 { flex: 1; }
-        .opacity-50 { opacity: 0.5; }
-
-        /* ===== FEEDBACK ANIMATIONS ===== */
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-            40% { transform: translate(-50%, -50%) scale(1); }
-            80% { opacity: 1; }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
-        }
-
-        .feedback-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 20px;
-            animation: fadeInOut 1.5s ease;
-            pointer-events: none;
-        }
-
-        .feedback-correct {
-            background: var(--green);
-            color: white;
-        }
-
-        .feedback-incorrect {
-            background: var(--red);
-            color: white;
-        }
-
-        .notification {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: var(--gray-800);
-            border-left: 4px solid var(--yellow);
-            padding: var(--space-md);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-card);
-            z-index: 1000;
-            animation: slideInRight 0.3s ease;
-            max-width: 350px;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-
         /* ===== BUZZER MODE STYLES ===== */
         .buzzer-container {
             display: flex;
@@ -1615,6 +1479,92 @@
 
         ::-webkit-scrollbar-thumb:hover {
             background: var(--gray-500);
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .text-center { text-align: center; }
+        .text-yellow { color: var(--yellow); }
+        .text-purple { color: var(--purple); }
+        .text-red { color: var(--red); }
+        .text-green { color: var(--green); }
+        .text-orange { color: var(--orange); }
+        .mt-sm { margin-top: var(--space-sm); }
+        .mt-md { margin-top: var(--space-md); }
+        .mt-lg { margin-top: var(--space-lg); }
+        .mt-xl { margin-top: var(--space-xl); }
+        .mb-sm { margin-bottom: var(--space-sm); }
+        .mb-md { margin-bottom: var(--space-md); }
+        .mb-lg { margin-bottom: var(--space-lg); }
+        .mb-xl { margin-bottom: var(--space-xl); }
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-sm { gap: var(--space-sm); }
+        .gap-md { gap: var(--space-md); }
+        .gap-lg { gap: var(--space-lg); }
+        .w-full { width: 100%; }
+        .relative { position: relative; }
+        .flex-1 { flex: 1; }
+        .opacity-50 { opacity: 0.5; }
+
+        /* ===== FEEDBACK ANIMATIONS ===== */
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            40% { transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .feedback-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 20px;
+            animation: fadeInOut 1.5s ease;
+            pointer-events: none;
+        }
+
+        .feedback-correct {
+            background: var(--green);
+            color: white;
+        }
+
+        .feedback-incorrect {
+            background: var(--red);
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--gray-800);
+            border-left: 4px solid var(--yellow);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            max-width: 350px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
         }
     </style>
 </head>
@@ -3100,24 +3050,6 @@
         }
     };
 
-    // ===== API CONFIGURATION =====
-    const API_CONFIG = {
-        BASE_URL: 'https://the-trivia-api.com/v2',
-        getCategoryId: function(category) {
-            const catMap = {
-                'general': 'general_knowledge',
-                'science': 'science',
-                'history': 'history',
-                'entertainment': 'film_and_tv',
-                'sports': 'sport_and_leisure',
-                'geography': 'geography',
-                'arts': 'arts_and_literature',
-                'technology': 'science_and_nature'
-            };
-            return catMap[category] || 'general_knowledge';
-        }
-    };
-
     // ===== DOM ELEMENTS =====
     const elements = {
         // Auth
@@ -3345,7 +3277,7 @@
         addPlayer('Player 1');
         addPlayer('Player 2');
         
-        // Setup auth event listeners - CRITICAL FIX
+        // Setup auth event listeners
         setupAuthListeners();
     }
 
@@ -3369,7 +3301,7 @@
                 password
             });
             
-            if (error) {
+        if (error) {
                 console.error('Login error:', error);
                 showAuthError('loginError', error.message);
                 return;
@@ -3537,85 +3469,118 @@
     function setupAuthListeners() {
         console.log('Setting up auth listeners...');
         
-        // Auth tab switching
-        const loginTab = document.getElementById('loginTab');
-        const registerTab = document.getElementById('registerTab');
-        
-        if (loginTab) {
-            loginTab.addEventListener('click', () => showAuthTab('loginForm'));
-            console.log('Login tab listener added');
-        }
-        
-        if (registerTab) {
-            registerTab.addEventListener('click', () => showAuthTab('registerForm'));
-            console.log('Register tab listener added');
-        }
-        
-        // Login button
-        const loginBtn = document.getElementById('loginBtn');
-        if (loginBtn) {
-            loginBtn.addEventListener('click', handleLogin);
-            console.log('Login button listener added');
-        }
-        
-        // Register button
-        const registerBtn = document.getElementById('registerBtn');
-        if (registerBtn) {
-            registerBtn.addEventListener('click', handleRegister);
-            console.log('Register button listener added');
-        }
-        
-        // Complete profile button
-        const completeProfileBtn = document.getElementById('completeProfileBtn');
-        if (completeProfileBtn) {
-            completeProfileBtn.addEventListener('click', handleCompleteProfile);
-            console.log('Complete profile button listener added');
-        }
-        
-        // Setup avatar upload
-        const setupAvatarUpload = document.getElementById('setupAvatarUpload');
-        const setupAvatarContainer = document.querySelector('#profileSetupForm .profile-avatar-container');
-        
-        if (setupAvatarUpload && setupAvatarContainer) {
-            setupAvatarContainer.addEventListener('click', function() {
-                setupAvatarUpload.click();
+        // Use setTimeout to ensure DOM is ready
+        setTimeout(() => {
+            // Auth tab switching - use onclick instead of addEventListener
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            
+            if (loginTab) {
+                loginTab.onclick = () => {
+                    console.log('Login tab clicked');
+                    showAuthTab('loginForm');
+                };
+                console.log('✓ Login tab listener added');
+            } else {
+                console.error('✗ Login tab not found');
+            }
+            
+            if (registerTab) {
+                registerTab.onclick = () => {
+                    console.log('Register tab clicked');
+                    showAuthTab('registerForm');
+                };
+                console.log('✓ Register tab listener added');
+            } else {
+                console.error('✗ Register tab not found');
+            }
+            
+            // Login button - use onclick
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.onclick = (e) => {
+                    e.preventDefault();
+                    console.log('Login button clicked');
+                    handleLogin();
+                };
+                console.log('✓ Login button listener added');
+            } else {
+                console.error('✗ Login button not found');
+            }
+            
+            // Register button - use onclick
+            const registerBtn = document.getElementById('registerBtn');
+            if (registerBtn) {
+                registerBtn.onclick = (e) => {
+                    e.preventDefault();
+                    console.log('Register button clicked');
+                    handleRegister();
+                };
+                console.log('✓ Register button listener added');
+            } else {
+                console.error('✗ Register button not found');
+            }
+            
+            // Complete profile button - use onclick
+            const completeProfileBtn = document.getElementById('completeProfileBtn');
+            if (completeProfileBtn) {
+                completeProfileBtn.onclick = (e) => {
+                    e.preventDefault();
+                    console.log('Complete profile button clicked');
+                    handleCompleteProfile();
+                };
+                console.log('✓ Complete profile button listener added');
+            } else {
+                console.error('✗ Complete profile button not found');
+            }
+            
+            // Setup avatar upload
+            const setupAvatarUpload = document.getElementById('setupAvatarUpload');
+            const setupAvatarContainer = document.querySelector('#profileSetupForm .profile-avatar-container');
+            
+            if (setupAvatarUpload && setupAvatarContainer) {
+                setupAvatarContainer.onclick = function() {
+                    setupAvatarUpload.click();
+                };
+                
+                setupAvatarUpload.onchange = function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const setupAvatarImg = document.getElementById('setupAvatarImg');
+                            const setupAvatarText = document.getElementById('setupAvatarText');
+                            if (setupAvatarImg && setupAvatarText) {
+                                setupAvatarImg.src = event.target.result;
+                                setupAvatarImg.style.display = 'block';
+                                setupAvatarText.style.display = 'none';
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+            }
+            
+            // Forgot password link
+            const forgotPassword = document.getElementById('forgotPassword');
+            if (forgotPassword) {
+                forgotPassword.onclick = function(e) {
+                    e.preventDefault();
+                    alert('Password reset functionality would be implemented here.');
+                };
+            }
+            
+            // Category tags in profile setup
+            const categoryTags = document.querySelectorAll('.category-tag');
+            categoryTags.forEach(tag => {
+                tag.onclick = function() {
+                    this.classList.toggle('btn-primary');
+                    this.classList.toggle('btn-outline');
+                };
             });
             
-            setupAvatarUpload.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const setupAvatarImg = document.getElementById('setupAvatarImg');
-                        const setupAvatarText = document.getElementById('setupAvatarText');
-                        if (setupAvatarImg && setupAvatarText) {
-                            setupAvatarImg.src = event.target.result;
-                            setupAvatarImg.style.display = 'block';
-                            setupAvatarText.style.display = 'none';
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-        
-        // Forgot password link
-        const forgotPassword = document.getElementById('forgotPassword');
-        if (forgotPassword) {
-            forgotPassword.addEventListener('click', function(e) {
-                e.preventDefault();
-                alert('Password reset functionality would be implemented here.');
-            });
-        }
-        
-        // Category tags in profile setup
-        const categoryTags = document.querySelectorAll('.category-tag');
-        categoryTags.forEach(tag => {
-            tag.addEventListener('click', function() {
-                this.classList.toggle('btn-primary');
-                this.classList.toggle('btn-outline');
-            });
-        });
+            console.log('Auth listeners setup complete');
+        }, 200);
     }
 
     // ===== EVENT LISTENERS SETUP =====
@@ -3914,10 +3879,6 @@
         });
     }
 
-    // ===== REST OF THE FUNCTIONS (keep all your existing functions below) =====
-    // All your other functions (loadUserProfile, createUserProfile, updateUserProfile, 
-    // loadSavedData, showAuthScreen, showMainApp, etc.) remain exactly as they were
-    
     async function loadUserProfile() {
         if (!currentUser) return;
         
@@ -4818,11 +4779,6 @@
             }]);
     }
 
-    // ===== SOUND EFFECTS =====
-    function playSound(soundName) {
-        soundEffects.play(soundName);
-    }
-
     // ===== HELPER FUNCTIONS =====
     function generateRoomCode() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -4930,7 +4886,6 @@
         openModal('joinRoomModal');
     }
 
-    // ===== MISSING FUNCTIONS - ADDED =====
     function simulateLoading() {
         let progress = 0;
         const interval = setInterval(() => {
@@ -5500,6 +5455,6 @@
     window.shareRoomLink = shareRoomLink;
     window.joinRoomByCode = joinRoomByCode;
     window.playSound = playSound;
-</script>
+    </script>
 </body>
 </html>
