@@ -2327,184 +2327,684 @@
     </div>
 
     <script>
-        // ===== SUPABASE CONFIGURATION =====
-        // Replace these with your actual Supabase credentials
+               // ===== SUPABASE CONFIGURATION =====
         const SUPABASE_CONFIG = {
             URL: 'https://emwnshsfhrdcojzaxkjd.supabase.co',
             ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtd25zaHNmaHJkY29qemF4a2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYzMjU4ODQsImV4cCI6MjA4MTkwMTg4NH0.Q_43zqq0eTZiUVUdDrfYtYr-F8ZjTjQVKs3VIJPTap4'
         };
-
-        // Initialize Supabase client (will be set up when Supabase is configured)
+        
+        // Initialize Supabase client
         let supabaseClient = null;
-
-        // ===== REAL-TIME WEBSOCKET COMMUNICATION =====
-        class RealTimeGameService {
+        
+        // ===== REAL-TIME MULTIPLAYER SERVICE =====
+        class RealTimeMultiplayerService {
             constructor() {
-                this.roomChannel = null;
-                this.gameChannel = null;
+                this.roomSubscription = null;
+                this.gameStateSubscription = null;
+                this.roomEventsSubscription = null;
                 this.roomCode = null;
+                this.roomId = null;
                 this.listeners = {};
+                this.socketId = Math.random().toString(36).substring(7);
             }
             
-            // 1. Real-Time Communication using Supabase
-            async connectToRoom(roomCode, playerName, isHost = false) {
-                this.roomCode = roomCode;
-                
-                // 5. Security: Validate room exists
-                const { data: room, error } = await supabaseClient
-                    .from('game_rooms')
-                    .select('*')
-                    .eq('room_code', roomCode)
-                    .single();
+            async initialize() {
+                try {
+                    if (!window.supabase) {
+                        console.error('Supabase client not loaded');
+                        return false;
+                    }
                     
-                if (error && !isHost) {
-                    throw new Error('Room not found');
-                }
-                
-                if (isHost) {
-                    // Create room if hosting
-                    const { data: newRoom, error: createError } = await supabaseClient
-                        .from('game_rooms')
-                        .insert([
-                            {
-                                room_code: roomCode,
-                                host_id: playerName,
-                                max_players: 8,
-                                game_state: 'waiting',
-                                created_at: new Date().toISOString()
+                    supabaseClient = window.supabase.createClient(
+                        SUPABASE_CONFIG.URL,
+                        SUPABASE_CONFIG.ANON_KEY,
+                        {
+                            auth: {
+                                autoRefreshToken: true,
+                                persistSession: true,
+                                detectSessionInUrl: true
                             }
-                        ])
-                        .select()
-                        .single();
-                        
-                    if (createError) throw createError;
+                        }
+                    );
+                    
+                    // Test connection by fetching a simple count
+                    const { data, error } = await supabaseClient
+                        .from('rooms')
+                        .select('count', { count: 'exact', head: true });
+                    
+                    if (error && !error.message.includes('relation "rooms" does not exist')) {
+                        console.error('Supabase connection test failed:', error.message);
+                        return false;
+                    }
+                    
+                    console.log('Supabase connected successfully');
+                    return true;
+                    
+                } catch (error) {
+                    console.error('Failed to initialize Supabase:', error);
+                    return false;
                 }
-                
-                // Join player to room
-                const { error: joinError } = await supabaseClient
-                    .from('room_players')
-                    .insert({
-                        room_code: roomCode,
-                        player_name: playerName,
-                        is_host: isHost,
-                        joined_at: new Date().toISOString()
+            }
+            
+            // Generate secure room code
+            generateRoomCode() {
+                const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                let code = '';
+                for (let i = 0; i < 6; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return code;
+            }
+            
+            // Create a new game room
+            async createRoom(roomName, gameMode, category, difficulty, questionCount, maxPlayers) {
+                try {
+                    // Generate room code
+                    const roomCode = this.generateRoomCode();
+                    
+                    // Get current user (if authenticated) or create guest ID
+                    const hostId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    const hostName = gameState.playerName;
+                    
+                    console.log('Creating room with data:', {
+                        code: roomCode,
+                        name: roomName,
+                        game_mode: gameMode,
+                        category: category,
+                        difficulty: difficulty,
+                        question_count: parseInt(questionCount),
+                        max_players: parseInt(maxPlayers),
+                        host_id: hostId,
+                        status: 'waiting'
                     });
                     
-                if (joinError) throw joinError;
-                
-                // Subscribe to room updates
-                this.setupRoomChannel(roomCode);
-                this.setupGameChannel(roomCode);
-                
-                return true;
+                    // Create room in database
+                    const { data: room, error } = await supabaseClient
+                        .from('rooms')
+                        .insert([{
+                            code: roomCode,
+                            name: roomName,
+                            game_mode: gameMode,
+                            category: category,
+                            difficulty: difficulty,
+                            question_count: parseInt(questionCount),
+                            max_players: parseInt(maxPlayers),
+                            host_id: hostId,
+                            status: 'waiting',
+                            game_state: 'waiting'
+                        }])
+                        .select()
+                        .single();
+                    
+                    if (error) {
+                        console.error('Supabase insert error:', error);
+                        throw error;
+                    }
+                    
+                    console.log('Room created successfully:', room);
+                    
+                    // Join as host
+                    const joinResult = await this.joinRoom(roomCode, hostName, true);
+                    
+                    if (!joinResult.success) {
+                        throw new Error('Failed to join room as host: ' + joinResult.error);
+                    }
+                    
+                    this.roomId = room.id;
+                    this.roomCode = roomCode;
+                    
+                    // Initialize game state
+                    await this.initializeGameState(room.id, roomCode);
+                    
+                    return {
+                        success: true,
+                        roomCode,
+                        roomId: room.id,
+                        roomName: room.name
+                    };
+                    
+                } catch (error) {
+                    console.error('Failed to create room:', error);
+                    return {
+                        success: false,
+                        error: error.message || 'Unknown error creating room'
+                    };
+                }
             }
             
-            setupRoomChannel(roomCode) {
-                this.roomChannel = supabaseClient
-                    .channel(`room:${roomCode}`)
+            // Initialize game state
+            async initializeGameState(roomId, roomCode) {
+                try {
+                    // Create initial game state
+                    const { error } = await supabaseClient
+                        .from('realtime_game_states')
+                        .insert([{
+                            room_id: roomId,
+                            room_code: roomCode,
+                            current_question: null,
+                            question_index: 0,
+                            player_scores: {},
+                            time_remaining: null,
+                            buzzer_active: false,
+                            last_updated: new Date().toISOString()
+                        }]);
+                    
+                    if (error) throw error;
+                    
+                    console.log('Game state initialized');
+                    
+                } catch (error) {
+                    console.error('Failed to initialize game state:', error);
+                }
+            }
+            
+            // Join an existing room
+            async joinRoom(roomCode, playerName, isHost = false) {
+                try {
+                    console.log('Joining room:', roomCode);
+                    
+                    // Find the room
+                    const { data: room, error: roomError } = await supabaseClient
+                        .from('rooms')
+                        .select('*')
+                        .eq('code', roomCode.toUpperCase())
+                        .single();
+                    
+                    if (roomError) {
+                        console.error('Room not found:', roomError);
+                        throw new Error('Room not found');
+                    }
+                    
+                    if (room.status !== 'waiting') {
+                        throw new Error('Game already in progress');
+                    }
+                    
+                    // Check if room is full
+                    const { data: players, error: playersError } = await supabaseClient
+                        .from('room_players')
+                        .select('*', { count: 'exact', head: false })
+                        .eq('room_id', room.id)
+                        .is('left_at', null);
+                    
+                    if (playersError) throw playersError;
+                    
+                    const playerCount = players?.length || 0;
+                    if (playerCount >= room.max_players) {
+                        throw new Error('Room is full');
+                    }
+                    
+                    // Check if player already exists in room
+                    const existingPlayer = players?.find(p => p.player_name === playerName);
+                    if (existingPlayer) {
+                        // Update existing player
+                        const { data: updatedPlayer, error: updateError } = await supabaseClient
+                            .from('room_players')
+                            .update({ left_at: null, is_ready: false })
+                            .eq('id', existingPlayer.id)
+                            .select()
+                            .single();
+                        
+                        if (updateError) throw updateError;
+                        
+                        this.roomId = room.id;
+                        this.roomCode = roomCode;
+                        
+                        return {
+                            success: true,
+                            roomId: room.id,
+                            roomCode: room.code,
+                            roomName: room.name,
+                            gameMode: room.game_mode,
+                            category: room.category,
+                            maxPlayers: room.max_players
+                        };
+                    }
+                    
+                    // Create guest ID for player
+                    const playerId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    
+                    // Join the room
+                    const { data: roomPlayer, error: joinError } = await supabaseClient
+                        .from('room_players')
+                        .insert([{
+                            room_id: room.id,
+                            player_id: playerId,
+                            player_name: playerName,
+                            is_host: isHost,
+                            is_ready: false,
+                            score: 0,
+                            lives: 3,
+                            joined_at: new Date().toISOString()
+                        }])
+                        .select()
+                        .single();
+                    
+                    if (joinError) {
+                        console.error('Failed to join room:', joinError);
+                        throw joinError;
+                    }
+                    
+                    this.roomId = room.id;
+                    this.roomCode = roomCode;
+                    
+                    // Update connection status
+                    await this.updateConnectionStatus(true);
+                    
+                    return {
+                        success: true,
+                        roomId: room.id,
+                        roomCode: room.code,
+                        roomName: room.name,
+                        gameMode: room.game_mode,
+                        category: room.category,
+                        maxPlayers: room.max_players
+                    };
+                    
+                } catch (error) {
+                    console.error('Failed to join room:', error);
+                    return {
+                        success: false,
+                        error: error.message || 'Unknown error joining room'
+                    };
+                }
+            }
+            
+            // Subscribe to room updates
+            async subscribeToRoom(roomId) {
+                // Unsubscribe from previous subscriptions
+                this.unsubscribe();
+                
+                // Subscribe to room players changes
+                this.roomSubscription = supabaseClient
+                    .channel(`room:${roomId}`)
                     .on(
                         'postgres_changes',
                         {
                             event: '*',
                             schema: 'public',
                             table: 'room_players',
-                            filter: `room_code=eq.${roomCode}`
+                            filter: `room_id=eq.${roomId}`
                         },
                         (payload) => this.handleRoomUpdate(payload)
                     )
-                    .subscribe();
-            }
-            
-            setupGameChannel(roomCode) {
-                this.gameChannel = supabaseClient
-                    .channel(`game:${roomCode}`)
+                    .subscribe((status) => {
+                        console.log('Room subscription status:', status);
+                    });
+                
+                // Subscribe to game state changes
+                this.gameStateSubscription = supabaseClient
+                    .channel(`game-state:${roomId}`)
                     .on(
                         'postgres_changes',
                         {
                             event: '*',
                             schema: 'public',
-                            table: 'game_states',
-                            filter: `room_code=eq.${roomCode}`
+                            table: 'realtime_game_states',
+                            filter: `room_id=eq.${roomId}`
                         },
-                        (payload) => this.handleGameUpdate(payload)
+                        (payload) => this.handleGameStateUpdate(payload)
                     )
-                    .subscribe();
-            }
-            
-            // 2. Room Code Validation System
-            async validateRoomCode(roomCode) {
-                // Check if room exists and is joinable
-                const { data, error } = await supabaseClient
-                    .from('game_rooms')
-                    .select('*, room_players(count)')
-                    .eq('room_code', roomCode)
-                    .eq('game_state', 'waiting')
-                    .single();
-                    
-                if (error) return { valid: false, error: 'Room not found' };
-                
-                const playerCount = data.room_players[0]?.count || 0;
-                if (playerCount >= data.max_players) {
-                    return { valid: false, error: 'Room is full' };
-                }
-                
-                return { 
-                    valid: true, 
-                    data: { 
-                        roomName: data.room_name,
-                        mode: data.game_mode,
-                        players: playerCount,
-                        maxPlayers: data.max_players
-                    }
-                };
-            }
-            
-            // 3. Game State Synchronization
-            async updateGameState(stateUpdate) {
-                const { error } = await supabaseClient
-                    .from('game_states')
-                    .upsert({
-                        room_code: this.roomCode,
-                        current_question: stateUpdate.currentQuestion,
-                        question_index: stateUpdate.questionIndex,
-                        scores: stateUpdate.scores,
-                        time_remaining: stateUpdate.timeRemaining,
-                        last_updated: new Date().toISOString()
+                    .subscribe((status) => {
+                        console.log('Game state subscription status:', status);
                     });
-                    
-                if (error) console.error('State sync error:', error);
+                
+                // Subscribe to room events
+                this.roomEventsSubscription = supabaseClient
+                    .channel(`room-events:${roomId}`)
+                    .on(
+                        'postgres_changes',
+                        {
+                            event: 'INSERT',
+                            schema: 'public',
+                            table: 'room_events',
+                            filter: `room_id=eq.${roomId}`
+                        },
+                        (payload) => this.handleRoomEvent(payload.new)
+                    )
+                    .subscribe((status) => {
+                        console.log('Room events subscription status:', status);
+                    });
+                
+                console.log('Subscribed to room updates');
             }
             
-            async getGameState() {
-                const { data, error } = await supabaseClient
-                    .from('game_states')
-                    .select('*')
-                    .eq('room_code', this.roomCode)
-                    .order('last_updated', { ascending: false })
-                    .limit(1)
-                    .single();
-                    
-                return { data, error };
-            }
-            
-            // 4. Client-Side Interface Handlers
+            // Handle room updates (players joining/leaving)
             handleRoomUpdate(payload) {
+                console.log('Room update:', payload);
+                
                 switch(payload.eventType) {
                     case 'INSERT':
-                        this.trigger('player_joined', payload.new);
+                        this.trigger('player_joined', {
+                            playerId: payload.new.player_id,
+                            playerName: payload.new.player_name,
+                            isHost: payload.new.is_host,
+                            isReady: payload.new.is_ready
+                        });
                         break;
+                        
+                    case 'UPDATE':
+                        if (payload.new.left_at && !payload.old.left_at) {
+                            this.trigger('player_left', {
+                                playerId: payload.new.player_id,
+                                playerName: payload.new.player_name
+                            });
+                        } else if (payload.new.is_ready !== payload.old.is_ready) {
+                            this.trigger('player_ready', {
+                                playerId: payload.new.player_id,
+                                playerName: payload.new.player_name,
+                                isReady: payload.new.is_ready
+                            });
+                        }
+                        break;
+                        
                     case 'DELETE':
-                        this.trigger('player_left', payload.old);
+                        this.trigger('player_left', {
+                            playerId: payload.old.player_id,
+                            playerName: payload.old.player_name
+                        });
                         break;
                 }
             }
             
-            handleGameUpdate(payload) {
-                switch(payload.eventType) {
-                    case 'INSERT':
-                    case 'UPDATE':
-                        this.trigger('game_state_updated', payload.new);
+            // Handle game state updates
+            handleGameStateUpdate(payload) {
+                console.log('Game state update:', payload);
+                
+                if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+                    this.trigger('game_state_updated', payload.new);
+                }
+            }
+            
+            // Handle room events
+            handleRoomEvent(event) {
+                console.log('Room event:', event);
+                
+                switch(event.event_type) {
+                    case 'buzzer_pressed':
+                        this.trigger('buzzer_pressed', {
+                            playerId: event.player_id,
+                            playerName: event.player_name,
+                            timestamp: event.created_at
+                        });
                         break;
+                        
+                    case 'answer_submitted':
+                        this.trigger('answer_submitted', {
+                            playerId: event.player_id,
+                            playerName: event.player_name,
+                            isCorrect: event.event_data?.is_correct,
+                            score: event.event_data?.score
+                        });
+                        break;
+                }
+            }
+            
+            // Update game state
+            async updateGameState(state) {
+                try {
+                    console.log('Updating game state:', state);
+                    
+                    const { error } = await supabaseClient
+                        .from('realtime_game_states')
+                        .upsert({
+                            room_id: this.roomId,
+                            room_code: this.roomCode,
+                            current_question: state.currentQuestion,
+                            question_index: state.questionIndex,
+                            player_scores: state.playerScores,
+                            time_remaining: state.timeRemaining,
+                            buzzer_active: state.buzzerActive,
+                            buzzed_player_name: state.buzzedPlayerName,
+                            last_updated: new Date().toISOString()
+                        }, {
+                            onConflict: 'room_id,room_code'
+                        });
+                    
+                    if (error) {
+                        console.error('Failed to update game state:', error);
+                        throw error;
+                    }
+                    
+                    console.log('Game state updated successfully');
+                    return { success: true };
+                    
+                } catch (error) {
+                    console.error('Failed to update game state:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+            
+            // Press buzzer
+            async pressBuzzer() {
+                try {
+                    console.log('Pressing buzzer for player:', gameState.playerName);
+                    
+                    // First, update game state to mark who buzzed
+                    const { error: updateError } = await supabaseClient
+                        .from('realtime_game_states')
+                        .update({
+                            buzzed_player_name: gameState.playerName,
+                            buzzer_active: false,
+                            last_updated: new Date().toISOString()
+                        })
+                        .eq('room_id', this.roomId);
+                    
+                    if (updateError) throw updateError;
+                    
+                    // Also update rooms table
+                    const { error: roomError } = await supabaseClient
+                        .from('rooms')
+                        .update({
+                            buzzed_player_name: gameState.playerName,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', this.roomId);
+                    
+                    if (roomError) throw roomError;
+                    
+                    // Record the event
+                    const { error: eventError } = await supabaseClient
+                        .from('room_events')
+                        .insert([{
+                            room_id: this.roomId,
+                            event_type: 'buzzer_pressed',
+                            player_name: gameState.playerName,
+                            event_data: {
+                                timestamp: Date.now(),
+                                player_name: gameState.playerName
+                            },
+                            created_at: new Date().toISOString()
+                        }]);
+                    
+                    if (eventError) throw eventError;
+                    
+                    return {
+                        success: true,
+                        message: 'Buzzer registered',
+                        player_name: gameState.playerName
+                    };
+                    
+                } catch (error) {
+                    console.error('Failed to press buzzer:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+            
+            // Reset buzzer
+            async resetBuzzer() {
+                try {
+                    const { error } = await supabaseClient
+                        .from('realtime_game_states')
+                        .update({
+                            buzzed_player_name: null,
+                            buzzer_active: true,
+                            last_updated: new Date().toISOString()
+                        })
+                        .eq('room_id', this.roomId);
+                    
+                    if (error) throw error;
+                    
+                    // Also update rooms table
+                    await supabaseClient
+                        .from('rooms')
+                        .update({
+                            buzzed_player_name: null,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', this.roomId);
+                    
+                    // Record the event
+                    await supabaseClient
+                        .from('room_events')
+                        .insert([{
+                            room_id: this.roomId,
+                            event_type: 'buzzer_reset',
+                            event_data: { timestamp: Date.now() },
+                            created_at: new Date().toISOString()
+                        }]);
+                    
+                    return { success: true };
+                    
+                } catch (error) {
+                    console.error('Failed to reset buzzer:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+            
+            // Send chat message
+            async sendMessage(message, type = 'chat') {
+                try {
+                    const { error } = await supabaseClient
+                        .from('game_messages')
+                        .insert([{
+                            room_id: this.roomId,
+                            player_name: gameState.playerName,
+                            message_type: type,
+                            message_text: message,
+                            created_at: new Date().toISOString()
+                        }]);
+                    
+                    if (error) throw error;
+                    
+                    return { success: true };
+                    
+                } catch (error) {
+                    console.error('Failed to send message:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+            
+            // Update connection status
+            async updateConnectionStatus(isConnected) {
+                try {
+                    const playerId = `guest_${gameState.playerName.replace(/\s+/g, '_')}_${Date.now()}`;
+                    
+                    if (isConnected) {
+                        const { error } = await supabaseClient
+                            .from('player_connections')
+                            .upsert({
+                                player_id: playerId,
+                                room_id: this.roomId,
+                                socket_id: this.socketId,
+                                is_connected: true,
+                                last_heartbeat: new Date().toISOString(),
+                                connected_at: new Date().toISOString()
+                            }, {
+                                onConflict: 'player_id,room_id'
+                            });
+                        
+                        if (error) throw error;
+                    } else {
+                        const { error } = await supabaseClient
+                            .from('player_connections')
+                            .update({
+                                is_connected: false,
+                                disconnected_at: new Date().toISOString()
+                            })
+                            .eq('player_id', playerId)
+                            .eq('room_id', this.roomId);
+                        
+                        if (error) throw error;
+                    }
+                    
+                } catch (error) {
+                    console.error('Failed to update connection status:', error);
+                }
+            }
+            
+            // Get room players
+            async getRoomPlayers() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('room_players')
+                        .select('*')
+                        .eq('room_id', this.roomId)
+                        .is('left_at', null)
+                        .order('joined_at', { ascending: true });
+                    
+                    if (error) throw error;
+                    
+                    return data.map(player => ({
+                        id: player.player_id,
+                        name: player.player_name,
+                        isHost: player.is_host,
+                        isReady: player.is_ready,
+                        score: player.score,
+                        lives: player.lives
+                    }));
+                    
+                } catch (error) {
+                    console.error('Failed to get room players:', error);
+                    return [];
+                }
+            }
+            
+            // Get room info
+            async getRoomInfo() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('rooms')
+                        .select('*')
+                        .eq('id', this.roomId)
+                        .single();
+                    
+                    if (error) throw error;
+                    
+                    return data;
+                    
+                } catch (error) {
+                    console.error('Failed to get room info:', error);
+                    return null;
+                }
+            }
+            
+            // Leave room
+            async leaveRoom() {
+                try {
+                    // Mark player as left
+                    const { error } = await supabaseClient
+                        .from('room_players')
+                        .update({ left_at: new Date().toISOString() })
+                        .eq('room_id', this.roomId)
+                        .eq('player_name', gameState.playerName)
+                        .is('left_at', null);
+                    
+                    if (error) throw error;
+                    
+                    // Update connection status
+                    await this.updateConnectionStatus(false);
+                    
+                    // Unsubscribe
+                    this.unsubscribe();
+                    
+                    this.roomId = null;
+                    this.roomCode = null;
+                    
+                    return { success: true };
+                    
+                } catch (error) {
+                    console.error('Failed to leave room:', error);
+                    return { success: false, error: error.message };
                 }
             }
             
@@ -2520,17 +3020,32 @@
                 }
             }
             
-            // Cleanup
-            disconnect() {
-                if (this.roomChannel) {
-                    supabaseClient.removeChannel(this.roomChannel);
+            // Unsubscribe from all channels
+            unsubscribe() {
+                if (this.roomSubscription) {
+                    supabaseClient.removeChannel(this.roomSubscription);
+                    this.roomSubscription = null;
                 }
-                if (this.gameChannel) {
-                    supabaseClient.removeChannel(this.gameChannel);
+                if (this.gameStateSubscription) {
+                    supabaseClient.removeChannel(this.gameStateSubscription);
+                    this.gameStateSubscription = null;
+                }
+                if (this.roomEventsSubscription) {
+                    supabaseClient.removeChannel(this.roomEventsSubscription);
+                    this.roomEventsSubscription = null;
+                }
+            }
+            
+            // Cleanup
+            async cleanup() {
+                this.unsubscribe();
+                
+                if (this.roomId) {
+                    await this.updateConnectionStatus(false);
                 }
             }
         }
-
+        
         // ===== GAME STATE =====
         const gameState = {
             // User Profile
@@ -2820,10 +3335,11 @@
             // Online State
             roomCode: null,
             roomName: null,
+            roomId: null,
             isHost: false,
             onlinePlayers: [],
             onlineRooms: [],
-            realTimeService: null,
+            multiplayerService: null,
             
             // Achievements
             achievements: [
@@ -2854,7 +3370,7 @@
                 themeColor: '#FFDE21'
             }
         };
-
+        
         // ===== API CONFIGURATION =====
         const API_CONFIG = {
             BASE_URL: 'https://the-trivia-api.com/v2',
@@ -2869,7 +3385,7 @@
                 'technology': 'science'
             }
         };
-
+        
         // ===== DOM ELEMENTS =====
         const elements = {
             // Loading
@@ -3052,7 +3568,7 @@
             // Settings Toggles
             darkModeToggle: document.getElementById('darkModeToggle')
         };
-
+        
         // ===== TOUCH/HANDLER UTILITIES =====
         class TouchHandler {
             constructor() {
@@ -3111,7 +3627,7 @@
                 }
             }
         }
-
+        
         // ===== INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp();
@@ -3125,22 +3641,24 @@
             // Save state before unload
             window.addEventListener('beforeunload', saveGameState);
         });
-
+        
         async function initializeApp() {
             // Load saved data from localStorage
             loadSavedData();
             
-            // Initialize Supabase client if credentials are provided
+            // Initialize Multiplayer Service
+            gameState.multiplayerService = new RealTimeMultiplayerService();
+            
+            // Try to initialize Supabase
             try {
-                if (SUPABASE_CONFIG.URL && SUPABASE_CONFIG.URL !== 'https://your-project.supabase.co' &&
-                    SUPABASE_CONFIG.ANON_KEY && SUPABASE_CONFIG.ANON_KEY !== 'your-anon-key') {
-                    
-                    supabaseClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
-                    gameState.realTimeService = new RealTimeGameService();
-                    console.log('Supabase client initialized');
+                const supabaseConnected = await gameState.multiplayerService.initialize();
+                if (supabaseConnected) {
+                    console.log('Supabase multiplayer service initialized');
+                } else {
+                    console.warn('Supabase initialization failed, using fallback mode');
                 }
             } catch (error) {
-                console.warn('Supabase not configured or failed to initialize:', error);
+                console.error('Failed to initialize multiplayer service:', error);
             }
             
             // Update UI
@@ -3168,14 +3686,14 @@
             // Check URL hash for screen navigation
             checkUrlHash();
         }
-
+        
         function checkUrlHash() {
             const hash = window.location.hash.substring(1);
             if (hash && elements.screens[hash]) {
                 updateNavigation(hash);
             }
         }
-
+        
         function loadSavedData() {
             // Try to load previous game state
             const savedState = localStorage.getItem('triviaGameState');
@@ -3212,7 +3730,7 @@
                 }
             }
         }
-
+        
         function saveGameState() {
             const stateToSave = {
                 playerName: gameState.playerName,
@@ -3240,7 +3758,7 @@
             
             localStorage.setItem('triviaGameState', JSON.stringify(stateToSave));
         }
-
+        
         function restorePreviousGame() {
             if (!gameState.previousGameState) return;
             
@@ -3266,7 +3784,7 @@
                 loadQuestion();
             }
         }
-
+        
         function initializeSettings() {
             // Set toggle states
             elements.darkModeToggle.checked = gameState.settings.darkMode;
@@ -3278,7 +3796,7 @@
             // Apply dark mode
             applyDarkMode(gameState.settings.darkMode);
         }
-
+        
         function applyDarkMode(isDark) {
             if (isDark) {
                 document.documentElement.classList.remove('light-mode');
@@ -3288,19 +3806,51 @@
                 document.body.classList.add('light-mode');
             }
         }
-
+        
         function applyThemeColor(color) {
-            // Remove yellow shadow from light mode
-            const root = document.documentElement;
-            root.style.setProperty('--yellow', color);
-            root.style.setProperty('--yellow-dark', darkenColor(color, 20));
+            // Update CSS variable for yellow color
+            document.documentElement.style.setProperty('--yellow', color);
+            document.documentElement.style.setProperty('--yellow-dark', darkenColor(color, 20));
             
-            // Update any existing yellow elements
-            document.querySelectorAll('.text-yellow, .nav-item.active').forEach(el => {
+            // Update navigation active items
+            document.querySelectorAll('.nav-item.active').forEach(el => {
+                el.style.color = color;
+                el.style.background = `rgba(${hexToRgb(color)}, 0.1)`;
+            });
+            
+            // Update buttons with yellow
+            document.querySelectorAll('.btn-primary').forEach(el => {
+                el.style.background = color;
+                el.style.color = '#000000';
+            });
+            
+            document.querySelectorAll('.btn-outline').forEach(el => {
+                el.style.borderColor = color;
+                el.style.color = color;
+            });
+            
+            // Update text with yellow
+            document.querySelectorAll('.text-yellow').forEach(el => {
                 el.style.color = color;
             });
         }
-
+        
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `${r}, ${g}, ${b}`;
+        }
+        
+        function darkenColor(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = Math.max(0, (num >> 16) - amt);
+            const G = Math.max(0, (num >> 8 & 0x00FF) - amt);
+            const B = Math.max(0, (num & 0x0000FF) - amt);
+            return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+        }
+        
         function simulateLoading() {
             let progress = 0;
             const messages = [
@@ -3341,7 +3891,7 @@
                 }
             }, 200);
         }
-
+        
         function updateHUD() {
             elements.playerName.textContent = gameState.playerName;
             elements.playerScoreHud.textContent = gameState.totalScore.toLocaleString();
@@ -3357,7 +3907,7 @@
                 elements.profilePicHudEmoji.style.display = 'block';
             }
         }
-
+        
         function updateProfileDisplay() {
             elements.profileName.textContent = gameState.playerName;
             
@@ -3378,7 +3928,7 @@
                 `;
             }
         }
-
+        
         function populateGameData() {
             // Populate game modes grid
             if (elements.modesGrid) {
@@ -3404,7 +3954,7 @@
                 `).join('');
             }
         }
-
+        
         function populateCategories() {
             // Populate categories for setup screen
             if (elements.categorySelect) {
@@ -3413,7 +3963,7 @@
                 `).join('');
             }
         }
-
+        
         function populateCategoriesScreen() {
             // Populate categories screen
             if (elements.categoriesGrid) {
@@ -3434,7 +3984,7 @@
                 `).join('');
             }
         }
-
+        
         function populateStats() {
             // Calculate stats
             const accuracy = gameState.totalQuestions > 0 ? 
@@ -3446,7 +3996,7 @@
             elements.winStreakStat.textContent = gameState.winStreak;
             elements.totalPointsStat.textContent = gameState.totalScore.toLocaleString();
         }
-
+        
         function populateAchievements() {
             if (elements.achievementsList) {
                 elements.achievementsList.innerHTML = gameState.achievements.map(achievement => `
@@ -3464,7 +4014,7 @@
                 `).join('');
             }
         }
-
+        
         function populateLeaderboard() {
             // Sample leaderboard data
             const leaderboardData = [
@@ -3495,7 +4045,7 @@
                 `).join('');
             }
         }
-
+        
         function populateOnlineSelectors() {
             // Populate online mode selector
             if (elements.onlineModeSelect) {
@@ -3511,23 +4061,7 @@
                 `).join('');
             }
         }
-
-        function hexToRgb(hex) {
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            return `${r}, ${g}, ${b}`;
-        }
-
-        function darkenColor(color, percent) {
-            const num = parseInt(color.replace('#', ''), 16);
-            const amt = Math.round(2.55 * percent);
-            const R = Math.max(0, (num >> 16) - amt);
-            const G = Math.max(0, (num >> 8 & 0x00FF) - amt);
-            const B = Math.max(0, (num & 0x0000FF) - amt);
-            return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
-        }
-
+        
         // ===== NAVIGATION =====
         function updateNavigation(screenId) {
             // Save current state before navigation
@@ -3541,11 +4075,26 @@
                 gameState.currentScreen = screenId;
             }
             
-            // Update bottom navigation
+            // Update bottom navigation - FIX FOR YELLOW HIGHLIGHT
             elements.navItems.forEach(item => {
                 item.classList.remove('active');
+                const navIcon = item.querySelector('.nav-icon');
+                const navText = item.querySelector('span');
+                
+                // Reset colors
+                item.style.color = '';
+                item.style.background = '';
+                if (navIcon) navIcon.style.color = '';
+                if (navText) navText.style.color = '';
+                
                 if (item.dataset.screen === screenId) {
                     item.classList.add('active');
+                    // Apply theme color to active nav item
+                    const themeColor = gameState.settings.themeColor;
+                    item.style.color = themeColor;
+                    item.style.background = `rgba(${hexToRgb(themeColor)}, 0.1)`;
+                    if (navIcon) navIcon.style.color = themeColor;
+                    if (navText) navText.style.color = themeColor;
                 }
             });
             
@@ -3571,6 +4120,9 @@
                 updateProfileDisplay();
             } else if (screenId === 'categories') {
                 populateCategoriesScreen();
+            } else if (screenId === 'online') {
+                // Refresh room list when entering online screen
+                refreshOnlineRooms();
             }
             
             // Reset game state if leaving game screen
@@ -3578,7 +4130,7 @@
                 resetGameState();
             }
         }
-
+        
         function resetGameState() {
             if (gameState.isGameActive) {
                 clearInterval(gameState.timerInterval);
@@ -3589,7 +4141,7 @@
                 elements.currentPlayerIndicator.classList.add('hidden');
             }
         }
-
+        
         function goBack() {
             if (gameState.screenHistory.length > 1) {
                 gameState.screenHistory.pop(); // Remove current
@@ -3599,7 +4151,7 @@
                 }
             }
         }
-
+        
         // ===== PLAYER MANAGEMENT =====
         function addPlayer(name) {
             if (!name.trim()) return;
@@ -3615,13 +4167,13 @@
             elements.playerNameInput.value = '';
             elements.playerNameInput.focus();
         }
-
+        
         function removePlayer(name) {
             gameState.players = gameState.players.filter(p => p !== name);
             delete gameState.playerScores[name];
             updatePlayersList();
         }
-
+        
         function updatePlayersList() {
             const list = elements.playersList;
             
@@ -3644,7 +4196,7 @@
                 </div>
             `).join('');
         }
-
+        
         function updateOnlinePlayersList() {
             const list = elements.onlinePlayersList;
             
@@ -3671,10 +4223,11 @@
             // Enable start button for host if enough players
             if (gameState.isHost) {
                 const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
-                elements.startOnlineGameBtn.disabled = gameState.onlinePlayers.length < mode.minPlayers;
+                const minPlayers = mode ? mode.minPlayers : 2;
+                elements.startOnlineGameBtn.disabled = gameState.onlinePlayers.length < minPlayers;
             }
         }
-
+        
         // ===== GAME SETUP =====
         function setupStepNavigation() {
             const steps = document.querySelectorAll('.step');
@@ -3687,7 +4240,7 @@
             steps[0].classList.add('active');
             sections[0].classList.add('active');
         }
-
+        
         function navigateToStep(stepNumber) {
             const steps = document.querySelectorAll('.step');
             const sections = document.querySelectorAll('.setup-section');
@@ -3715,7 +4268,7 @@
                 updateSettingsDisplay();
             }
         }
-
+        
         function updateFinalPlayersList() {
             const list = elements.finalPlayersList;
             list.innerHTML = gameState.players.map((player, index) => `
@@ -3732,7 +4285,7 @@
                 </div>
             `).join('');
         }
-
+        
         function updateSelectedMode() {
             const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
             if (mode) {
@@ -3744,13 +4297,13 @@
                 elements.setupModeDescription.textContent = mode.description;
             }
         }
-
+        
         function updateSettingsDisplay() {
             elements.settingsQuestionCount.textContent = elements.questionCount.value;
             elements.settingsCategory.textContent = elements.categorySelect.options[elements.categorySelect.selectedIndex].text;
             elements.settingsDifficulty.textContent = elements.difficultySelect.options[elements.difficultySelect.selectedIndex].text;
         }
-
+        
         // ===== QUESTION MANAGEMENT =====
         async function fetchQuestions(category, difficulty, limit) {
             try {
@@ -3790,7 +4343,7 @@
                 return getLocalQuestions(category, limit);
             }
         }
-
+        
         function getLocalQuestions(category, limit) {
             // Local fallback questions
             const localQuestions = {
@@ -3873,7 +4426,7 @@
             const questions = localQuestions[category] || localQuestions.general;
             return questions.slice(0, limit);
         }
-
+        
         // ===== GAME MODE FUNCTIONS =====
         async function startGame() {
             if (!gameState.currentGameMode) {
@@ -3957,7 +4510,7 @@
                 updateCurrentPlayerIndicator();
             }
         }
-
+        
         function updateCurrentPlayerIndicator() {
             if (gameState.players.length > 0 && gameState.currentGameMode !== 'solo') {
                 const currentPlayer = gameState.players[gameState.currentPlayerIndex];
@@ -3965,7 +4518,7 @@
                 elements.currentPlayerIndicator.classList.remove('hidden');
             }
         }
-
+        
         async function loadQuestion() {
             if (gameState.currentQuestionIndex >= gameState.totalQuestions) {
                 endGame();
@@ -4035,6 +4588,21 @@
                 // Reset buzzer if in buzzer mode
                 if (gameState.currentGameMode === 'buzzer') {
                     resetBuzzerState();
+                    
+                    // If online game and host, update game state
+                    if (gameState.isOnlineGame && gameState.isHost && gameState.multiplayerService) {
+                        await gameState.multiplayerService.updateGameState({
+                            currentQuestion: question,
+                            questionIndex: gameState.currentQuestionIndex,
+                            playerScores: gameState.playerScores,
+                            timeRemaining: gameState.timer,
+                            buzzerActive: true,
+                            buzzedPlayerName: null
+                        });
+                        
+                        // Reset buzzer for all players
+                        await gameState.multiplayerService.resetBuzzer();
+                    }
                 }
                 
                 // Start timer with mode-specific settings
@@ -4050,7 +4618,7 @@
                 setTimeout(() => loadQuestion(), 2000);
             }
         }
-
+        
         function resetBuzzerState() {
             clearTimeout(gameState.buzzerTimeout);
             gameState.isBuzzerActive = true;
@@ -4074,7 +4642,7 @@
                 }
             }, 3000);
         }
-
+        
         function selectAnswer(isCorrect, element, difficulty) {
             if (!gameState.isGameActive) return;
             
@@ -4187,12 +4755,23 @@
             // Enable next button for all modes
             elements.nextQuestionBtn.disabled = false;
             
+            // If online game, update game state
+            if (gameState.isOnlineGame && gameState.isHost && gameState.multiplayerService) {
+                gameState.multiplayerService.updateGameState({
+                    currentQuestion: gameState.currentQuestion,
+                    questionIndex: gameState.currentQuestionIndex,
+                    playerScores: gameState.playerScores,
+                    timeRemaining: 0,
+                    buzzerActive: false
+                });
+            }
+            
             // Check if game over
             if (gameState.lives <= 0) {
                 setTimeout(() => endGame(), 1500);
             }
         }
-
+        
         function showFeedback(message, type) {
             const feedback = document.createElement('div');
             feedback.className = `feedback-message feedback-${type}`;
@@ -4204,7 +4783,7 @@
                 feedback.remove();
             }, 1500);
         }
-
+        
         function showHint() {
             if (gameState.hintCount <= 0 || !gameState.currentQuestion) return;
             
@@ -4238,7 +4817,7 @@
                 }, 5000);
             }
         }
-
+        
         function showNotification(message, type = 'info') {
             if (!gameState.settings.notifications) return;
             
@@ -4263,7 +4842,7 @@
                 }, 300);
             }, 3000);
         }
-
+        
         function startQuestionTimer() {
             clearInterval(gameState.timerInterval);
             
@@ -4280,7 +4859,7 @@
                 }
             }, 1000);
         }
-
+        
         function updateTimerDisplay(timeLeft) {
             elements.gameTimer.textContent = `${timeLeft}s`;
             
@@ -4293,7 +4872,7 @@
                 elements.gameTimer.style.color = 'var(--yellow)';
             }
         }
-
+        
         function timeUp() {
             // Disable all answers
             document.querySelectorAll('.answer-option').forEach(opt => {
@@ -4339,7 +4918,7 @@
                 setTimeout(() => endGame(), 1500);
             }
         }
-
+        
         function nextQuestion() {
             gameState.currentQuestionIndex++;
             
@@ -4354,10 +4933,27 @@
                 return;
             }
             
-            // Load next question
+            // If host and online, sync game state
+            if (gameState.isHost && gameState.isOnlineGame && gameState.multiplayerService) {
+                // Update game state for next question
+                gameState.multiplayerService.updateGameState({
+                    questionIndex: gameState.currentQuestionIndex,
+                    playerScores: gameState.playerScores,
+                    timeRemaining: gameState.timer,
+                    buzzerActive: gameState.currentGameMode === 'buzzer',
+                    buzzedPlayerName: null
+                });
+                
+                // Reset buzzer if in buzzer mode
+                if (gameState.currentGameMode === 'buzzer') {
+                    gameState.multiplayerService.resetBuzzer();
+                }
+            }
+            
+            // Load next question locally
             loadQuestion();
         }
-
+        
         function endGame() {
             gameState.isGameActive = false;
             clearInterval(gameState.timerInterval);
@@ -4420,27 +5016,48 @@
             // Show modal
             openModal('gameCompleteModal');
         }
-
+        
         // ===== BUZZER MODE FUNCTIONS =====
-        function buzzIn() {
+        async function buzzIn() {
             if (gameState.currentGameMode !== 'buzzer' || !gameState.isBuzzerActive) return;
             
-            // Disable buzzer for this player
-            gameState.hasBuzzed = true;
-            gameState.isBuzzerActive = false;
-            
-            elements.buzzerButton.className = 'buzzer-button buzzer-buzzed';
-            elements.buzzerButton.disabled = true;
-            elements.buzzerInstruction.textContent = 'You buzzed in! Answer now:';
-            elements.playerBuzzed.textContent = gameState.playerName;
-            
-            // Enable answer selection
-            elements.answersContainer.style.opacity = '1';
-            document.querySelectorAll('.answer-option').forEach(opt => {
-                opt.style.pointerEvents = 'auto';
-            });
+            // If online game, use multiplayer service
+            if (gameState.isOnlineGame && gameState.multiplayerService) {
+                const result = await gameState.multiplayerService.pressBuzzer();
+                
+                if (result.success) {
+                    gameState.hasBuzzed = true;
+                    elements.buzzerButton.className = 'buzzer-button buzzer-buzzed';
+                    elements.buzzerButton.disabled = true;
+                    elements.buzzerInstruction.textContent = 'You buzzed in! Answer now:';
+                    elements.playerBuzzed.textContent = gameState.playerName;
+                    
+                    // Enable answer selection
+                    elements.answersContainer.style.opacity = '1';
+                    document.querySelectorAll('.answer-option').forEach(opt => {
+                        opt.style.pointerEvents = 'auto';
+                    });
+                } else {
+                    showNotification(result.message || 'Failed to buzz in', 'error');
+                }
+            } else {
+                // Local game
+                gameState.hasBuzzed = true;
+                gameState.isBuzzerActive = false;
+                
+                elements.buzzerButton.className = 'buzzer-button buzzer-buzzed';
+                elements.buzzerButton.disabled = true;
+                elements.buzzerInstruction.textContent = 'You buzzed in! Answer now:';
+                elements.playerBuzzed.textContent = gameState.playerName;
+                
+                // Enable answer selection
+                elements.answersContainer.style.opacity = '1';
+                document.querySelectorAll('.answer-option').forEach(opt => {
+                    opt.style.pointerEvents = 'auto';
+                });
+            }
         }
-
+        
         // ===== ACHIEVEMENTS =====
         function checkAchievements() {
             // First game
@@ -4472,7 +5089,7 @@
                 unlockAchievement('trivia_champion');
             }
         }
-
+        
         function unlockAchievement(achievementId) {
             const achievement = gameState.achievements.find(a => a.id === achievementId);
             if (achievement && !achievement.unlocked) {
@@ -4484,7 +5101,7 @@
                 populateAchievements();
             }
         }
-
+        
         // ===== MODAL FUNCTIONS =====
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
@@ -4502,7 +5119,7 @@
                 }
             }
         }
-
+        
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
@@ -4510,7 +5127,7 @@
                 document.body.style.overflow = '';
             }
         }
-
+        
         function populateAvatarGrid() {
             const emojis = ['😎', '🤓', '😊', '😄', '😜', '🤩', '🧐', '🤠', '😇', '🥳', '🤖', '👾'];
             elements.avatarGrid.innerHTML = emojis.map(emoji => `
@@ -4537,7 +5154,7 @@
                 }
             };
         }
-
+        
         function populateThemeColors() {
             const colors = [
                 { name: 'Yellow', value: '#FFDE21' },
@@ -4556,8 +5173,15 @@
                     <div class="theme-name">${color.name}</div>
                 </div>
             `).join('');
+            
+            // Mark current theme as selected
+            document.querySelectorAll('.theme-option').forEach(option => {
+                if (option.dataset.color === gameState.settings.themeColor) {
+                    option.classList.add('selected');
+                }
+            });
         }
-
+        
         function selectAvatar(avatar) {
             gameState.playerAvatar = avatar;
             gameState.playerProfilePic = null; // Clear uploaded photo
@@ -4573,7 +5197,7 @@
             // Hide preview
             elements.avatarPreview.classList.add('hidden');
         }
-
+        
         function selectThemeColor(color) {
             // Remove selection from all colors
             document.querySelectorAll('.theme-option').forEach(el => {
@@ -4586,205 +5210,412 @@
             // Save theme color
             gameState.settings.themeColor = color;
             applyThemeColor(color);
+            saveGameState();
         }
-
-        // ===== ONLINE MULTIPLAYER =====
-        async function createRealRoom() {
+        
+        // ===== ONLINE MULTIPLAYER FUNCTIONS =====
+        async function createOnlineRoom() {
             const roomName = elements.roomName.value.trim() || `${gameState.playerName}'s Room`;
             const modeId = elements.onlineModeSelect.value;
-            const questions = elements.onlineQuestionCount.value;
             const categoryId = elements.onlineCategorySelect.value;
+            const questions = elements.onlineQuestionCount.value;
             const maxPlayers = elements.maxPlayers.value;
             
-            // Generate secure room code
-            gameState.roomCode = generateSecureRoomCode();
+            // Show loading
+            showNotification('Creating room...', 'info');
             
-            try {
-                // Connect to room as host
-                await gameState.realTimeService.connectToRoom(
-                    gameState.roomCode, 
-                    gameState.playerName, 
-                    true
+            // Use Supabase if available
+            if (gameState.multiplayerService && supabaseClient) {
+                const result = await gameState.multiplayerService.createRoom(
+                    roomName,
+                    modeId,
+                    categoryId,
+                    'medium',
+                    questions,
+                    maxPlayers
                 );
                 
-                // Set up event listeners
-                gameState.realTimeService.on('player_joined', (player) => {
-                    gameState.onlinePlayers.push({
-                        name: player.player_name,
-                        isHost: player.is_host
-                    });
-                    updateOnlinePlayersList();
-                    showNotification(`${player.player_name} joined!`);
-                });
-                
-                gameState.realTimeService.on('player_left', (player) => {
-                    gameState.onlinePlayers = gameState.onlinePlayers.filter(
-                        p => p.name !== player.player_name
-                    );
-                    updateOnlinePlayersList();
-                    showNotification(`${player.player_name} left`);
-                });
-                
-                gameState.realTimeService.on('game_state_updated', (state) => {
-                    syncGameState(state);
-                });
-                
-                // Update room in database
-                await supabaseClient
-                    .from('game_rooms')
-                    .update({
-                        room_name: roomName,
-                        game_mode: modeId,
-                        max_players: parseInt(maxPlayers)
-                    })
-                    .eq('room_code', gameState.roomCode);
-                
-                // Set game settings
-                gameState.currentGameMode = modeId;
-                gameState.totalQuestions = parseInt(questions);
-                gameState.selectedCategory = categoryId;
-                gameState.isHost = true;
-                gameState.isOnlineGame = true;
-                
-                // Update UI
-                elements.roomCodeDisplay.textContent = gameState.roomCode;
-                updateNavigation('waiting');
-                closeModal('createRoomModal');
-                showNotification('Room created! Share the code.');
-                
-            } catch (error) {
-                console.error('Room creation failed:', error);
-                showNotification('Failed to create room', 'error');
+                if (result.success) {
+                    gameState.roomCode = result.roomCode;
+                    gameState.roomId = result.roomId;
+                    gameState.isHost = true;
+                    gameState.isOnlineGame = true;
+                    gameState.currentGameMode = modeId;
+                    gameState.totalQuestions = parseInt(questions);
+                    gameState.selectedCategory = categoryId;
+                    
+                    // Set up event listeners
+                    setupMultiplayerListeners();
+                    
+                    // Subscribe to room updates
+                    await gameState.multiplayerService.subscribeToRoom(result.roomId);
+                    
+                    // Get room info
+                    const roomInfo = await gameState.multiplayerService.getRoomInfo();
+                    if (roomInfo) {
+                        elements.roomMode.textContent = gameState.gameModes.find(m => m.id === roomInfo.game_mode)?.name || roomInfo.game_mode;
+                        elements.roomQuestions.textContent = roomInfo.question_count;
+                        elements.roomCategory.textContent = gameState.categories.find(c => c.id === roomInfo.category)?.name || roomInfo.category;
+                    }
+                    
+                    // Update UI
+                    elements.roomCodeDisplay.textContent = gameState.roomCode;
+                    updateNavigation('waiting');
+                    closeModal('createRoomModal');
+                    showNotification('Room created! Share the code.');
+                    
+                } else {
+                    showNotification(`Failed to create room: ${result.error}`, 'error');
+                }
+            } else {
+                // Fallback to simulated room creation
+                createSimulatedRoom(roomName, modeId, categoryId, questions, maxPlayers);
             }
         }
-
-        async function joinRealRoom() {
+        
+        async function joinOnlineRoom() {
             const roomCode = elements.joinRoomCode.value.trim().toUpperCase();
             
-            // Validate room code
             if (!roomCode || roomCode.length !== 6) {
                 showNotification('Please enter a valid 6-digit code', 'error');
                 return;
             }
             
-            try {
-                // Connect to room as player
-                await gameState.realTimeService.connectToRoom(
-                    roomCode,
-                    gameState.playerName,
-                    false
-                );
+            // Show loading
+            showNotification('Joining room...', 'info');
+            
+            // Use Supabase if available
+            if (gameState.multiplayerService && supabaseClient) {
+                const result = await gameState.multiplayerService.joinRoom(roomCode, gameState.playerName);
                 
-                gameState.roomCode = roomCode;
-                gameState.isHost = false;
-                gameState.isOnlineGame = true;
-                
-                // Get existing players
-                const { data: players } = await supabaseClient
-                    .from('room_players')
-                    .select('player_name, is_host')
-                    .eq('room_code', roomCode);
+                if (result.success) {
+                    gameState.roomCode = roomCode;
+                    gameState.roomId = result.roomId;
+                    gameState.isHost = false;
+                    gameState.isOnlineGame = true;
+                    gameState.currentGameMode = result.gameMode;
+                    gameState.totalQuestions = 10; // Default or from room
+                    gameState.selectedCategory = result.category;
                     
-                gameState.onlinePlayers = players.map(p => ({
-                    name: p.player_name,
-                    isHost: p.is_host
-                }));
-                
-                // Get room settings
-                const { data: room } = await supabaseClient
-                    .from('game_rooms')
-                    .select('*')
-                    .eq('room_code', roomCode)
-                    .single();
+                    // Set up event listeners
+                    setupMultiplayerListeners();
                     
-                gameState.currentGameMode = room.game_mode;
-                gameState.totalQuestions = 10; // Default or from room settings
-                
-                // Update UI
-                elements.roomCodeDisplay.textContent = roomCode;
-                updateOnlinePlayersList();
-                updateNavigation('waiting');
-                closeModal('joinRoomModal');
-                showNotification('Joined room successfully!');
-                
-            } catch (error) {
-                console.error('Join failed:', error);
-                showNotification('Failed to join room', 'error');
+                    // Subscribe to room updates
+                    await gameState.multiplayerService.subscribeToRoom(result.roomId);
+                    
+                    // Get existing players
+                    const players = await gameState.multiplayerService.getRoomPlayers();
+                    gameState.onlinePlayers = players.map(p => ({
+                        name: p.name,
+                        isHost: p.isHost,
+                        isReady: p.isReady
+                    }));
+                    
+                    // Get room info
+                    const roomInfo = await gameState.multiplayerService.getRoomInfo();
+                    if (roomInfo) {
+                        elements.roomMode.textContent = gameState.gameModes.find(m => m.id === roomInfo.game_mode)?.name || roomInfo.game_mode;
+                        elements.roomQuestions.textContent = roomInfo.question_count;
+                        elements.roomCategory.textContent = gameState.categories.find(c => c.id === roomInfo.category)?.name || roomInfo.category;
+                    }
+                    
+                    // Update UI
+                    elements.roomCodeDisplay.textContent = roomCode;
+                    updateOnlinePlayersList();
+                    
+                    updateNavigation('waiting');
+                    closeModal('joinRoomModal');
+                    showNotification('Joined room successfully!');
+                    
+                } else {
+                    showNotification(`Failed to join room: ${result.error}`, 'error');
+                }
+            } else {
+                // Fallback to simulated room joining
+                joinSimulatedRoom(roomCode);
             }
         }
-
+        
+        // Setup multiplayer event listeners
+        function setupMultiplayerListeners() {
+            const service = gameState.multiplayerService;
+            if (!service) return;
+            
+            service.on('player_joined', (player) => {
+                gameState.onlinePlayers.push({
+                    name: player.playerName,
+                    isHost: player.isHost,
+                    isReady: player.isReady
+                });
+                updateOnlinePlayersList();
+                showNotification(`${player.playerName} joined!`);
+            });
+            
+            service.on('player_left', (player) => {
+                gameState.onlinePlayers = gameState.onlinePlayers.filter(p => p.name !== player.playerName);
+                updateOnlinePlayersList();
+                showNotification(`${player.playerName} left`);
+            });
+            
+            service.on('game_state_updated', (state) => {
+                syncGameState(state);
+            });
+            
+            service.on('buzzer_pressed', (data) => {
+                if (gameState.currentGameMode === 'buzzer') {
+                    elements.playerBuzzed.textContent = `${data.playerName} buzzed in!`;
+                    elements.buzzerInstruction.textContent = `${data.playerName} has control`;
+                    elements.buzzerButton.disabled = true;
+                    elements.buzzerButton.className = 'buzzer-button buzzer-disabled';
+                    
+                    // If this player buzzed, enable answer selection
+                    if (data.playerName === gameState.playerName) {
+                        elements.answersContainer.style.opacity = '1';
+                        document.querySelectorAll('.answer-option').forEach(opt => {
+                            opt.style.pointerEvents = 'auto';
+                        });
+                    }
+                }
+            });
+            
+            service.on('player_ready', (player) => {
+                const onlinePlayer = gameState.onlinePlayers.find(p => p.name === player.playerName);
+                if (onlinePlayer) {
+                    onlinePlayer.isReady = player.isReady;
+                    updateOnlinePlayersList();
+                }
+            });
+        }
+        
+        // Synchronize game state
         function syncGameState(state) {
-            if (!gameState.isOnlineGame) return;
+            if (!gameState.isOnlineGame || gameState.isHost) return;
             
-            // Only update if we're not the host making changes
-            if (gameState.isHost) return;
-            
-            // Update local game state
-            gameState.currentQuestion = state.current_question;
-            gameState.currentQuestionIndex = state.question_index;
-            gameState.playerScores = state.scores || {};
-            
-            // Update UI
+            // Update current question
             if (state.current_question) {
+                gameState.currentQuestion = state.current_question;
                 displayQuestion(state.current_question);
             }
             
-            updateScoresDisplay();
-        }
-
-        async function startOnlineGame() {
-            if (!gameState.isHost) return;
+            // Update scores
+            if (state.player_scores) {
+                gameState.playerScores = state.player_scores;
+                updateScoresDisplay();
+            }
             
-            // Fetch questions
+            // Update buzzer state
+            if (state.buzzer_active !== undefined) {
+                gameState.isBuzzerActive = state.buzzer_active;
+                
+                if (gameState.currentGameMode === 'buzzer') {
+                    if (state.buzzer_active) {
+                        resetBuzzerState();
+                    } else if (state.buzzed_player_name) {
+                        elements.playerBuzzed.textContent = `${state.buzzed_player_name} buzzed in!`;
+                    }
+                }
+            }
+            
+            // Update question index
+            if (state.question_index !== undefined) {
+                gameState.currentQuestionIndex = state.question_index;
+                elements.currentQuestion.textContent = state.question_index + 1;
+            }
+        }
+        
+        function displayQuestion(questionData) {
+            if (!questionData) return;
+            
+            elements.questionText.textContent = questionData.question;
+            elements.answersContainer.innerHTML = '';
+            
+            const letters = ['A', 'B', 'C', 'D'];
+            const answers = questionData.answers || [];
+            
+            answers.forEach((answer, index) => {
+                const answerElement = document.createElement('div');
+                answerElement.className = 'answer-option';
+                answerElement.innerHTML = `
+                    <div class="answer-letter">${letters[index]}</div>
+                    <div class="flex-1">${answer.text}</div>
+                `;
+                answerElement.onclick = () => selectAnswer(answer.correct, answerElement, questionData.difficulty);
+                elements.answersContainer.appendChild(answerElement);
+            });
+        }
+        
+        function updateScoresDisplay() {
+            // Update player score if in online game
+            if (gameState.isOnlineGame && gameState.playerScores[gameState.playerName]) {
+                elements.playerScore.textContent = gameState.playerScores[gameState.playerName];
+                elements.playerScoreHud.textContent = gameState.playerScores[gameState.playerName];
+            }
+        }
+        
+        // Start online game (host only)
+        async function startOnlineGame() {
+            if (!gameState.isHost || !gameState.multiplayerService) return;
+            
+            // Fetch questions from API
             const questions = await fetchQuestions(
                 gameState.selectedCategory,
                 'medium',
                 gameState.totalQuestions
             );
             
-            // Update game state in database
-            await gameState.realTimeService.updateGameState({
+            if (!questions || questions.length === 0) {
+                showNotification('Failed to fetch questions', 'error');
+                return;
+            }
+            
+            // Update room status to playing
+            try {
+                await supabaseClient
+                    .from('rooms')
+                    .update({ 
+                        status: 'playing',
+                        game_started_at: new Date().toISOString()
+                    })
+                    .eq('id', gameState.roomId);
+            } catch (error) {
+                console.error('Failed to update room status:', error);
+            }
+            
+            // Sync first question
+            await gameState.multiplayerService.updateGameState({
                 currentQuestion: questions[0],
                 questionIndex: 0,
-                scores: {},
-                timeRemaining: 30
+                playerScores: {},
+                timeRemaining: 30,
+                buzzerActive: gameState.currentGameMode === 'buzzer'
             });
-            
-            // Broadcast game start
-            await supabaseClient
-                .from('game_rooms')
-                .update({ game_state: 'playing' })
-                .eq('room_code', gameState.roomCode);
             
             // Start local game
             startGame();
         }
-
-        function generateSecureRoomCode() {
-            // Mix letters and numbers, excluding confusing characters
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let code = '';
-            for (let i = 0; i < 6; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
+        
+        // Refresh online rooms list
+        async function refreshOnlineRooms() {
+            if (!supabaseClient) return;
+            
+            try {
+                const { data: rooms, error } = await supabaseClient
+                    .from('rooms')
+                    .select('*')
+                    .eq('status', 'waiting')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                gameState.onlineRooms = rooms || [];
+                updateRoomList();
+                
+            } catch (error) {
+                console.error('Failed to refresh rooms:', error);
             }
-            return code;
         }
-
-        function cleanupOnlineGame() {
-            if (gameState.realTimeService) {
-                gameState.realTimeService.disconnect();
+        
+        function updateRoomList() {
+            if (!elements.roomList) return;
+            
+            if (gameState.onlineRooms.length === 0) {
+                elements.roomList.innerHTML = '<div class="text-center text-gray-400 py-8">No rooms available</div>';
+                return;
             }
             
-            // Remove player from room
-            if (gameState.roomCode && supabaseClient) {
-                supabaseClient
-                    .from('room_players')
-                    .delete()
-                    .eq('room_code', gameState.roomCode)
-                    .eq('player_name', gameState.playerName);
-            }
+            elements.roomList.innerHTML = gameState.onlineRooms.map(room => `
+                <div class="room-item">
+                    <div>
+                        <div class="font-bold">${room.name}</div>
+                        <div class="text-sm text-gray-400">
+                            ${room.max_players} players • ${gameState.gameModes.find(m => m.id === room.game_mode)?.name || room.game_mode}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-sm">
+                        <div class="text-sm text-yellow">${room.code}</div>
+                        <button class="btn btn-primary btn-sm join-room-list-btn" data-code="${room.code}">
+                            Join
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
-
+        
+        // Fallback simulated functions
+        function createSimulatedRoom(roomName, modeId, categoryId, questions, maxPlayers) {
+            const roomCode = gameState.multiplayerService ? 
+                gameState.multiplayerService.generateRoomCode() : 
+                Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            gameState.roomCode = roomCode;
+            gameState.isHost = true;
+            gameState.isOnlineGame = true;
+            gameState.currentGameMode = modeId;
+            gameState.totalQuestions = parseInt(questions);
+            gameState.selectedCategory = categoryId;
+            
+            // Add host as first player
+            gameState.onlinePlayers = [{
+                name: gameState.playerName,
+                isHost: true,
+                isReady: true
+            }];
+            
+            elements.roomCodeDisplay.textContent = gameState.roomCode;
+            elements.roomMode.textContent = gameState.gameModes.find(m => m.id === modeId)?.name || modeId;
+            elements.roomQuestions.textContent = questions;
+            elements.roomCategory.textContent = gameState.categories.find(c => c.id === categoryId)?.name || categoryId;
+            
+            updateOnlinePlayersList();
+            updateNavigation('waiting');
+            closeModal('createRoomModal');
+            showNotification('Room created! Share the code. (Simulated)');
+        }
+        
+        function joinSimulatedRoom(roomCode) {
+            gameState.roomCode = roomCode;
+            gameState.isHost = false;
+            gameState.isOnlineGame = true;
+            
+            // Simulate joining a room with some players
+            gameState.onlinePlayers = [
+                { name: 'Host Player', isHost: true, isReady: true },
+                { name: 'Player 2', isHost: false, isReady: false },
+                { name: gameState.playerName, isHost: false, isReady: false }
+            ];
+            
+            elements.roomCodeDisplay.textContent = roomCode;
+            elements.roomMode.textContent = 'Classic';
+            elements.roomQuestions.textContent = '10';
+            elements.roomCategory.textContent = 'General Knowledge';
+            updateOnlinePlayersList();
+            
+            updateNavigation('waiting');
+            closeModal('joinRoomModal');
+            showNotification('Joined room! (Simulated)');
+        }
+        
+        // Update cleanup function
+        async function cleanupOnlineGame() {
+            if (gameState.multiplayerService) {
+                await gameState.multiplayerService.cleanup();
+            }
+            
+            if (gameState.roomCode && gameState.multiplayerService) {
+                try {
+                    await gameState.multiplayerService.leaveRoom();
+                } catch (error) {
+                    console.error('Error leaving room:', error);
+                }
+            }
+            
+            gameState.isOnlineGame = false;
+            gameState.roomCode = null;
+            gameState.roomId = null;
+            gameState.onlinePlayers = [];
+            gameState.isHost = false;
+        }
+        
         // ===== EVENT LISTENERS =====
         function setupEventListeners() {
             // Bottom navigation
@@ -4883,6 +5714,14 @@
                             elements.categorySelect.value = categoryId;
                         }, 100);
                     }
+                }
+                
+                // Join room button in room list
+                if (e.target.closest('.join-room-list-btn')) {
+                    const btn = e.target.closest('.join-room-list-btn');
+                    const roomCode = btn.dataset.code;
+                    elements.joinRoomCode.value = roomCode;
+                    openModal('joinRoomModal');
                 }
             });
             
@@ -5011,68 +5850,24 @@
                 openModal('joinRoomModal');
             });
             
+            elements.refreshRoomsBtn.addEventListener('click', refreshOnlineRooms);
+            
             // Create room confirmation
-            elements.createRoomConfirmBtn.addEventListener('click', () => {
-                if (supabaseClient && gameState.realTimeService) {
-                    createRealRoom();
-                } else {
-                    showNotification('Supabase not configured. Using simulated multiplayer.', 'error');
-                    // Fallback to simulated room creation
-                    const roomCode = generateSecureRoomCode();
-                    gameState.roomCode = roomCode;
-                    gameState.isHost = true;
-                    gameState.isOnlineGame = true;
-                    elements.roomCodeDisplay.textContent = roomCode;
-                    updateNavigation('waiting');
-                    closeModal('createRoomModal');
-                    showNotification('Room created! Share the code.');
-                }
-            });
+            elements.createRoomConfirmBtn.addEventListener('click', createOnlineRoom);
             
             // Join room confirmation
-            elements.joinRoomConfirmBtn.addEventListener('click', () => {
-                if (supabaseClient && gameState.realTimeService) {
-                    joinRealRoom();
-                } else {
-                    showNotification('Supabase not configured. Using simulated multiplayer.', 'error');
-                    // Fallback to simulated room joining
-                    const roomCode = elements.joinRoomCode.value.trim().toUpperCase();
-                    if (roomCode.length === 6) {
-                        gameState.roomCode = roomCode;
-                        gameState.isHost = false;
-                        gameState.isOnlineGame = true;
-                        gameState.onlinePlayers = [
-                            { name: 'Host Player', isHost: true },
-                            { name: gameState.playerName, isHost: false }
-                        ];
-                        elements.roomCodeDisplay.textContent = roomCode;
-                        updateOnlinePlayersList();
-                        updateNavigation('waiting');
-                        closeModal('joinRoomModal');
-                        showNotification('Joined room successfully!');
-                    } else {
-                        showNotification('Please enter a valid 6-digit code', 'error');
-                    }
-                }
-            });
+            elements.joinRoomConfirmBtn.addEventListener('click', joinOnlineRoom);
             
             // Waiting room buttons
-            elements.leaveRoomBtn.addEventListener('click', () => {
+            elements.leaveRoomBtn.addEventListener('click', async () => {
                 if (confirm('Leave this room?')) {
-                    cleanupOnlineGame();
-                    gameState.isOnlineGame = false;
-                    gameState.roomCode = null;
-                    gameState.onlinePlayers = [];
+                    await cleanupOnlineGame();
                     updateNavigation('online');
                     resetGameState();
                 }
             });
             
-            elements.startOnlineGameBtn.addEventListener('click', () => {
-                if (gameState.isHost) {
-                    startOnlineGame();
-                }
-            });
+            elements.startOnlineGameBtn.addEventListener('click', startOnlineGame);
             
             // Room code input formatting
             elements.joinRoomCode.addEventListener('input', function(e) {
@@ -5170,9 +5965,12 @@
             });
             
             // Cleanup on page unload
-            window.addEventListener('beforeunload', cleanupOnlineGame);
+            window.addEventListener('beforeunload', async () => {
+                await cleanupOnlineGame();
+                saveGameState();
+            });
         }
-
+        
         // Make functions globally accessible
         window.removePlayer = removePlayer;
         window.addPlayer = addPlayer;
