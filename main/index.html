@@ -2865,64 +2865,118 @@
         end: null,
         
         init() {
-            // Initialize sound effects
-            this.buzz = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-electronic-retro-block-hit-2185.mp3'],
-                volume: 0.5
-            });
-            
-            this.correct = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3'],
-                volume: 0.5
-            });
-            
-            this.incorrect = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3'],
-                volume: 0.5
-            });
-            
-            this.timer = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3'],
-                volume: 0.3
-            });
-            
-            this.win = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3'],
-                volume: 0.5
-            });
-            
-            this.lose = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-retro-game-over-1947.mp3'],
-                volume: 0.5
-            });
-            
-            this.click = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3'],
-                volume: 0.2
-            });
-            
-            this.bell = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3'],
-                volume: 0.4
-            });
-            
-            this.start = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-game-show-intro-331.mp3'],
-                volume: 0.5
-            });
-            
-            this.end = new Howl({
-                src: ['https://assets.mixkit.co/sfx/preview/mixkit-winning-trumpet-2018.mp3'],
-                volume: 0.5
-            });
+            try {
+                // Initialize sound effects with fallback empty sources
+                this.buzz = new Howl({
+                    src: ['https://assets.mixkit.co/sfx/preview/mixkit-electronic-retro-block-hit-2185.mp3'],
+                    volume: 0.5,
+                    onloaderror: () => {
+                        console.log('Buzz sound failed to load, using silent fallback');
+                        this.buzz = { play: () => {} };
+                    }
+                });
+                
+                this.correct = new Howl({
+                    src: ['https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3'],
+                    volume: 0.5,
+                    onloaderror: () => {
+                        console.log('Correct sound failed to load');
+                        this.correct = { play: () => {} };
+                    }
+                });
+                
+                this.incorrect = new Howl({
+                    src: ['https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3'],
+                    volume: 0.5,
+                    onloaderror: () => {
+                        console.log('Incorrect sound failed to load');
+                        this.incorrect = { play: () => {} };
+                    }
+                });
+                
+                this.timer = new Howl({
+                    src: ['https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3'],
+                    volume: 0.3,
+                    onloaderror: () => {
+                        console.log('Timer sound failed to load');
+                        this.timer = { play: () => {} };
+                    }
+                });
+                
+                this.win = new Howl({
+                    src: ['https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3'],
+                    volume: 0.5,
+                    onloaderror: () => {
+                        console.log('Win sound failed to load');
+                        this.win = { play: () => {} };
+                    }
+                });
+                
+                this.lose = new Howl({
+                    src: ['https://assets.mixkit.co/sfx/preview/mixkit-retro-game-over-1947.mp3'],
+                    volume: 0.5,
+                    onloaderror: () => {
+                        console.log('Lose sound failed to load');
+                        this.lose = { play: () => {} };
+                    }
+                });
+                
+                this.click = new Howl({
+                    src: ['https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3'],
+                    volume: 0.2,
+                    onloaderror: () => {
+                        console.log('Click sound failed to load');
+                        this.click = { play: () => {} };
+                    }
+                });
+                
+                this.bell = new Howl({
+                    src: ['https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3'],
+                    volume: 0.4,
+                    onloaderror: () => {
+                        console.log('Bell sound failed to load');
+                        this.bell = { play: () => {} };
+                    }
+                });
+                
+                this.start = new Howl({
+                    src: ['https://assets.mixkit.co/sfx/preview/mixkit-game-show-intro-331.mp3'],
+                    volume: 0.5,
+                    onloaderror: () => {
+                        console.log('Start sound failed to load');
+                        this.start = { play: () => {} };
+                    }
+                });
+                
+                this.end = new Howl({
+                    src: ['https://assets.mixkit.co/sfx/preview/mixkit-winning-trumpet-2018.mp3'],
+                    volume: 0.5,
+                    onloaderror: () => {
+                        console.log('End sound failed to load');
+                        this.end = { play: () => {} };
+                    }
+                });
+            } catch (error) {
+                console.log('Sound initialization error, continuing without sound:', error);
+                // Initialize dummy sound objects
+                Object.keys(this).forEach(key => {
+                    if (key !== 'init' && key !== 'play') {
+                        this[key] = { play: () => {} };
+                    }
+                });
+            }
         },
         
         play(soundName) {
             if (!gameState.settings.soundEffects) return;
             
             const sound = this[soundName];
-            if (sound) {
-                sound.play();
+            if (sound && typeof sound.play === 'function') {
+                try {
+                    sound.play();
+                } catch (error) {
+                    console.log(`Error playing sound ${soundName}:`, error);
+                }
             }
         }
     };
@@ -3151,31 +3205,9 @@
         gameState.playerName = email.split('@')[0] || 'Player';
         gameState.playerAvatar = gameState.playerName.charAt(0).toUpperCase();
         
+        // Show main app
         showMainApp();
         showNotification('Welcome to Too Turned Trivia!');
-        
-        // In a real app, you would call Supabase here:
-        /*
-        try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password
-            });
-            
-            if (error) {
-                showAuthError('loginError', error.message);
-                return;
-            }
-            
-            currentUser = data.user;
-            await loadUserProfile();
-            showMainApp();
-            showNotification('Welcome back!');
-            
-        } catch (error) {
-            showAuthError('loginError', 'Login failed. Please try again.');
-        }
-        */
     }
 
     async function handleRegister() {
@@ -3217,42 +3249,6 @@
         
         showAuthTab('profileSetupForm');
         showNotification('Account created! Complete your profile.');
-        
-        // In a real app, you would call Supabase here:
-        /*
-        try {
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        username: username
-                    }
-                }
-            });
-            
-            if (error) {
-                showAuthError('registerError', error.message);
-                return;
-            }
-            
-            currentUser = data.user;
-            
-            gameState.playerName = username;
-            if (elements.profileDisplayName) {
-                elements.profileDisplayName.value = username;
-            }
-            if (elements.setupAvatarText) {
-                elements.setupAvatarText.textContent = username.charAt(0).toUpperCase();
-            }
-            
-            showAuthTab('profileSetupForm');
-            showNotification('Account created! Complete your profile.');
-            
-        } catch (error) {
-            showAuthError('registerError', 'Registration failed. Please try again.');
-        }
-        */
     }
 
     async function handleCompleteProfile() {
@@ -3275,6 +3271,7 @@
         gameState.playerName = displayName;
         gameState.playerAvatar = displayName.charAt(0).toUpperCase();
         
+        // Show main app
         showMainApp();
         showNotification('Welcome to Too Turned Trivia!');
     }
@@ -3319,118 +3316,109 @@
     function setupAuthListeners() {
         console.log('Setting up auth listeners...');
         
-        // Use setTimeout to ensure DOM is ready
-        setTimeout(() => {
-            // Auth tab switching - use onclick instead of addEventListener
-            const loginTab = document.getElementById('loginTab');
-            const registerTab = document.getElementById('registerTab');
-            
-            if (loginTab) {
-                loginTab.onclick = () => {
-                    console.log('Login tab clicked');
-                    showAuthTab('loginForm');
-                };
-                console.log('✓ Login tab listener added');
-            } else {
-                console.error('✗ Login tab not found');
-            }
-            
-            if (registerTab) {
-                registerTab.onclick = () => {
-                    console.log('Register tab clicked');
-                    showAuthTab('registerForm');
-                };
-                console.log('✓ Register tab listener added');
-            } else {
-                console.error('✗ Register tab not found');
-            }
-            
-            // Login button - use onclick
-            const loginBtn = document.getElementById('loginBtn');
-            if (loginBtn) {
-                loginBtn.onclick = (e) => {
-                    e.preventDefault();
-                    console.log('Login button clicked');
-                    handleLogin();
-                };
-                console.log('✓ Login button listener added');
-            } else {
-                console.error('✗ Login button not found');
-            }
-            
-            // Register button - use onclick
-            const registerBtn = document.getElementById('registerBtn');
-            if (registerBtn) {
-                registerBtn.onclick = (e) => {
-                    e.preventDefault();
-                    console.log('Register button clicked');
-                    handleRegister();
-                };
-                console.log('✓ Register button listener added');
-            } else {
-                console.error('✗ Register button not found');
-            }
-            
-            // Complete profile button - use onclick
-            const completeProfileBtn = document.getElementById('completeProfileBtn');
-            if (completeProfileBtn) {
-                completeProfileBtn.onclick = (e) => {
-                    e.preventDefault();
-                    console.log('Complete profile button clicked');
-                    handleCompleteProfile();
-                };
-                console.log('✓ Complete profile button listener added');
-            } else {
-                console.error('✗ Complete profile button not found');
-            }
-            
-            // Setup avatar upload
-            const setupAvatarUpload = document.getElementById('setupAvatarUpload');
-            const setupAvatarContainer = document.querySelector('#profileSetupForm .profile-avatar-container');
-            
-            if (setupAvatarUpload && setupAvatarContainer) {
-                setupAvatarContainer.onclick = function() {
-                    setupAvatarUpload.click();
-                };
-                
-                setupAvatarUpload.onchange = function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(event) {
-                            const setupAvatarImg = document.getElementById('setupAvatarImg');
-                            const setupAvatarText = document.getElementById('setupAvatarText');
-                            if (setupAvatarImg && setupAvatarText) {
-                                setupAvatarImg.src = event.target.result;
-                                setupAvatarImg.style.display = 'block';
-                                setupAvatarText.style.display = 'none';
-                            }
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                };
-            }
-            
-            // Forgot password link
-            const forgotPassword = document.getElementById('forgotPassword');
-            if (forgotPassword) {
-                forgotPassword.onclick = function(e) {
-                    e.preventDefault();
-                    alert('Password reset functionality would be implemented here.');
-                };
-            }
-            
-            // Category tags in profile setup
-            const categoryTags = document.querySelectorAll('.category-tag');
-            categoryTags.forEach(tag => {
-                tag.onclick = function() {
-                    this.classList.toggle('btn-primary');
-                    this.classList.toggle('btn-outline');
-                };
+        // Auth tab switching
+        if (elements.loginTab) {
+            elements.loginTab.addEventListener('click', () => {
+                console.log('Login tab clicked');
+                showAuthTab('loginForm');
+            });
+            console.log('✓ Login tab listener added');
+        } else {
+            console.error('✗ Login tab not found');
+        }
+        
+        if (elements.registerTab) {
+            elements.registerTab.addEventListener('click', () => {
+                console.log('Register tab clicked');
+                showAuthTab('registerForm');
+            });
+            console.log('✓ Register tab listener added');
+        } else {
+            console.error('✗ Register tab not found');
+        }
+        
+        // Login button
+        if (elements.loginBtn) {
+            elements.loginBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Login button clicked');
+                handleLogin();
+            });
+            console.log('✓ Login button listener added');
+        } else {
+            console.error('✗ Login button not found');
+        }
+        
+        // Register button
+        if (elements.registerBtn) {
+            elements.registerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Register button clicked');
+                handleRegister();
+            });
+            console.log('✓ Register button listener added');
+        } else {
+            console.error('✗ Register button not found');
+        }
+        
+        // Complete profile button
+        if (elements.completeProfileBtn) {
+            elements.completeProfileBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Complete profile button clicked');
+                handleCompleteProfile();
+            });
+            console.log('✓ Complete profile button listener added');
+        } else {
+            console.error('✗ Complete profile button not found');
+        }
+        
+        // Setup avatar upload
+        const setupAvatarUpload = document.getElementById('setupAvatarUpload');
+        const setupAvatarContainer = document.querySelector('#profileSetupForm .profile-avatar-container');
+        
+        if (setupAvatarUpload && setupAvatarContainer) {
+            setupAvatarContainer.addEventListener('click', function() {
+                setupAvatarUpload.click();
             });
             
-            console.log('Auth listeners setup complete');
-        }, 200); // Increased timeout to 200ms for safety
+            setupAvatarUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const setupAvatarImg = document.getElementById('setupAvatarImg');
+                        const setupAvatarText = document.getElementById('setupAvatarText');
+                        if (setupAvatarImg && setupAvatarText) {
+                            setupAvatarImg.src = event.target.result;
+                            setupAvatarImg.style.display = 'block';
+                            setupAvatarText.style.display = 'none';
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        // Forgot password link
+        const forgotPassword = document.getElementById('forgotPassword');
+        if (forgotPassword) {
+            forgotPassword.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Password reset functionality would be implemented here.');
+            });
+        }
+        
+        // Category tags in profile setup
+        const categoryTags = document.querySelectorAll('.category-tag');
+        categoryTags.forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.classList.toggle('btn-primary');
+                this.classList.toggle('btn-outline');
+            });
+        });
+        
+        console.log('Auth listeners setup complete');
     }
 
     // ===== EVENT LISTENERS SETUP =====
@@ -3708,21 +3696,33 @@
         if (savedSettings) {
             gameState.settings = JSON.parse(savedSettings);
         }
-    }
-
-    function showAuthScreen() {
-        elements.authScreen.classList.add('active');
-        elements.playerHud.classList.add('hidden');
-        elements.bottomNav.classList.add('hidden');
-        document.querySelector('main').classList.add('hidden');
+        
+        // Load game stats
+        const savedStats = localStorage.getItem('gameStats');
+        if (savedStats) {
+            const stats = JSON.parse(savedStats);
+            gameState.totalGames = stats.totalGames || 0;
+            gameState.totalCorrectAnswers = stats.totalCorrectAnswers || 0;
+            gameState.totalQuestions = stats.totalQuestions || 0;
+            gameState.totalScore = stats.totalScore || 0;
+            gameState.highestStreak = stats.highestStreak || 0;
+            gameState.winStreak = stats.winStreak || 0;
+        }
     }
 
     function showMainApp() {
+        console.log('Showing main app...');
         elements.authScreen.classList.remove('active');
         elements.playerHud.classList.remove('hidden');
         elements.bottomNav.classList.remove('hidden');
         document.querySelector('main').classList.remove('hidden');
         updateNavigation('home');
+        
+        // Update HUD with user info
+        updateHUD();
+        updateProfile();
+        populateStats();
+        populateAchievements();
     }
 
     // ===== PLAYER MANAGEMENT =====
@@ -4129,6 +4129,7 @@
         
         // Update HUD
         updateHUD();
+        populateStats();
         
         // Play win/lose sound
         if (winner === gameState.playerName) {
@@ -4343,6 +4344,7 @@
     function updateProfile() {
         elements.profileName.textContent = gameState.playerName;
         elements.profileTitle.textContent = gameState.rank;
+        updateProfilePicture();
     }
 
     function navigateToStep(step) {
@@ -4350,13 +4352,19 @@
         document.querySelectorAll('.step').forEach(stepEl => {
             stepEl.classList.remove('active');
         });
-        document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+        const stepElement = document.querySelector(`.step[data-step="${step}"]`);
+        if (stepElement) {
+            stepElement.classList.add('active');
+        }
         
         // Update sections
         document.querySelectorAll('.setup-section').forEach(section => {
             section.classList.remove('active');
         });
-        document.querySelector(`.setup-section[data-step="${step}"]`).classList.add('active');
+        const sectionElement = document.querySelector(`.setup-section[data-step="${step}"]`);
+        if (sectionElement) {
+            sectionElement.classList.add('active');
+        }
         
         // Update mode info if we're on step 3
         if (step === 3) {
@@ -4367,10 +4375,16 @@
             }
             
             // Update settings display
-            elements.settingsQuestionCount.textContent = elements.questionCount.value;
-            const category = gameState.categories.find(c => c.id === elements.categorySelect.value);
-            elements.settingsCategory.textContent = category ? category.name : 'General Knowledge';
-            elements.settingsDifficulty.textContent = elements.difficultySelect.value.charAt(0).toUpperCase() + elements.difficultySelect.value.slice(1);
+            if (elements.settingsQuestionCount) {
+                elements.settingsQuestionCount.textContent = elements.questionCount.value;
+            }
+            if (elements.settingsCategory) {
+                const category = gameState.categories.find(c => c.id === elements.categorySelect.value);
+                elements.settingsCategory.textContent = category ? category.name : 'General Knowledge';
+            }
+            if (elements.settingsDifficulty) {
+                elements.settingsDifficulty.textContent = elements.difficultySelect.value.charAt(0).toUpperCase() + elements.difficultySelect.value.slice(1);
+            }
         }
     }
 
@@ -4383,7 +4397,9 @@
         
         // Hide all screens
         Object.values(elements.screens).forEach(screenEl => {
-            screenEl.classList.remove('active');
+            if (screenEl) {
+                screenEl.classList.remove('active');
+            }
         });
         
         // Show current screen
@@ -4401,14 +4417,14 @@
         
         // Update HUD visibility
         if (screen === 'home' || screen === 'modes' || screen === 'categories' || screen === 'stats' || screen === 'profile') {
-            elements.playerHud.classList.remove('hidden');
-            elements.bottomNav.classList.remove('hidden');
+            if (elements.playerHud) elements.playerHud.classList.remove('hidden');
+            if (elements.bottomNav) elements.bottomNav.classList.remove('hidden');
         } else if (screen === 'game') {
-            elements.playerHud.classList.remove('hidden');
-            elements.bottomNav.classList.add('hidden');
+            if (elements.playerHud) elements.playerHud.classList.remove('hidden');
+            if (elements.bottomNav) elements.bottomNav.classList.add('hidden');
         } else {
-            elements.playerHud.classList.add('hidden');
-            elements.bottomNav.classList.add('hidden');
+            if (elements.playerHud) elements.playerHud.classList.add('hidden');
+            if (elements.bottomNav) elements.bottomNav.classList.add('hidden');
         }
     }
 
@@ -4509,12 +4525,20 @@
         clearInterval(gameState.timerInterval);
         
         const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
-        gameState.timer = mode.timePerQuestion;
-        elements.gameTimer.textContent = `${gameState.timer}s`;
+        if (mode) {
+            gameState.timer = mode.timePerQuestion;
+        }
+        
+        if (elements.gameTimer) {
+            elements.gameTimer.textContent = `${gameState.timer}s`;
+        }
         
         gameState.timerInterval = setInterval(() => {
             gameState.timer--;
-            elements.gameTimer.textContent = `${gameState.timer}s`;
+            
+            if (elements.gameTimer) {
+                elements.gameTimer.textContent = `${gameState.timer}s`;
+            }
             
             // Play timer sound when time is low
             if (gameState.timer === 5) {
@@ -4534,7 +4558,10 @@
         // Time's up - mark as incorrect
         soundEffects.play('incorrect');
         gameState.lives--;
-        elements.playerLives.textContent = gameState.lives;
+        
+        if (elements.playerLives) {
+            elements.playerLives.textContent = gameState.lives;
+        }
         
         // Disable all answers
         document.querySelectorAll('.answer-option').forEach(opt => {
@@ -4557,7 +4584,9 @@
         showFeedback('Time\'s up!', 'incorrect');
         
         // Enable next button
-        elements.nextQuestionBtn.disabled = false;
+        if (elements.nextQuestionBtn) {
+            elements.nextQuestionBtn.disabled = false;
+        }
         
         // Check if game over
         if (gameState.lives <= 0) {
@@ -4567,12 +4596,14 @@
 
     function nextQuestion() {
         gameState.currentQuestionIndex++;
-        gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+        if (gameState.players.length > 0) {
+            gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+        }
         loadQuestion();
     }
 
     function showHint() {
-        if (gameState.hintsLeft <= 0 || gameState.hintUsed) return;
+        if (gameState.hintsLeft <= 0 || gameState.hintUsed || !elements.hintBtn) return;
         
         gameState.hintsLeft--;
         gameState.hintUsed = true;
@@ -4585,16 +4616,25 @@
             `Hint: The answer starts with "${gameState.currentQuestion.answers.find(a => a.correct)?.text?.charAt(0)}"` :
             "Try to eliminate obviously wrong answers first.";
         
-        document.getElementById('hintText').textContent = hintText;
+        const hintTextElement = document.getElementById('hintText');
+        if (hintTextElement) {
+            hintTextElement.textContent = hintText;
+        }
+        
         openModal('hintModal');
         
         // Auto-close after 5 seconds
         let timer = 5;
-        document.getElementById('hintTimer').textContent = `Closing in ${timer} seconds...`;
+        const hintTimerElement = document.getElementById('hintTimer');
+        if (hintTimerElement) {
+            hintTimerElement.textContent = `Closing in ${timer} seconds...`;
+        }
         
         const hintTimerInterval = setInterval(() => {
             timer--;
-            document.getElementById('hintTimer').textContent = `Closing in ${timer} seconds...`;
+            if (hintTimerElement) {
+                hintTimerElement.textContent = `Closing in ${timer} seconds...`;
+            }
             
             if (timer <= 0) {
                 clearInterval(hintTimerInterval);
@@ -4612,12 +4652,20 @@
         gameState.buzzedPlayer = gameState.playerName;
         
         // Update UI
-        elements.buzzerButton.className = 'buzzer-button buzzer-buzzed';
-        elements.buzzerInstruction.textContent = 'You buzzed in! Select your answer.';
-        elements.playerBuzzed.textContent = `${gameState.playerName} buzzed in!`;
+        if (elements.buzzerButton) {
+            elements.buzzerButton.className = 'buzzer-button buzzer-buzzed';
+        }
+        if (elements.buzzerInstruction) {
+            elements.buzzerInstruction.textContent = 'You buzzed in! Select your answer.';
+        }
+        if (elements.playerBuzzed) {
+            elements.playerBuzzed.textContent = `${gameState.playerName} buzzed in!`;
+        }
         
         // Enable answers
-        elements.answersContainer.style.opacity = '1';
+        if (elements.answersContainer) {
+            elements.answersContainer.style.opacity = '1';
+        }
         document.querySelectorAll('.answer-option').forEach(opt => {
             opt.style.pointerEvents = 'auto';
         });
@@ -4662,10 +4710,10 @@
 
     // ===== ONLINE MULTIPLAYER (SIMPLIFIED) =====
     async function createRoom() {
-        const roomName = elements.roomName.value.trim() || `${gameState.playerName}'s Room`;
-        const modeId = elements.onlineModeSelect.value;
-        const questions = elements.onlineQuestionCount.value;
-        const categoryId = elements.onlineCategorySelect.value;
+        const roomName = elements.roomName ? elements.roomName.value.trim() : `${gameState.playerName}'s Room`;
+        const modeId = elements.onlineModeSelect ? elements.onlineModeSelect.value : 'classic';
+        const questions = elements.onlineQuestionCount ? elements.onlineQuestionCount.value : '10';
+        const categoryId = elements.onlineCategorySelect ? elements.onlineCategorySelect.value : 'general';
         
         // Generate room code
         const roomCode = generateRoomCode();
@@ -4679,12 +4727,20 @@
         gameState.isOnlineGame = true;
         
         // Update waiting room
-        elements.roomCodeDisplay.textContent = roomCode;
+        if (elements.roomCodeDisplay) {
+            elements.roomCodeDisplay.textContent = roomCode;
+        }
         const mode = gameState.gameModes.find(m => m.id === modeId);
-        elements.roomMode.textContent = mode ? mode.name : 'Classic';
-        elements.roomQuestions.textContent = questions;
+        if (elements.roomMode) {
+            elements.roomMode.textContent = mode ? mode.name : 'Classic';
+        }
+        if (elements.roomQuestions) {
+            elements.roomQuestions.textContent = questions;
+        }
         const category = gameState.categories.find(c => c.id === categoryId);
-        elements.roomCategory.textContent = category ? category.name : 'General Knowledge';
+        if (elements.roomCategory) {
+            elements.roomCategory.textContent = category ? category.name : 'General Knowledge';
+        }
         
         // Close modal and go to waiting room
         closeModal('createRoomModal');
@@ -4694,7 +4750,7 @@
     }
 
     async function joinRoom() {
-        const roomCode = elements.joinRoomCode.value.trim().toUpperCase();
+        const roomCode = elements.joinRoomCode ? elements.joinRoomCode.value.trim().toUpperCase() : '';
         
         if (!roomCode || roomCode.length !== 6) {
             alert('Please enter a valid 6-digit room code');
@@ -4711,10 +4767,18 @@
         gameState.isOnlineGame = true;
         
         // Update waiting room
-        elements.roomCodeDisplay.textContent = roomCode;
-        elements.roomMode.textContent = 'Classic';
-        elements.roomQuestions.textContent = '10';
-        elements.roomCategory.textContent = 'General Knowledge';
+        if (elements.roomCodeDisplay) {
+            elements.roomCodeDisplay.textContent = roomCode;
+        }
+        if (elements.roomMode) {
+            elements.roomMode.textContent = 'Classic';
+        }
+        if (elements.roomQuestions) {
+            elements.roomQuestions.textContent = '10';
+        }
+        if (elements.roomCategory) {
+            elements.roomCategory.textContent = 'General Knowledge';
+        }
         
         // Close modal and go to waiting room
         closeModal('joinRoomModal');
@@ -4733,8 +4797,20 @@
     }
 
     function copyRoomCode() {
-        navigator.clipboard.writeText(gameState.roomCode);
-        showNotification('Room code copied to clipboard!');
+        if (gameState.roomCode) {
+            navigator.clipboard.writeText(gameState.roomCode).then(() => {
+                showNotification('Room code copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = gameState.roomCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('Room code copied to clipboard!');
+            });
+        }
     }
 
     function shareRoomLink() {
@@ -4751,41 +4827,45 @@
 
     async function refreshRoomsList() {
         // For demo, show mock rooms
-        elements.roomList.innerHTML = `
-            <div class="room-item" onclick="joinRoomByCode('ABC123')">
-                <div class="room-info">
-                    <div class="room-name">Demo Room 1</div>
-                    <div class="room-meta">
-                        <span><i class="fas fa-crown"></i> Classic</span>
-                        <span><i class="fas fa-users"></i> 2/4</span>
-                        <span><i class="fas fa-question-circle"></i> 10 Qs</span>
+        if (elements.roomList) {
+            elements.roomList.innerHTML = `
+                <div class="room-item" onclick="joinRoomByCode('ABC123')">
+                    <div class="room-info">
+                        <div class="room-name">Demo Room 1</div>
+                        <div class="room-meta">
+                            <span><i class="fas fa-crown"></i> Classic</span>
+                            <span><i class="fas fa-users"></i> 2/4</span>
+                            <span><i class="fas fa-question-circle"></i> 10 Qs</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="room-status waiting">Join</span>
                     </div>
                 </div>
-                <div>
-                    <span class="room-status waiting">Join</span>
-                </div>
-            </div>
-            <div class="room-item" onclick="joinRoomByCode('DEF456')">
-                <div class="room-info">
-                    <div class="room-name">Battle Arena</div>
-                    <div class="room-meta">
-                        <span><i class="fas fa-skull-crossbones"></i> Battle</span>
-                        <span><i class="fas fa-users"></i> 3/6</span>
-                        <span><i class="fas fa-question-circle"></i> 15 Qs</span>
+                <div class="room-item" onclick="joinRoomByCode('DEF456')">
+                    <div class="room-info">
+                        <div class="room-name">Battle Arena</div>
+                        <div class="room-meta">
+                            <span><i class="fas fa-skull-crossbones"></i> Battle</span>
+                            <span><i class="fas fa-users"></i> 3/6</span>
+                            <span><i class="fas fa-question-circle"></i> 15 Qs</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="room-status waiting">Join</span>
                     </div>
                 </div>
-                <div>
-                    <span class="room-status waiting">Join</span>
-                </div>
-            </div>
-        `;
+            `;
+        }
         
         showNotification('Rooms refreshed!');
     }
 
     function joinRoomByCode(code) {
-        elements.joinRoomCode.value = code;
-        openModal('joinRoomModal');
+        if (elements.joinRoomCode) {
+            elements.joinRoomCode.value = code;
+            openModal('joinRoomModal');
+        }
     }
 
     function leaveRoom() {
