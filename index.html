@@ -6,11 +6,17 @@
     <title>Too Turned Trivia™</title>
     <meta name="description" content="Online multiplayer trivia with 6 unique game modes">
     
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 rotate=%22-15%22>🎯</text></svg>">
+    
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Supabase Client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <style>
         /* ===== RESET & BASE ===== */
@@ -29,6 +35,8 @@
             --gray-900: #0F0F0F;
             --gray-800: #1A1A1A;
             --gray-700: #2D2D2D;
+            --gray-600: #404040;
+            --gray-500: #666666;
             --gray-400: #9E9E9E;
             --purple: #6C5CE7;
             --red: #FF7675;
@@ -49,12 +57,27 @@
             --shadow-card-hover: 0 12px 30px rgba(0, 0, 0, 0.25);
         }
 
+        /* Light mode variables - DARKER GREYS */
+        :root.light-mode {
+            --black: #FFFFFF;
+            --white: #000000;
+            --gray-900: #F0F0F0;
+            --gray-800: #E0E0E0;
+            --gray-700: #D0D0D0;
+            --gray-600: #C0C0C0;
+            --gray-500: #909090;
+            --gray-400: #606060;
+            --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.08);
+            --shadow-card-hover: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: var(--black);
             color: var(--white);
             min-height: 100vh;
             overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         /* ===== LOADING SCREEN ===== */
@@ -124,6 +147,12 @@
             z-index: 100;
             border-bottom: 1px solid rgba(255, 222, 33, 0.1);
             height: 60px;
+            transition: background-color 0.3s;
+        }
+
+        .light-mode .player-hud {
+            background: rgba(240, 240, 240, 0.95);
+            border-bottom: 1px solid rgba(255, 222, 33, 0.2);
         }
 
         .hud-left {
@@ -166,6 +195,31 @@
             gap: var(--space-sm);
         }
 
+        .profile-display {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .profile-pic-hud {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            overflow: hidden;
+        }
+
+        .profile-pic-hud img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         /* ===== SCREENS ===== */
         .screen {
             display: none;
@@ -199,6 +253,12 @@
             z-index: 100;
             border-top: 1px solid rgba(255, 222, 33, 0.1);
             height: 70px;
+            transition: background-color 0.3s;
+        }
+
+        .light-mode .bottom-nav {
+            background: rgba(240, 240, 240, 0.95);
+            border-top: 1px solid rgba(255, 222, 33, 0.2);
         }
 
         .nav-item {
@@ -289,6 +349,10 @@
             box-shadow: var(--shadow-card);
             transition: all 0.3s;
             border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .light-mode .card {
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .card:hover {
@@ -596,6 +660,8 @@
             display: flex;
             align-items: center;
             gap: var(--space-md);
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         .answer-option:hover {
@@ -670,7 +736,7 @@
             margin-bottom: var(--space-xl);
         }
 
-        .profile-avatar {
+        .profile-pic {
             width: 100px;
             height: 100px;
             border-radius: 50%;
@@ -682,10 +748,18 @@
             font-weight: 700;
             cursor: pointer;
             transition: transform 0.3s;
+            overflow: hidden;
+            position: relative;
         }
 
-        .profile-avatar:hover {
+        .profile-pic:hover {
             transform: scale(1.05);
+        }
+
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .profile-info {
@@ -874,6 +948,10 @@
             padding: var(--space-md);
         }
 
+        .light-mode .modal-overlay {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
         .modal-overlay.active {
             display: flex;
             animation: fadeIn 0.3s ease;
@@ -1024,6 +1102,50 @@
             font-weight: bold;
         }
 
+        /* ===== THEME SELECTION GRID ===== */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: var(--space-sm);
+        }
+
+        @media (max-width: 480px) {
+            .theme-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .theme-option {
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .theme-option:hover {
+            transform: translateY(-2px);
+        }
+
+        .theme-option.selected {
+            border-color: var(--white);
+            box-shadow: 0 0 0 2px var(--yellow);
+        }
+
+        .theme-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto var(--space-sm);
+            border: 2px solid var(--gray-600);
+        }
+
+        .theme-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
         /* ===== UTILITY CLASSES ===== */
         .text-center { text-align: center; }
         .text-yellow { color: var(--yellow); }
@@ -1131,6 +1253,7 @@
             align-items: center;
             justify-content: center;
             gap: var(--space-sm);
+            touch-action: manipulation;
         }
 
         .buzzer-button:active {
@@ -1188,6 +1311,59 @@
             to { transform: translateY(0); }
         }
 
+        /* ===== HINT STYLES ===== */
+        .hint-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--gray-800);
+            border: 2px solid var(--yellow);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            z-index: 1001;
+            max-width: 80%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            animation: hintFadeIn 0.3s ease;
+        }
+
+        @keyframes hintFadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* ===== PROFILE PICTURE UPLOAD ===== */
+        .profile-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--yellow);
+            color: var(--black);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .upload-preview {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-md);
+        }
+
+        /* ===== TOUCH SWIPE SUPPORT ===== */
+        .swipe-area {
+            position: relative;
+            overflow: hidden;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 639px) {
             .hero-actions {
@@ -1231,6 +1407,22 @@
                 font-size: 32px;
                 letter-spacing: 4px;
             }
+
+            .buzzer-button {
+                height: 150px;
+                font-size: 36px;
+            }
+
+            .hint-display {
+                padding: var(--space-lg);
+                max-width: 90%;
+            }
+        }
+
+        @media (min-width: 640px) and (max-width: 1024px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         /* ===== SCROLLBAR ===== */
@@ -1265,13 +1457,16 @@
     <!-- Player HUD -->
     <div class="player-hud">
         <div class="hud-left">
-            <div class="hud-item">
-                <div class="hud-icon">
-                    <i class="fas fa-user"></i>
+            <div class="profile-display">
+                <div class="profile-pic-hud" id="profilePicHud">
+                    <img id="profilePicHudImg" src="" alt="" style="display: none;">
+                    <span id="profilePicHudEmoji">😎</span>
                 </div>
-                <div>
-                    <div class="hud-value" id="playerName">Player</div>
-                    <div class="hud-label">Profile</div>
+                <div class="hud-item">
+                    <div>
+                        <div class="hud-value" id="playerName">Player</div>
+                        <div class="hud-label">Profile</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1340,7 +1535,7 @@
                             <i class="fas fa-user-circle"></i>
                         </div>
                         <h3 class="card-title">My Profile</h3>
-                        <p class="card-description">Customize your avatar and manage settings</p>
+                        <p class="card-description">Customize your profile and manage settings</p>
                     </div>
                 </div>
             </div>
@@ -1421,7 +1616,11 @@
         <div class="screen" id="profileScreen">
             <div class="page-content">
                 <div class="profile-header">
-                    <div class="profile-avatar" id="profileAvatar" onclick="openModal('avatarModal')">P</div>
+                    <div class="profile-pic" id="profilePic" onclick="openModal('avatarModal')">
+                        <div class="profile-upload">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
                     <div class="profile-info">
                         <h1 class="profile-name" id="profileName" onclick="openModal('nameModal')">Player</h1>
                         <p class="text-gray-400">Trivia Master</p>
@@ -1436,7 +1635,7 @@
                             <i class="fas fa-chevron-right text-gray-400"></i>
                         </div>
                         <div class="settings-item" onclick="openModal('avatarModal')">
-                            <span><i class="fas fa-image text-yellow mr-md"></i> Change Avatar</span>
+                            <span><i class="fas fa-image text-yellow mr-md"></i> Change Profile Picture</span>
                             <i class="fas fa-chevron-right text-gray-400"></i>
                         </div>
                     </div>
@@ -1502,7 +1701,7 @@
                     <!-- Step 1: Players -->
                     <div class="setup-section active" data-step="1">
                         <h3 class="text-center mb-lg">Add Players</h3>
-                        <p class="text-center text-gray-400 mb-lg">Add at least 2 players to start the game</p>
+                        <p class="text-center text-gray-400 mb-lg">Add at least 1 player to start the game</p>
                         
                         <div class="players-list" id="playersList">
                             <!-- Players will be added here -->
@@ -1740,7 +1939,7 @@
                     <button class="btn btn-outline" id="hintBtn">
                         <i class="fas fa-lightbulb"></i> Hint (2 left)
                     </button>
-                    <button class="btn btn-primary" id="nextQuestionBtn" disabled>
+                    <button class="btn btn-primary" id="nextQuestionBtn">
                         Next Question <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
@@ -1966,17 +2165,28 @@
         </div>
     </div>
 
-    <!-- Avatar Selection Modal -->
+    <!-- Profile Picture Modal -->
     <div class="modal-overlay" id="avatarModal">
         <div class="modal">
             <div class="modal-header">
                 <button class="modal-close" onclick="closeModal('avatarModal')">&times;</button>
-                <h2 class="modal-title">Choose Avatar</h2>
-                <p class="modal-subtitle">Select your profile picture</p>
+                <h2 class="modal-title">Choose Profile Picture</h2>
+                <p class="modal-subtitle">Select from emojis or upload your own</p>
             </div>
             <div class="modal-body">
-                <div class="grid grid-cols-4 gap-4" id="avatarGrid">
-                    <!-- Avatars will be populated -->
+                <div class="form-group">
+                    <label class="form-label">Upload Photo</label>
+                    <input type="file" class="form-input" id="avatarUpload" accept="image/*" style="padding: 10px;">
+                </div>
+                <div class="text-center mb-lg">
+                    <img id="avatarPreview" class="upload-preview hidden" alt="Avatar preview">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Or choose an emoji:</label>
+                    <div class="grid grid-cols-4 gap-4" id="avatarGrid">
+                        <!-- Emojis will be populated -->
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1984,7 +2194,7 @@
                     Cancel
                 </button>
                 <button class="btn btn-primary" id="saveAvatarBtn">
-                    Save Avatar
+                    Save Picture
                 </button>
             </div>
         </div>
@@ -1999,7 +2209,7 @@
                 <p class="modal-subtitle">Choose your preferred accent color</p>
             </div>
             <div class="modal-body">
-                <div class="grid grid-cols-3 gap-4" id="themeColors">
+                <div class="theme-grid" id="themeColors">
                     <!-- Theme colors will be populated -->
                 </div>
             </div>
@@ -2007,7 +2217,7 @@
                 <button class="btn btn-outline" onclick="closeModal('themeModal')">
                     Cancel
                 </button>
-                <button class="btn btn-primary" onclick="closeModal('themeModal')">
+                <button class="btn btn-primary" id="saveThemeBtn">
                     Save Theme
                 </button>
             </div>
@@ -2117,11 +2327,216 @@
     </div>
 
     <script>
+        // ===== SUPABASE CONFIGURATION =====
+        // Replace these with your actual Supabase credentials
+        const SUPABASE_CONFIG = {
+            URL: 'https://your-project.supabase.co',
+            ANON_KEY: 'your-anon-key'
+        };
+
+        // Initialize Supabase client (will be set up when Supabase is configured)
+        let supabaseClient = null;
+
+        // ===== REAL-TIME WEBSOCKET COMMUNICATION =====
+        class RealTimeGameService {
+            constructor() {
+                this.roomChannel = null;
+                this.gameChannel = null;
+                this.roomCode = null;
+                this.listeners = {};
+            }
+            
+            // 1. Real-Time Communication using Supabase
+            async connectToRoom(roomCode, playerName, isHost = false) {
+                this.roomCode = roomCode;
+                
+                // 5. Security: Validate room exists
+                const { data: room, error } = await supabaseClient
+                    .from('game_rooms')
+                    .select('*')
+                    .eq('room_code', roomCode)
+                    .single();
+                    
+                if (error && !isHost) {
+                    throw new Error('Room not found');
+                }
+                
+                if (isHost) {
+                    // Create room if hosting
+                    const { data: newRoom, error: createError } = await supabaseClient
+                        .from('game_rooms')
+                        .insert([
+                            {
+                                room_code: roomCode,
+                                host_id: playerName,
+                                max_players: 8,
+                                game_state: 'waiting',
+                                created_at: new Date().toISOString()
+                            }
+                        ])
+                        .select()
+                        .single();
+                        
+                    if (createError) throw createError;
+                }
+                
+                // Join player to room
+                const { error: joinError } = await supabaseClient
+                    .from('room_players')
+                    .insert({
+                        room_code: roomCode,
+                        player_name: playerName,
+                        is_host: isHost,
+                        joined_at: new Date().toISOString()
+                    });
+                    
+                if (joinError) throw joinError;
+                
+                // Subscribe to room updates
+                this.setupRoomChannel(roomCode);
+                this.setupGameChannel(roomCode);
+                
+                return true;
+            }
+            
+            setupRoomChannel(roomCode) {
+                this.roomChannel = supabaseClient
+                    .channel(`room:${roomCode}`)
+                    .on(
+                        'postgres_changes',
+                        {
+                            event: '*',
+                            schema: 'public',
+                            table: 'room_players',
+                            filter: `room_code=eq.${roomCode}`
+                        },
+                        (payload) => this.handleRoomUpdate(payload)
+                    )
+                    .subscribe();
+            }
+            
+            setupGameChannel(roomCode) {
+                this.gameChannel = supabaseClient
+                    .channel(`game:${roomCode}`)
+                    .on(
+                        'postgres_changes',
+                        {
+                            event: '*',
+                            schema: 'public',
+                            table: 'game_states',
+                            filter: `room_code=eq.${roomCode}`
+                        },
+                        (payload) => this.handleGameUpdate(payload)
+                    )
+                    .subscribe();
+            }
+            
+            // 2. Room Code Validation System
+            async validateRoomCode(roomCode) {
+                // Check if room exists and is joinable
+                const { data, error } = await supabaseClient
+                    .from('game_rooms')
+                    .select('*, room_players(count)')
+                    .eq('room_code', roomCode)
+                    .eq('game_state', 'waiting')
+                    .single();
+                    
+                if (error) return { valid: false, error: 'Room not found' };
+                
+                const playerCount = data.room_players[0]?.count || 0;
+                if (playerCount >= data.max_players) {
+                    return { valid: false, error: 'Room is full' };
+                }
+                
+                return { 
+                    valid: true, 
+                    data: { 
+                        roomName: data.room_name,
+                        mode: data.game_mode,
+                        players: playerCount,
+                        maxPlayers: data.max_players
+                    }
+                };
+            }
+            
+            // 3. Game State Synchronization
+            async updateGameState(stateUpdate) {
+                const { error } = await supabaseClient
+                    .from('game_states')
+                    .upsert({
+                        room_code: this.roomCode,
+                        current_question: stateUpdate.currentQuestion,
+                        question_index: stateUpdate.questionIndex,
+                        scores: stateUpdate.scores,
+                        time_remaining: stateUpdate.timeRemaining,
+                        last_updated: new Date().toISOString()
+                    });
+                    
+                if (error) console.error('State sync error:', error);
+            }
+            
+            async getGameState() {
+                const { data, error } = await supabaseClient
+                    .from('game_states')
+                    .select('*')
+                    .eq('room_code', this.roomCode)
+                    .order('last_updated', { ascending: false })
+                    .limit(1)
+                    .single();
+                    
+                return { data, error };
+            }
+            
+            // 4. Client-Side Interface Handlers
+            handleRoomUpdate(payload) {
+                switch(payload.eventType) {
+                    case 'INSERT':
+                        this.trigger('player_joined', payload.new);
+                        break;
+                    case 'DELETE':
+                        this.trigger('player_left', payload.old);
+                        break;
+                }
+            }
+            
+            handleGameUpdate(payload) {
+                switch(payload.eventType) {
+                    case 'INSERT':
+                    case 'UPDATE':
+                        this.trigger('game_state_updated', payload.new);
+                        break;
+                }
+            }
+            
+            // Event system
+            on(event, callback) {
+                if (!this.listeners[event]) this.listeners[event] = [];
+                this.listeners[event].push(callback);
+            }
+            
+            trigger(event, data) {
+                if (this.listeners[event]) {
+                    this.listeners[event].forEach(cb => cb(data));
+                }
+            }
+            
+            // Cleanup
+            disconnect() {
+                if (this.roomChannel) {
+                    supabaseClient.removeChannel(this.roomChannel);
+                }
+                if (this.gameChannel) {
+                    supabaseClient.removeChannel(this.gameChannel);
+                }
+            }
+        }
+
         // ===== GAME STATE =====
         const gameState = {
             // User Profile
             playerName: 'Player',
-            playerAvatar: 'P',
+            playerAvatar: '😎',
+            playerProfilePic: null,
             
             // Player Stats
             totalGames: 0,
@@ -2134,6 +2549,7 @@
             // Navigation
             currentScreen: 'home',
             screenHistory: ['home'],
+            previousGameState: null,
             
             // Players
             players: [],
@@ -2166,7 +2582,7 @@
                         'Game continues until all questions answered',
                         'Highest score wins'
                     ],
-                    minPlayers: 2,
+                    minPlayers: 1,
                     maxPlayers: 8,
                     timePerQuestion: 30,
                     lives: 3
@@ -2194,7 +2610,7 @@
                         'Speed matters!',
                         'Highest score wins'
                     ],
-                    minPlayers: 2,
+                    minPlayers: 1,
                     maxPlayers: 6,
                     timePerQuestion: 15,
                     lives: 3
@@ -2252,7 +2668,7 @@
                         'Survive to win',
                         'Last player standing wins all'
                     ],
-                    minPlayers: 3,
+                    minPlayers: 2,
                     maxPlayers: 8,
                     timePerQuestion: 20,
                     lives: 1
@@ -2394,13 +2810,20 @@
             currentQuestion: null,
             currentAnswers: [],
             selectedAnswer: null,
+            hintCount: 2,
+            
+            // Buzzer Mode State
+            isBuzzerActive: false,
+            hasBuzzed: false,
+            buzzerTimeout: null,
             
             // Online State
             roomCode: null,
             roomName: null,
             isHost: false,
             onlinePlayers: [],
-            socket: null,
+            onlineRooms: [],
+            realTimeService: null,
             
             // Achievements
             achievements: [
@@ -2427,7 +2850,8 @@
                 soundEffects: true,
                 music: true,
                 notifications: true,
-                achievementNotifications: true
+                achievementNotifications: true,
+                themeColor: '#FFDE21'
             }
         };
 
@@ -2456,6 +2880,9 @@
             // Player HUD
             playerName: document.getElementById('playerName'),
             playerScoreHud: document.getElementById('playerScoreHud'),
+            profilePicHud: document.getElementById('profilePicHud'),
+            profilePicHudImg: document.getElementById('profilePicHudImg'),
+            profilePicHudEmoji: document.getElementById('profilePicHudEmoji'),
             
             // Bottom Navigation
             navItems: document.querySelectorAll('.nav-item'),
@@ -2552,7 +2979,7 @@
             leaderboard: document.getElementById('leaderboard'),
             
             // Profile Screen
-            profileAvatar: document.getElementById('profileAvatar'),
+            profilePic: document.getElementById('profilePic'),
             profileName: document.getElementById('profileName'),
             
             // Categories Screen
@@ -2600,10 +3027,13 @@
             
             avatarModal: document.getElementById('avatarModal'),
             avatarGrid: document.getElementById('avatarGrid'),
+            avatarUpload: document.getElementById('avatarUpload'),
+            avatarPreview: document.getElementById('avatarPreview'),
             saveAvatarBtn: document.getElementById('saveAvatarBtn'),
             
             themeModal: document.getElementById('themeModal'),
             themeColors: document.getElementById('themeColors'),
+            saveThemeBtn: document.getElementById('saveThemeBtn'),
             
             soundModal: document.getElementById('soundModal'),
             soundEffectsToggle: document.getElementById('soundEffectsToggle'),
@@ -2623,16 +3053,95 @@
             darkModeToggle: document.getElementById('darkModeToggle')
         };
 
+        // ===== TOUCH/HANDLER UTILITIES =====
+        class TouchHandler {
+            constructor() {
+                this.startX = 0;
+                this.startY = 0;
+                this.threshold = 50;
+                this.currentScreen = null;
+            }
+            
+            init() {
+                document.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+                document.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+            }
+            
+            handleTouchStart(e) {
+                this.startX = e.touches[0].clientX;
+                this.startY = e.touches[0].clientY;
+                this.currentScreen = gameState.currentScreen;
+            }
+            
+            handleTouchEnd(e) {
+                if (!this.startX || !this.startY) return;
+                
+                const endX = e.changedTouches[0].clientX;
+                const endY = e.changedTouches[0].clientY;
+                
+                const diffX = this.startX - endX;
+                const diffY = this.startY - endY;
+                
+                // Only consider horizontal swipes
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > this.threshold) {
+                    // Left swipe = go forward/next
+                    if (diffX > 0) {
+                        this.handleSwipe('left');
+                    } 
+                    // Right swipe = go back/previous
+                    else {
+                        this.handleSwipe('right');
+                    }
+                }
+                
+                this.startX = 0;
+                this.startY = 0;
+            }
+            
+            handleSwipe(direction) {
+                const screenOrder = ['home', 'modes', 'categories', 'stats', 'profile'];
+                const currentIndex = screenOrder.indexOf(this.currentScreen);
+                
+                if (direction === 'left' && currentIndex < screenOrder.length - 1) {
+                    // Swipe left - go to next screen
+                    updateNavigation(screenOrder[currentIndex + 1]);
+                } else if (direction === 'right' && currentIndex > 0) {
+                    // Swipe right - go to previous screen
+                    updateNavigation(screenOrder[currentIndex - 1]);
+                }
+            }
+        }
+
         // ===== INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp();
             setupEventListeners();
             simulateLoading();
+            
+            // Initialize touch handler for mobile swiping
+            const touchHandler = new TouchHandler();
+            touchHandler.init();
+            
+            // Save state before unload
+            window.addEventListener('beforeunload', saveGameState);
         });
 
         async function initializeApp() {
             // Load saved data from localStorage
             loadSavedData();
+            
+            // Initialize Supabase client if credentials are provided
+            try {
+                if (SUPABASE_CONFIG.URL && SUPABASE_CONFIG.URL !== 'https://your-project.supabase.co' &&
+                    SUPABASE_CONFIG.ANON_KEY && SUPABASE_CONFIG.ANON_KEY !== 'your-anon-key') {
+                    
+                    supabaseClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
+                    gameState.realTimeService = new RealTimeGameService();
+                    console.log('Supabase client initialized');
+                }
+            } catch (error) {
+                console.warn('Supabase not configured or failed to initialize:', error);
+            }
             
             // Update UI
             updateHUD();
@@ -2650,52 +3159,112 @@
             // Initialize settings
             initializeSettings();
             
-            // Add sample players for demo
-            addPlayer('Player 1');
-            addPlayer('Player 2');
+            // Add current player for demo
+            addPlayer(gameState.playerName);
+            
+            // Apply theme color
+            applyThemeColor(gameState.settings.themeColor);
+            
+            // Check URL hash for screen navigation
+            checkUrlHash();
+        }
+
+        function checkUrlHash() {
+            const hash = window.location.hash.substring(1);
+            if (hash && elements.screens[hash]) {
+                updateNavigation(hash);
+            }
         }
 
         function loadSavedData() {
-            const savedName = localStorage.getItem('playerName');
-            const savedAvatar = localStorage.getItem('playerAvatar');
-            
-            if (savedName) {
-                gameState.playerName = savedName;
-                gameState.playerAvatar = savedAvatar || 'P';
-            }
-            
-            // Load stats
-            gameState.totalGames = parseInt(localStorage.getItem('totalGames')) || 0;
-            gameState.totalCorrectAnswers = parseInt(localStorage.getItem('totalCorrectAnswers')) || 0;
-            gameState.totalQuestions = parseInt(localStorage.getItem('totalQuestions')) || 0;
-            gameState.highestStreak = parseInt(localStorage.getItem('highestStreak')) || 0;
-            gameState.winStreak = parseInt(localStorage.getItem('winStreak')) || 0;
-            gameState.totalScore = parseInt(localStorage.getItem('totalScore')) || 0;
-            
-            // Load achievements
-            const savedAchievements = localStorage.getItem('achievements');
-            if (savedAchievements) {
-                gameState.achievements = JSON.parse(savedAchievements);
-            }
-            
-            // Load settings
-            const savedSettings = localStorage.getItem('settings');
-            if (savedSettings) {
-                gameState.settings = JSON.parse(savedSettings);
+            // Try to load previous game state
+            const savedState = localStorage.getItem('triviaGameState');
+            if (savedState) {
+                try {
+                    const parsed = JSON.parse(savedState);
+                    gameState.playerName = parsed.playerName || 'Player';
+                    gameState.playerAvatar = parsed.playerAvatar || '😎';
+                    gameState.playerProfilePic = parsed.playerProfilePic || null;
+                    gameState.totalGames = parsed.totalGames || 0;
+                    gameState.totalCorrectAnswers = parsed.totalCorrectAnswers || 0;
+                    gameState.totalQuestions = parsed.totalQuestions || 0;
+                    gameState.highestStreak = parsed.highestStreak || 0;
+                    gameState.winStreak = parsed.winStreak || 0;
+                    gameState.totalScore = parsed.totalScore || 0;
+                    
+                    // Load achievements
+                    if (parsed.achievements) {
+                        gameState.achievements = parsed.achievements;
+                    }
+                    
+                    // Load settings
+                    if (parsed.settings) {
+                        gameState.settings = parsed.settings;
+                    }
+                    
+                    // Load previous game state if exists
+                    if (parsed.previousGameState && confirm('Restore previous game?')) {
+                        gameState.previousGameState = parsed.previousGameState;
+                    }
+                    
+                } catch (e) {
+                    console.error('Error loading saved state:', e);
+                }
             }
         }
 
-        function saveData() {
-            localStorage.setItem('playerName', gameState.playerName);
-            localStorage.setItem('playerAvatar', gameState.playerAvatar);
-            localStorage.setItem('totalGames', gameState.totalGames);
-            localStorage.setItem('totalCorrectAnswers', gameState.totalCorrectAnswers);
-            localStorage.setItem('totalQuestions', gameState.totalQuestions);
-            localStorage.setItem('highestStreak', gameState.highestStreak);
-            localStorage.setItem('winStreak', gameState.winStreak);
-            localStorage.setItem('totalScore', gameState.totalScore);
-            localStorage.setItem('achievements', JSON.stringify(gameState.achievements));
-            localStorage.setItem('settings', JSON.stringify(gameState.settings));
+        function saveGameState() {
+            const stateToSave = {
+                playerName: gameState.playerName,
+                playerAvatar: gameState.playerAvatar,
+                playerProfilePic: gameState.playerProfilePic,
+                totalGames: gameState.totalGames,
+                totalCorrectAnswers: gameState.totalCorrectAnswers,
+                totalQuestions: gameState.totalQuestions,
+                highestStreak: gameState.highestStreak,
+                winStreak: gameState.winStreak,
+                totalScore: gameState.totalScore,
+                achievements: gameState.achievements,
+                settings: gameState.settings,
+                previousGameState: gameState.isGameActive ? {
+                    currentScreen: gameState.currentScreen,
+                    isGameActive: gameState.isGameActive,
+                    currentGameMode: gameState.currentGameMode,
+                    currentQuestionIndex: gameState.currentQuestionIndex,
+                    score: gameState.score,
+                    lives: gameState.lives,
+                    players: gameState.players,
+                    playerScores: gameState.playerScores
+                } : null
+            };
+            
+            localStorage.setItem('triviaGameState', JSON.stringify(stateToSave));
+        }
+
+        function restorePreviousGame() {
+            if (!gameState.previousGameState) return;
+            
+            const state = gameState.previousGameState;
+            gameState.currentScreen = state.currentScreen;
+            gameState.isGameActive = state.isGameActive;
+            gameState.currentGameMode = state.currentGameMode;
+            gameState.currentQuestionIndex = state.currentQuestionIndex;
+            gameState.score = state.score;
+            gameState.lives = state.lives;
+            gameState.players = state.players || [];
+            gameState.playerScores = state.playerScores || {};
+            
+            // Clear the saved state
+            gameState.previousGameState = null;
+            localStorage.removeItem('triviaGameState');
+            
+            // Update navigation
+            updateNavigation(gameState.currentScreen);
+            
+            // If game was active, reload the question
+            if (gameState.isGameActive) {
+                loadQuestion();
+            }
         }
 
         function initializeSettings() {
@@ -2707,14 +3276,29 @@
             elements.achievementNotificationToggle.checked = gameState.settings.achievementNotifications;
             
             // Apply dark mode
-            if (!gameState.settings.darkMode) {
-                document.documentElement.style.setProperty('--black', '#FFFFFF');
-                document.documentElement.style.setProperty('--white', '#000000');
-                document.documentElement.style.setProperty('--gray-900', '#F0F0F0');
-                document.documentElement.style.setProperty('--gray-800', '#E0E0E0');
-                document.documentElement.style.setProperty('--gray-700', '#D0D0D0');
-                document.documentElement.style.setProperty('--gray-400', '#606060');
+            applyDarkMode(gameState.settings.darkMode);
+        }
+
+        function applyDarkMode(isDark) {
+            if (isDark) {
+                document.documentElement.classList.remove('light-mode');
+                document.body.classList.remove('light-mode');
+            } else {
+                document.documentElement.classList.add('light-mode');
+                document.body.classList.add('light-mode');
             }
+        }
+
+        function applyThemeColor(color) {
+            // Remove yellow shadow from light mode
+            const root = document.documentElement;
+            root.style.setProperty('--yellow', color);
+            root.style.setProperty('--yellow-dark', darkenColor(color, 20));
+            
+            // Update any existing yellow elements
+            document.querySelectorAll('.text-yellow, .nav-item.active').forEach(el => {
+                el.style.color = color;
+            });
         }
 
         function simulateLoading() {
@@ -2744,6 +3328,14 @@
                         elements.loadingScreen.style.opacity = '0';
                         setTimeout(() => {
                             elements.loadingScreen.style.display = 'none';
+                            // Check if we should restore previous game
+                            if (localStorage.getItem('triviaGameState')) {
+                                setTimeout(() => {
+                                    if (confirm('Would you like to continue your previous game?')) {
+                                        restorePreviousGame();
+                                    }
+                                }, 500);
+                            }
                         }, 500);
                     }, 500);
                 }
@@ -2753,6 +3345,38 @@
         function updateHUD() {
             elements.playerName.textContent = gameState.playerName;
             elements.playerScoreHud.textContent = gameState.totalScore.toLocaleString();
+            
+            // Update profile picture in HUD
+            if (gameState.playerProfilePic) {
+                elements.profilePicHudImg.src = gameState.playerProfilePic;
+                elements.profilePicHudImg.style.display = 'block';
+                elements.profilePicHudEmoji.style.display = 'none';
+            } else {
+                elements.profilePicHudEmoji.textContent = gameState.playerAvatar;
+                elements.profilePicHudImg.style.display = 'none';
+                elements.profilePicHudEmoji.style.display = 'block';
+            }
+        }
+
+        function updateProfileDisplay() {
+            elements.profileName.textContent = gameState.playerName;
+            
+            // Update profile picture display
+            if (gameState.playerProfilePic) {
+                elements.profilePic.innerHTML = `
+                    <img src="${gameState.playerProfilePic}" alt="${gameState.playerName}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="profile-upload">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                `;
+            } else {
+                elements.profilePic.innerHTML = `
+                    ${gameState.playerAvatar}
+                    <div class="profile-upload">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                `;
+            }
         }
 
         function populateGameData() {
@@ -2895,8 +3519,22 @@
             return `${r}, ${g}, ${b}`;
         }
 
+        function darkenColor(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = Math.max(0, (num >> 16) - amt);
+            const G = Math.max(0, (num >> 8 & 0x00FF) - amt);
+            const B = Math.max(0, (num & 0x0000FF) - amt);
+            return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+        }
+
         // ===== NAVIGATION =====
         function updateNavigation(screenId) {
+            // Save current state before navigation
+            if (gameState.isGameActive) {
+                saveGameState();
+            }
+            
             // Update screen history
             if (screenId !== gameState.currentScreen) {
                 gameState.screenHistory.push(screenId);
@@ -2930,9 +3568,25 @@
                 populateAchievements();
                 populateLeaderboard();
             } else if (screenId === 'profile') {
-                updateProfile();
+                updateProfileDisplay();
             } else if (screenId === 'categories') {
                 populateCategoriesScreen();
+            }
+            
+            // Reset game state if leaving game screen
+            if (screenId !== 'game' && gameState.isGameActive) {
+                resetGameState();
+            }
+        }
+
+        function resetGameState() {
+            if (gameState.isGameActive) {
+                clearInterval(gameState.timerInterval);
+                clearTimeout(gameState.buzzerTimeout);
+                gameState.isGameActive = false;
+                gameState.isBuzzerActive = false;
+                gameState.hasBuzzed = false;
+                elements.currentPlayerIndicator.classList.add('hidden');
             }
         }
 
@@ -2991,9 +3645,34 @@
             `).join('');
         }
 
-        function updateProfile() {
-            elements.profileName.textContent = gameState.playerName;
-            elements.profileAvatar.textContent = gameState.playerAvatar;
+        function updateOnlinePlayersList() {
+            const list = elements.onlinePlayersList;
+            
+            if (gameState.onlinePlayers.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-400 py-8">No players connected</div>';
+                return;
+            }
+            
+            list.innerHTML = gameState.onlinePlayers.map(player => `
+                <div class="player-item">
+                    <div class="flex items-center gap-md">
+                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <div class="player-name">${player.name}</div>
+                            <div class="text-xs text-gray-400">${player.isHost ? 'Host' : 'Player'}</div>
+                        </div>
+                    </div>
+                    ${player.isHost ? '<span class="text-yellow"><i class="fas fa-crown"></i></span>' : ''}
+                </div>
+            `).join('');
+            
+            // Enable start button for host if enough players
+            if (gameState.isHost) {
+                const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
+                elements.startOnlineGameBtn.disabled = gameState.onlinePlayers.length < mode.minPlayers;
+            }
         }
 
         // ===== GAME SETUP =====
@@ -3135,6 +3814,36 @@
                             { text: "8", correct: false }
                         ],
                         difficulty: "easy"
+                    },
+                    {
+                        question: "What is the largest planet in our solar system?",
+                        answers: [
+                            { text: "Earth", correct: false },
+                            { text: "Jupiter", correct: true },
+                            { text: "Saturn", correct: false },
+                            { text: "Mars", correct: false }
+                        ],
+                        difficulty: "easy"
+                    },
+                    {
+                        question: "Who wrote 'Romeo and Juliet'?",
+                        answers: [
+                            { text: "Charles Dickens", correct: false },
+                            { text: "William Shakespeare", correct: true },
+                            { text: "Jane Austen", correct: false },
+                            { text: "Mark Twain", correct: false }
+                        ],
+                        difficulty: "medium"
+                    },
+                    {
+                        question: "What is the chemical symbol for gold?",
+                        answers: [
+                            { text: "Go", correct: false },
+                            { text: "Gd", correct: false },
+                            { text: "Au", correct: true },
+                            { text: "Ag", correct: false }
+                        ],
+                        difficulty: "medium"
                     }
                 ],
                 science: [
@@ -3145,6 +3854,16 @@
                             { text: "CO2", correct: false },
                             { text: "O2", correct: false },
                             { text: "NaCl", correct: false }
+                        ],
+                        difficulty: "easy"
+                    },
+                    {
+                        question: "What planet is known as the Red Planet?",
+                        answers: [
+                            { text: "Venus", correct: false },
+                            { text: "Mars", correct: true },
+                            { text: "Jupiter", correct: false },
+                            { text: "Saturn", correct: false }
                         ],
                         difficulty: "easy"
                     }
@@ -3174,6 +3893,7 @@
             gameState.currentQuestionIndex = 0;
             gameState.playerTurn = 0;
             gameState.currentPlayerIndex = 0;
+            gameState.hintCount = 2;
             
             // Initialize player scores
             gameState.players.forEach(player => {
@@ -3194,6 +3914,10 @@
             gameState.selectedCategory = elements.categorySelect.value;
             gameState.selectedDifficulty = elements.difficultySelect.value;
             
+            // Reset buzzer state
+            gameState.isBuzzerActive = false;
+            gameState.hasBuzzed = false;
+            
             // Update UI
             elements.modeName.textContent = mode.name;
             elements.currentGameMode.innerHTML = `<i class="fas fa-${mode.icon}"></i> <span>${mode.name}</span>`;
@@ -3208,10 +3932,16 @@
             if (gameState.currentGameMode === 'buzzer') {
                 elements.buzzerContainer.classList.remove('hidden');
                 elements.gameControls.classList.add('hidden');
+                elements.nextQuestionBtn.disabled = false; // Enable next question button for buzzer mode
             } else {
                 elements.buzzerContainer.classList.add('hidden');
                 elements.gameControls.classList.remove('hidden');
+                elements.nextQuestionBtn.disabled = true; // Disabled until answer is selected
             }
+            
+            // Update hint button
+            elements.hintBtn.innerHTML = `<i class="fas fa-lightbulb"></i> Hint (${gameState.hintCount} left)`;
+            elements.hintBtn.disabled = gameState.hintCount === 0;
             
             // Hide current player indicator initially
             elements.currentPlayerIndicator.classList.add('hidden');
@@ -3296,20 +4026,15 @@
                 });
                 
                 // Reset controls
-                elements.nextQuestionBtn.disabled = true;
-                elements.hintBtn.disabled = false;
-                elements.hintBtn.innerHTML = '<i class="fas fa-lightbulb"></i> Hint (2 left)';
+                if (gameState.currentGameMode !== 'buzzer') {
+                    elements.nextQuestionBtn.disabled = true;
+                }
+                elements.hintBtn.disabled = gameState.hintCount === 0;
+                elements.hintBtn.innerHTML = `<i class="fas fa-lightbulb"></i> Hint (${gameState.hintCount} left)`;
                 
                 // Reset buzzer if in buzzer mode
                 if (gameState.currentGameMode === 'buzzer') {
-                    elements.buzzerButton.className = 'buzzer-button buzzer-ready';
-                    elements.buzzerButton.disabled = false;
-                    elements.buzzerInstruction.textContent = 'Wait for the question to be read, then buzz in!';
-                    elements.playerBuzzed.textContent = '';
-                    elements.answersContainer.style.opacity = '0.5';
-                    document.querySelectorAll('.answer-option').forEach(opt => {
-                        opt.style.pointerEvents = 'none';
-                    });
+                    resetBuzzerState();
                 }
                 
                 // Start timer with mode-specific settings
@@ -3326,8 +4051,38 @@
             }
         }
 
+        function resetBuzzerState() {
+            clearTimeout(gameState.buzzerTimeout);
+            gameState.isBuzzerActive = true;
+            gameState.hasBuzzed = false;
+            
+            elements.buzzerButton.className = 'buzzer-button buzzer-ready';
+            elements.buzzerButton.disabled = false;
+            elements.buzzerInstruction.textContent = 'Wait for the question to be read, then buzz in!';
+            elements.playerBuzzed.textContent = '';
+            elements.answersContainer.style.opacity = '0.5';
+            
+            document.querySelectorAll('.answer-option').forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+            
+            // Auto-enable answers after 3 seconds for buzzer mode
+            gameState.buzzerTimeout = setTimeout(() => {
+                if (gameState.isBuzzerActive && !gameState.hasBuzzed) {
+                    elements.buzzerInstruction.textContent = 'You can now buzz in!';
+                    elements.buzzerButton.disabled = false;
+                }
+            }, 3000);
+        }
+
         function selectAnswer(isCorrect, element, difficulty) {
             if (!gameState.isGameActive) return;
+            
+            // For buzzer mode, check if player has buzzed in
+            if (gameState.currentGameMode === 'buzzer' && !gameState.hasBuzzed) {
+                showFeedback('You must buzz in first!', 'incorrect');
+                return;
+            }
             
             // Disable all answers
             document.querySelectorAll('.answer-option').forEach(opt => {
@@ -3373,6 +4128,8 @@
                 case 'buzzer':
                     // Buzzer mode points
                     pointsEarned += 50; // Bonus for buzzing in first
+                    // Reset buzzer state for next question
+                    gameState.hasBuzzed = false;
                     break;
                     
                 case 'solo':
@@ -3425,8 +4182,9 @@
             
             // Stop timer
             clearInterval(gameState.timerInterval);
+            clearTimeout(gameState.buzzerTimeout);
             
-            // Enable next button
+            // Enable next button for all modes
             elements.nextQuestionBtn.disabled = false;
             
             // Check if game over
@@ -3445,6 +4203,40 @@
             setTimeout(() => {
                 feedback.remove();
             }, 1500);
+        }
+
+        function showHint() {
+            if (gameState.hintCount <= 0 || !gameState.currentQuestion) return;
+            
+            gameState.hintCount--;
+            elements.hintBtn.innerHTML = `<i class="fas fa-lightbulb"></i> Hint (${gameState.hintCount} left)`;
+            elements.hintBtn.disabled = gameState.hintCount === 0;
+            
+            // Create hint display
+            const hintDiv = document.createElement('div');
+            hintDiv.className = 'hint-display';
+            
+            // Get the correct answer
+            const correctAnswer = gameState.currentQuestion.answers.find(a => a.correct);
+            
+            if (correctAnswer) {
+                const answerLength = correctAnswer.text.length;
+                const hint = 'The correct answer has ' + answerLength + ' characters';
+                hintDiv.textContent = hint;
+                
+                document.body.appendChild(hintDiv);
+                
+                // Remove hint after 5 seconds
+                setTimeout(() => {
+                    hintDiv.style.opacity = '0';
+                    hintDiv.style.transform = 'translate(-50%, -50%) scale(0.9)';
+                    setTimeout(() => {
+                        if (hintDiv.parentNode) {
+                            hintDiv.parentNode.removeChild(hintDiv);
+                        }
+                    }, 300);
+                }, 5000);
+            }
         }
 
         function showNotification(message, type = 'info') {
@@ -3569,6 +4361,7 @@
         function endGame() {
             gameState.isGameActive = false;
             clearInterval(gameState.timerInterval);
+            clearTimeout(gameState.buzzerTimeout);
             
             // Calculate final stats
             const timePlayed = Math.floor((Date.now() - gameState.gameStartTime) / 1000);
@@ -3610,7 +4403,7 @@
             checkAchievements();
             
             // Save updated data
-            saveData();
+            saveGameState();
             
             // Update modal
             elements.finalScore.textContent = gameState.score.toLocaleString();
@@ -3626,6 +4419,26 @@
             
             // Show modal
             openModal('gameCompleteModal');
+        }
+
+        // ===== BUZZER MODE FUNCTIONS =====
+        function buzzIn() {
+            if (gameState.currentGameMode !== 'buzzer' || !gameState.isBuzzerActive) return;
+            
+            // Disable buzzer for this player
+            gameState.hasBuzzed = true;
+            gameState.isBuzzerActive = false;
+            
+            elements.buzzerButton.className = 'buzzer-button buzzer-buzzed';
+            elements.buzzerButton.disabled = true;
+            elements.buzzerInstruction.textContent = 'You buzzed in! Answer now:';
+            elements.playerBuzzed.textContent = gameState.playerName;
+            
+            // Enable answer selection
+            elements.answersContainer.style.opacity = '1';
+            document.querySelectorAll('.answer-option').forEach(opt => {
+                opt.style.pointerEvents = 'auto';
+            });
         }
 
         // ===== ACHIEVEMENTS =====
@@ -3667,7 +4480,7 @@
                 if (gameState.settings.achievementNotifications) {
                     showNotification(`You unlocked: ${achievement.name}!`, 'achievement');
                 }
-                saveData();
+                saveGameState();
                 populateAchievements();
             }
         }
@@ -3699,12 +4512,30 @@
         }
 
         function populateAvatarGrid() {
-            const avatars = ['😎', '🤓', '😊', '😄', '😜', '🤩', '🧐', '🤠', '😇', '🥳', '🤖', '👾'];
-            elements.avatarGrid.innerHTML = avatars.map(avatar => `
-                <div class="profile-avatar text-3xl avatar-option" data-avatar="${avatar}" onclick="selectAvatar('${avatar}')">
-                    ${avatar}
+            const emojis = ['😎', '🤓', '😊', '😄', '😜', '🤩', '🧐', '🤠', '😇', '🥳', '🤖', '👾'];
+            elements.avatarGrid.innerHTML = emojis.map(emoji => `
+                <div class="profile-pic avatar-option text-3xl flex items-center justify-center" 
+                     data-avatar="${emoji}" 
+                     onclick="selectAvatar('${emoji}')"
+                     style="width: 60px; height: 60px; margin: 0 auto; cursor: pointer;">
+                    ${emoji}
                 </div>
             `).join('');
+            
+            // Set up file upload
+            elements.avatarUpload.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        elements.avatarPreview.src = event.target.result;
+                        elements.avatarPreview.classList.remove('hidden');
+                        // Store the uploaded image
+                        gameState.playerProfilePic = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
         }
 
         function populateThemeColors() {
@@ -3714,21 +4545,22 @@
                 { name: 'Red', value: '#FF7675' },
                 { name: 'Green', value: '#00B894' },
                 { name: 'Blue', value: '#3498DB' },
-                { name: 'Pink', value: '#FD79A8' }
+                { name: 'Pink', value: '#FD79A8' },
+                { name: 'Orange', value: '#FDCB6E' },
+                { name: 'Cyan', value: '#00CEC9' }
             ];
             
             elements.themeColors.innerHTML = colors.map(color => `
-                <div class="profile-avatar theme-color-option" data-color="${color.value}" 
-                     style="background: ${color.value}; color: white; cursor: pointer;"
-                     onclick="selectThemeColor('${color.value}')">
-                    ${color.name}
+                <div class="theme-option" data-color="${color.value}" onclick="selectThemeColor('${color.value}')">
+                    <div class="theme-color" style="background: ${color.value};"></div>
+                    <div class="theme-name">${color.name}</div>
                 </div>
             `).join('');
         }
 
         function selectAvatar(avatar) {
             gameState.playerAvatar = avatar;
-            elements.profileAvatar.textContent = avatar;
+            gameState.playerProfilePic = null; // Clear uploaded photo
             
             // Remove selection from all avatars
             document.querySelectorAll('.avatar-option').forEach(el => {
@@ -3737,125 +4569,200 @@
             
             // Add selection to chosen avatar
             event.target.style.border = '3px solid var(--yellow)';
+            
+            // Hide preview
+            elements.avatarPreview.classList.add('hidden');
         }
 
         function selectThemeColor(color) {
-            // Update CSS variable for yellow color
-            document.documentElement.style.setProperty('--yellow', color);
-            document.documentElement.style.setProperty('--yellow-dark', darkenColor(color, 20));
-            
             // Remove selection from all colors
-            document.querySelectorAll('.theme-color-option').forEach(el => {
-                el.style.border = 'none';
+            document.querySelectorAll('.theme-option').forEach(el => {
+                el.classList.remove('selected');
             });
             
             // Add selection to chosen color
-            event.target.style.border = '3px solid white';
-        }
-
-        function darkenColor(color, percent) {
-            const num = parseInt(color.replace('#', ''), 16);
-            const amt = Math.round(2.55 * percent);
-            const R = (num >> 16) - amt;
-            const G = (num >> 8 & 0x00FF) - amt;
-            const B = (num & 0x0000FF) - amt;
-            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
-                (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+            event.target.closest('.theme-option').classList.add('selected');
+            
+            // Save theme color
+            gameState.settings.themeColor = color;
+            applyThemeColor(color);
         }
 
         // ===== ONLINE MULTIPLAYER =====
-        function createRoom() {
+        async function createRealRoom() {
             const roomName = elements.roomName.value.trim() || `${gameState.playerName}'s Room`;
             const modeId = elements.onlineModeSelect.value;
             const questions = elements.onlineQuestionCount.value;
             const categoryId = elements.onlineCategorySelect.value;
             const maxPlayers = elements.maxPlayers.value;
             
-            // Generate room code
-            gameState.roomCode = generateRoomCode();
-            gameState.roomName = roomName;
-            gameState.currentGameMode = modeId;
-            gameState.totalQuestions = parseInt(questions);
-            gameState.selectedCategory = categoryId;
-            gameState.isHost = true;
-            gameState.isOnlineGame = true;
+            // Generate secure room code
+            gameState.roomCode = generateSecureRoomCode();
             
-            // Clear players and add host
-            gameState.players = [gameState.playerName];
-            gameState.onlinePlayers = [{ name: gameState.playerName, isHost: true }];
-            
-            // Update waiting room
-            elements.roomCodeDisplay.textContent = gameState.roomCode;
-            const mode = gameState.gameModes.find(m => m.id === modeId);
-            elements.roomMode.textContent = mode ? mode.name : 'Classic';
-            elements.roomQuestions.textContent = questions;
-            const category = gameState.categories.find(c => c.id === categoryId);
-            elements.roomCategory.textContent = category ? category.name : 'General Knowledge';
-            
-            // Update online players list
-            updateOnlinePlayersList();
-            
-            // Close modal and go to waiting room
-            closeModal('createRoomModal');
-            updateNavigation('waiting');
-            
-            // Show notification
-            showNotification('Room created! Share the code with friends to join.');
-            
-            // Simulate other players joining (for demo)
-            setTimeout(() => simulatePlayerJoin('Player 2'), 2000);
-            setTimeout(() => simulatePlayerJoin('Player 3'), 4000);
+            try {
+                // Connect to room as host
+                await gameState.realTimeService.connectToRoom(
+                    gameState.roomCode, 
+                    gameState.playerName, 
+                    true
+                );
+                
+                // Set up event listeners
+                gameState.realTimeService.on('player_joined', (player) => {
+                    gameState.onlinePlayers.push({
+                        name: player.player_name,
+                        isHost: player.is_host
+                    });
+                    updateOnlinePlayersList();
+                    showNotification(`${player.player_name} joined!`);
+                });
+                
+                gameState.realTimeService.on('player_left', (player) => {
+                    gameState.onlinePlayers = gameState.onlinePlayers.filter(
+                        p => p.name !== player.player_name
+                    );
+                    updateOnlinePlayersList();
+                    showNotification(`${player.player_name} left`);
+                });
+                
+                gameState.realTimeService.on('game_state_updated', (state) => {
+                    syncGameState(state);
+                });
+                
+                // Update room in database
+                await supabaseClient
+                    .from('game_rooms')
+                    .update({
+                        room_name: roomName,
+                        game_mode: modeId,
+                        max_players: parseInt(maxPlayers)
+                    })
+                    .eq('room_code', gameState.roomCode);
+                
+                // Set game settings
+                gameState.currentGameMode = modeId;
+                gameState.totalQuestions = parseInt(questions);
+                gameState.selectedCategory = categoryId;
+                gameState.isHost = true;
+                gameState.isOnlineGame = true;
+                
+                // Update UI
+                elements.roomCodeDisplay.textContent = gameState.roomCode;
+                updateNavigation('waiting');
+                closeModal('createRoomModal');
+                showNotification('Room created! Share the code.');
+                
+            } catch (error) {
+                console.error('Room creation failed:', error);
+                showNotification('Failed to create room', 'error');
+            }
         }
 
-        function joinRoom() {
+        async function joinRealRoom() {
             const roomCode = elements.joinRoomCode.value.trim().toUpperCase();
             
+            // Validate room code
             if (!roomCode || roomCode.length !== 6) {
-                alert('Please enter a valid 6-digit room code');
+                showNotification('Please enter a valid 6-digit code', 'error');
                 return;
             }
             
-            // For demo purposes, simulate joining
-            gameState.roomCode = roomCode;
-            gameState.roomName = `Room ${roomCode}`;
-            gameState.isHost = false;
-            gameState.isOnlineGame = true;
-            
-            // Add player to room
-            gameState.players = [gameState.playerName];
-            gameState.onlinePlayers = [
-                { name: 'Host Player', isHost: true },
-                { name: gameState.playerName, isHost: false }
-            ];
-            
-            // Set game settings (these would come from server in real implementation)
-            gameState.currentGameMode = 'classic';
-            gameState.totalQuestions = 10;
-            gameState.selectedCategory = 'general';
-            
-            // Update waiting room
-            elements.roomCodeDisplay.textContent = gameState.roomCode;
-            elements.roomMode.textContent = 'Classic';
-            elements.roomQuestions.textContent = '10';
-            elements.roomCategory.textContent = 'General Knowledge';
-            
-            // Update online players list
-            updateOnlinePlayersList();
-            
-            // Disable start button for non-host
-            elements.startOnlineGameBtn.disabled = true;
-            
-            // Close modal and go to waiting room
-            closeModal('joinRoomModal');
-            updateNavigation('waiting');
-            
-            // Show notification
-            showNotification('Joined room successfully!');
+            try {
+                // Connect to room as player
+                await gameState.realTimeService.connectToRoom(
+                    roomCode,
+                    gameState.playerName,
+                    false
+                );
+                
+                gameState.roomCode = roomCode;
+                gameState.isHost = false;
+                gameState.isOnlineGame = true;
+                
+                // Get existing players
+                const { data: players } = await supabaseClient
+                    .from('room_players')
+                    .select('player_name, is_host')
+                    .eq('room_code', roomCode);
+                    
+                gameState.onlinePlayers = players.map(p => ({
+                    name: p.player_name,
+                    isHost: p.is_host
+                }));
+                
+                // Get room settings
+                const { data: room } = await supabaseClient
+                    .from('game_rooms')
+                    .select('*')
+                    .eq('room_code', roomCode)
+                    .single();
+                    
+                gameState.currentGameMode = room.game_mode;
+                gameState.totalQuestions = 10; // Default or from room settings
+                
+                // Update UI
+                elements.roomCodeDisplay.textContent = roomCode;
+                updateOnlinePlayersList();
+                updateNavigation('waiting');
+                closeModal('joinRoomModal');
+                showNotification('Joined room successfully!');
+                
+            } catch (error) {
+                console.error('Join failed:', error);
+                showNotification('Failed to join room', 'error');
+            }
         }
 
-        function generateRoomCode() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        function syncGameState(state) {
+            if (!gameState.isOnlineGame) return;
+            
+            // Only update if we're not the host making changes
+            if (gameState.isHost) return;
+            
+            // Update local game state
+            gameState.currentQuestion = state.current_question;
+            gameState.currentQuestionIndex = state.question_index;
+            gameState.playerScores = state.scores || {};
+            
+            // Update UI
+            if (state.current_question) {
+                displayQuestion(state.current_question);
+            }
+            
+            updateScoresDisplay();
+        }
+
+        async function startOnlineGame() {
+            if (!gameState.isHost) return;
+            
+            // Fetch questions
+            const questions = await fetchQuestions(
+                gameState.selectedCategory,
+                'medium',
+                gameState.totalQuestions
+            );
+            
+            // Update game state in database
+            await gameState.realTimeService.updateGameState({
+                currentQuestion: questions[0],
+                questionIndex: 0,
+                scores: {},
+                timeRemaining: 30
+            });
+            
+            // Broadcast game start
+            await supabaseClient
+                .from('game_rooms')
+                .update({ game_state: 'playing' })
+                .eq('room_code', gameState.roomCode);
+            
+            // Start local game
+            startGame();
+        }
+
+        function generateSecureRoomCode() {
+            // Mix letters and numbers, excluding confusing characters
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let code = '';
             for (let i = 0; i < 6; i++) {
                 code += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -3863,60 +4770,19 @@
             return code;
         }
 
-        function updateOnlinePlayersList() {
-            const list = elements.onlinePlayersList;
-            
-            if (gameState.onlinePlayers.length === 0) {
-                list.innerHTML = '<div class="text-center text-gray-400 py-8">No players connected</div>';
-                return;
+        function cleanupOnlineGame() {
+            if (gameState.realTimeService) {
+                gameState.realTimeService.disconnect();
             }
             
-            list.innerHTML = gameState.onlinePlayers.map(player => `
-                <div class="player-item">
-                    <div class="flex items-center gap-md">
-                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div>
-                            <div class="player-name">${player.name}</div>
-                            <div class="text-xs text-gray-400">${player.isHost ? 'Host' : 'Player'}</div>
-                        </div>
-                    </div>
-                    ${player.isHost ? '<span class="text-yellow"><i class="fas fa-crown"></i></span>' : ''}
-                </div>
-            `).join('');
-            
-            // Enable start button for host if enough players
-            if (gameState.isHost) {
-                const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
-                elements.startOnlineGameBtn.disabled = gameState.onlinePlayers.length < mode.minPlayers;
+            // Remove player from room
+            if (gameState.roomCode && supabaseClient) {
+                supabaseClient
+                    .from('room_players')
+                    .delete()
+                    .eq('room_code', gameState.roomCode)
+                    .eq('player_name', gameState.playerName);
             }
-        }
-
-        function simulatePlayerJoin(playerName) {
-            gameState.onlinePlayers.push({ name: playerName, isHost: false });
-            gameState.players.push(playerName);
-            updateOnlinePlayersList();
-            
-            // Show notification
-            showNotification(`${playerName} joined the room!`);
-        }
-
-        // ===== BUZZER MODE FUNCTIONS =====
-        function buzzIn() {
-            if (gameState.currentGameMode !== 'buzzer') return;
-            
-            // Disable buzzer for this player
-            elements.buzzerButton.className = 'buzzer-button buzzer-buzzed';
-            elements.buzzerButton.disabled = true;
-            elements.buzzerInstruction.textContent = 'You buzzed in! Answer now:';
-            elements.playerBuzzed.textContent = gameState.playerName;
-            
-            // Enable answer selection
-            elements.answersContainer.style.opacity = '1';
-            document.querySelectorAll('.answer-option').forEach(opt => {
-                opt.style.pointerEvents = 'auto';
-            });
         }
 
         // ===== EVENT LISTENERS =====
@@ -3947,7 +4813,7 @@
                     gameState.currentGameMode = btn.dataset.mode;
                     
                     // Clear players for fresh game
-                    gameState.players = [];
+                    gameState.players = [gameState.playerName];
                     gameState.playerScores = {};
                     updatePlayersList();
                     
@@ -4005,7 +4871,7 @@
                     const category = gameState.categories.find(c => c.id === categoryId);
                     if (category) {
                         // Clear players for fresh game
-                        gameState.players = [];
+                        gameState.players = [gameState.playerName];
                         gameState.playerScores = {};
                         updatePlayersList();
                         
@@ -4110,11 +4976,7 @@
             // Game controls
             elements.nextQuestionBtn.addEventListener('click', nextQuestion);
             
-            elements.hintBtn.addEventListener('click', () => {
-                // Implement hint functionality
-                showFeedback('Hint: Try to eliminate obviously wrong answers first!', 'correct');
-                elements.hintBtn.disabled = true;
-            });
+            elements.hintBtn.addEventListener('click', showHint);
             
             // Buzzer button
             elements.buzzerButton.addEventListener('click', buzzIn);
@@ -4123,6 +4985,7 @@
             elements.backToMenuBtn.addEventListener('click', () => {
                 closeModal('gameCompleteModal');
                 updateNavigation('home');
+                resetGameState();
             });
             
             elements.playAgainBtn.addEventListener('click', () => {
@@ -4136,6 +4999,7 @@
                     updateNavigation('play');
                     navigateToStep(1);
                 }
+                resetGameState();
             });
             
             // Online play buttons
@@ -4147,50 +5011,66 @@
                 openModal('joinRoomModal');
             });
             
-            elements.refreshRoomsBtn.addEventListener('click', () => {
-                // Simulate refreshing rooms
-                elements.roomList.innerHTML = `
-                    <div class="room-item">
-                        <div>
-                            <div class="font-bold">Classic Challenge</div>
-                            <div class="text-sm text-gray-400">2/4 players • 10 questions</div>
-                        </div>
-                        <button class="btn btn-primary btn-sm join-room-btn">
-                            Join
-                        </button>
-                    </div>
-                    <div class="room-item">
-                        <div>
-                            <div class="font-bold">Battle Arena</div>
-                            <div class="text-sm text-gray-400">3/8 players • 15 questions</div>
-                        </div>
-                        <button class="btn btn-primary btn-sm join-room-btn">
-                            Join
-                        </button>
-                    </div>
-                `;
-                
-                showNotification('Rooms refreshed!');
+            // Create room confirmation
+            elements.createRoomConfirmBtn.addEventListener('click', () => {
+                if (supabaseClient && gameState.realTimeService) {
+                    createRealRoom();
+                } else {
+                    showNotification('Supabase not configured. Using simulated multiplayer.', 'error');
+                    // Fallback to simulated room creation
+                    const roomCode = generateSecureRoomCode();
+                    gameState.roomCode = roomCode;
+                    gameState.isHost = true;
+                    gameState.isOnlineGame = true;
+                    elements.roomCodeDisplay.textContent = roomCode;
+                    updateNavigation('waiting');
+                    closeModal('createRoomModal');
+                    showNotification('Room created! Share the code.');
+                }
             });
             
-            // Create room confirmation
-            elements.createRoomConfirmBtn.addEventListener('click', createRoom);
-            
             // Join room confirmation
-            elements.joinRoomConfirmBtn.addEventListener('click', joinRoom);
+            elements.joinRoomConfirmBtn.addEventListener('click', () => {
+                if (supabaseClient && gameState.realTimeService) {
+                    joinRealRoom();
+                } else {
+                    showNotification('Supabase not configured. Using simulated multiplayer.', 'error');
+                    // Fallback to simulated room joining
+                    const roomCode = elements.joinRoomCode.value.trim().toUpperCase();
+                    if (roomCode.length === 6) {
+                        gameState.roomCode = roomCode;
+                        gameState.isHost = false;
+                        gameState.isOnlineGame = true;
+                        gameState.onlinePlayers = [
+                            { name: 'Host Player', isHost: true },
+                            { name: gameState.playerName, isHost: false }
+                        ];
+                        elements.roomCodeDisplay.textContent = roomCode;
+                        updateOnlinePlayersList();
+                        updateNavigation('waiting');
+                        closeModal('joinRoomModal');
+                        showNotification('Joined room successfully!');
+                    } else {
+                        showNotification('Please enter a valid 6-digit code', 'error');
+                    }
+                }
+            });
             
             // Waiting room buttons
             elements.leaveRoomBtn.addEventListener('click', () => {
                 if (confirm('Leave this room?')) {
+                    cleanupOnlineGame();
                     gameState.isOnlineGame = false;
                     gameState.roomCode = null;
+                    gameState.onlinePlayers = [];
                     updateNavigation('online');
+                    resetGameState();
                 }
             });
             
             elements.startOnlineGameBtn.addEventListener('click', () => {
                 if (gameState.isHost) {
-                    startGame();
+                    startOnlineGame();
                 }
             });
             
@@ -4205,8 +5085,8 @@
                 if (newName && newName.length > 0) {
                     gameState.playerName = newName.substring(0, 20);
                     updateHUD();
-                    updateProfile();
-                    saveData();
+                    updateProfileDisplay();
+                    saveGameState();
                     closeModal('nameModal');
                     showNotification('Username updated successfully!');
                 }
@@ -4214,37 +5094,45 @@
             
             // Save avatar
             elements.saveAvatarBtn.addEventListener('click', () => {
-                updateProfile();
-                saveData();
+                updateProfileDisplay();
+                updateHUD();
+                saveGameState();
                 closeModal('avatarModal');
-                showNotification('Avatar updated successfully!');
+                showNotification('Profile picture updated successfully!');
+            });
+            
+            // Save theme
+            elements.saveThemeBtn.addEventListener('click', () => {
+                saveGameState();
+                closeModal('themeModal');
+                showNotification('Theme color saved!');
             });
             
             // Settings toggles
             elements.darkModeToggle.addEventListener('change', function() {
                 gameState.settings.darkMode = this.checked;
-                saveData();
-                location.reload(); // Reload to apply theme changes
+                applyDarkMode(this.checked);
+                saveGameState();
             });
             
             elements.soundEffectsToggle.addEventListener('change', function() {
                 gameState.settings.soundEffects = this.checked;
-                saveData();
+                saveGameState();
             });
             
             elements.musicToggle.addEventListener('change', function() {
                 gameState.settings.music = this.checked;
-                saveData();
+                saveGameState();
             });
             
             elements.notificationSoundToggle.addEventListener('change', function() {
                 gameState.settings.notifications = this.checked;
-                saveData();
+                saveGameState();
             });
             
             elements.achievementNotificationToggle.addEventListener('change', function() {
                 gameState.settings.achievementNotifications = this.checked;
-                saveData();
+                saveGameState();
             });
             
             // Close modals on backdrop click
@@ -4277,8 +5165,12 @@
                 if (confirm('Are you sure you want to quit? Your progress will be lost.')) {
                     closeModal('pauseModal');
                     updateNavigation('home');
+                    resetGameState();
                 }
             });
+            
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', cleanupOnlineGame);
         }
 
         // Make functions globally accessible
