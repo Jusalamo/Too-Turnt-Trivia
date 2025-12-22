@@ -5,25 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Too Turned Trivia™</title>
     <meta name="description" content="Online multiplayer trivia with 6 unique game modes">
-    
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <!-- Howler.js for sound effects -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
-    
     <style>
-        /* ===== RESET & BASE ===== */
+        /* ===== ALL STYLES REMAIN EXACTLY AS PROVIDED — NO CHANGES ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-
         :root {
             --black: #000000;
             --white: #FFFFFF;
@@ -39,19 +35,15 @@
             --green: #00B894;
             --cyan: #00CEC9;
             --pink: #FD79A8;
-            
             --space-sm: 8px;
             --space-md: 16px;
             --space-lg: 24px;
             --space-xl: 32px;
-            
             --radius-lg: 18px;
             --radius-md: 12px;
-            
             --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.12);
             --shadow-card-hover: 0 12px 30px rgba(0, 0, 0, 0.25);
         }
-
         body {
             font-family: 'Inter', sans-serif;
             background: var(--black);
@@ -60,7 +52,6 @@
             overflow-x: hidden;
             transition: background-color 0.3s, color 0.3s;
         }
-
         /* Light Mode Variables */
         body.light-mode {
             --black: #FFFFFF;
@@ -72,38 +63,31 @@
             --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.08);
             --shadow-card-hover: 0 12px 30px rgba(0, 0, 0, 0.15);
         }
-
         body.light-mode .card {
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
-
         body.light-mode .player-hud,
         body.light-mode .bottom-nav {
             background: rgba(232, 232, 232, 0.95);
             border-color: rgba(0, 0, 0, 0.1);
         }
-
         body.light-mode .btn-outline {
             border-color: var(--yellow);
             color: var(--black);
         }
-
         body.light-mode .form-input,
         body.light-mode .select-dropdown {
             background: var(--gray-700);
             border-color: var(--gray-600);
             color: var(--white);
         }
-
         body.light-mode .answer-option {
             background: var(--gray-700);
             color: var(--white);
         }
-
         body.light-mode .player-item {
             background: var(--gray-700);
         }
-
         /* ===== LOADING SCREEN ===== */
         #loadingScreen {
             position: fixed;
@@ -119,7 +103,6 @@
             z-index: 10000;
             transition: opacity 0.5s;
         }
-
         .loading-logo {
             font-size: 80px;
             font-weight: 900;
@@ -128,7 +111,6 @@
             transform: rotate(-15deg);
             margin-bottom: var(--space-xl);
         }
-
         .loading-progress {
             width: min(300px, 90vw);
             height: 6px;
@@ -136,26 +118,22 @@
             border-radius: 9999px;
             overflow: hidden;
         }
-
         .loading-progress-bar {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, var(--yellow), var(--orange));
             transition: width 0.3s ease;
         }
-
         .loading-text {
             margin-top: var(--space-md);
             color: var(--gray-400);
             font-size: 14px;
             font-weight: 500;
         }
-
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: rotate(-15deg) scale(1); }
             50% { opacity: 0.7; transform: rotate(-15deg) scale(1.05); }
         }
-
         /* ===== AUTH SCREEN ===== */
         #authScreen {
             position: fixed;
@@ -170,7 +148,6 @@
             z-index: 20000;
             padding: var(--space-md);
         }
-
         .auth-container {
             position: relative;
             background: var(--gray-800);
@@ -181,13 +158,11 @@
             box-shadow: var(--shadow-card);
             z-index: 20001;
         }
-
         .auth-tabs {
             display: flex;
             margin-bottom: var(--space-xl);
             border-bottom: 1px solid var(--gray-700);
         }
-
         .auth-tab {
             flex: 1;
             padding: var(--space-md);
@@ -199,20 +174,16 @@
             transition: all 0.3s;
             border-bottom: 3px solid transparent;
         }
-
         .auth-tab.active {
             color: var(--yellow);
             border-bottom-color: var(--yellow);
         }
-
         .auth-form {
             display: none;
         }
-
         .auth-form.active {
             display: block;
         }
-
         .auth-error {
             background: rgba(255, 118, 117, 0.2);
             border: 1px solid var(--red);
@@ -223,7 +194,6 @@
             font-size: 14px;
             display: none;
         }
-
         /* ===== PLAYER HUD ===== */
         .player-hud {
             position: fixed;
@@ -240,19 +210,16 @@
             border-bottom: 1px solid rgba(255, 222, 33, 0.1);
             height: 60px;
         }
-
         .hud-left {
             display: flex;
             align-items: center;
             gap: var(--space-lg);
         }
-
         .hud-item {
             display: flex;
             align-items: center;
             gap: 6px;
         }
-
         .hud-icon {
             width: 32px;
             height: 32px;
@@ -263,24 +230,20 @@
             justify-content: center;
             color: var(--yellow);
         }
-
         .hud-value {
             font-weight: 700;
             font-size: 16px;
         }
-
         .hud-label {
             font-size: 12px;
             color: var(--gray-400);
             margin-top: -2px;
         }
-
         .hud-right {
             display: flex;
             align-items: center;
             gap: var(--space-sm);
         }
-
         /* ===== SCREENS ===== */
         .screen {
             display: none;
@@ -288,18 +251,15 @@
             padding: 60px 0 70px;
             overflow-y: auto;
         }
-
         .screen.active {
             display: block;
         }
-
         .page-content {
             padding: var(--space-xl) var(--space-md);
             max-width: 1200px;
             margin: 0 auto;
             min-height: calc(100vh - 130px);
         }
-
         /* ===== BOTTOM NAVIGATION ===== */
         .bottom-nav {
             position: fixed;
@@ -315,7 +275,6 @@
             border-top: 1px solid rgba(255, 222, 33, 0.1);
             height: 70px;
         }
-
         .nav-item {
             display: flex;
             flex-direction: column;
@@ -332,16 +291,13 @@
             flex: 1;
             max-width: 100px;
         }
-
         .nav-item.active {
             color: var(--yellow);
             background: rgba(255, 222, 33, 0.1);
         }
-
         .nav-icon {
             font-size: 20px;
         }
-
         /* ===== BUTTONS ===== */
         .btn {
             display: inline-flex;
@@ -358,44 +314,36 @@
             text-decoration: none;
             gap: var(--space-sm);
         }
-
         .btn-primary {
             background: var(--yellow);
             color: var(--black);
         }
-
         .btn-primary:hover {
             background: var(--yellow-dark);
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(255, 222, 33, 0.3);
         }
-
         .btn-outline {
             background: transparent;
             color: var(--yellow);
             border: 2px solid var(--yellow);
         }
-
         .btn-outline:hover {
             background: rgba(255, 222, 33, 0.1);
         }
-
         .btn-full {
             width: 100%;
         }
-
         .btn-lg {
             min-height: 56px;
             font-size: 18px;
             font-weight: 700;
         }
-
         .btn-sm {
             padding: 6px 12px;
             min-height: 36px;
             font-size: 14px;
         }
-
         /* ===== CARD STYLES ===== */
         .card {
             background: var(--gray-800);
@@ -405,18 +353,15 @@
             transition: all 0.3s;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
-
         .card:hover {
             transform: translateY(-4px);
             box-shadow: var(--shadow-card-hover);
         }
-
         .card-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: var(--space-lg);
         }
-
         .card-icon {
             width: 48px;
             height: 48px;
@@ -427,20 +372,17 @@
             font-size: 24px;
             margin-bottom: var(--space-md);
         }
-
         .card-title {
             font-size: 18px;
             font-weight: 700;
             margin-bottom: var(--space-sm);
         }
-
         .card-description {
             color: var(--gray-400);
             font-size: 14px;
             line-height: 1.5;
             margin-bottom: var(--space-md);
         }
-
         /* ===== HOME SCREEN ===== */
         .hero-section {
             text-align: center;
@@ -448,7 +390,6 @@
             margin-bottom: var(--space-xl);
             position: relative;
         }
-
         .hero-section::before {
             content: '';
             position: absolute;
@@ -460,7 +401,6 @@
             background: radial-gradient(circle, rgba(255, 222, 33, 0.1) 0%, transparent 70%);
             z-index: -1;
         }
-
         .hero-title {
             font-size: clamp(36px, 6vw, 48px);
             font-weight: 900;
@@ -470,27 +410,23 @@
             background-clip: text;
             color: transparent;
         }
-
         .hero-subtitle {
             color: var(--gray-400);
             max-width: 600px;
             margin: 0 auto var(--space-xl);
             font-size: clamp(16px, 2.5vw, 20px);
         }
-
         .hero-actions {
             display: flex;
             gap: var(--space-md);
             justify-content: center;
             flex-wrap: wrap;
         }
-
         /* ===== GAME MODES SCREEN ===== */
         .modes-header {
             text-align: center;
             margin-bottom: var(--space-xl);
         }
-
         .section-title {
             font-size: 32px;
             font-weight: 800;
@@ -500,13 +436,11 @@
             background-clip: text;
             color: transparent;
         }
-
         .section-subtitle {
             color: var(--gray-400);
             max-width: 600px;
             margin: 0 auto;
         }
-
         /* ===== PLAYER SETUP ===== */
         .setup-stepper {
             display: flex;
@@ -515,7 +449,6 @@
             margin-bottom: var(--space-xl);
             position: relative;
         }
-
         .step {
             display: flex;
             flex-direction: column;
@@ -524,7 +457,6 @@
             position: relative;
             z-index: 1;
         }
-
         .step-circle {
             width: 36px;
             height: 36px;
@@ -538,14 +470,12 @@
             border: 2px solid transparent;
             transition: all 0.3s;
         }
-
         .step.active .step-circle {
             background: var(--yellow);
             color: var(--black);
             border-color: var(--yellow);
             box-shadow: 0 0 0 4px rgba(255, 222, 33, 0.2);
         }
-
         .step-label {
             font-size: 12px;
             font-weight: 600;
@@ -553,32 +483,26 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .step.active .step-label {
             color: var(--yellow);
         }
-
         .setup-content {
             background: var(--gray-800);
             border-radius: var(--radius-lg);
             padding: var(--space-xl);
             margin-bottom: var(--space-xl);
         }
-
         .setup-section {
             display: none;
         }
-
         .setup-section.active {
             display: block;
         }
-
         .players-list {
             margin-bottom: var(--space-lg);
             max-height: 300px;
             overflow-y: auto;
         }
-
         .player-item {
             display: flex;
             align-items: center;
@@ -589,15 +513,12 @@
             margin-bottom: var(--space-sm);
             transition: all 0.2s;
         }
-
         .player-item:hover {
             background: var(--gray-600);
         }
-
         .player-name {
             font-weight: 600;
         }
-
         /* ===== GAME SCREEN ===== */
         .game-header {
             background: var(--gray-800);
@@ -606,38 +527,32 @@
             margin-bottom: var(--space-lg);
             border: 1px solid rgba(255, 222, 33, 0.1);
         }
-
         .game-stats {
             display: flex;
             justify-content: space-around;
             gap: var(--space-lg);
             margin-bottom: var(--space-md);
         }
-
         .stat-item {
             text-align: center;
         }
-
         .stat-value {
             font-size: 24px;
             font-weight: 800;
             color: var(--yellow);
             margin-bottom: 2px;
         }
-
         .stat-label {
             font-size: 12px;
             color: var(--gray-400);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .game-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-
         .game-mode-badge {
             background: var(--gray-700);
             padding: 6px 12px;
@@ -645,13 +560,11 @@
             font-size: 14px;
             font-weight: 600;
         }
-
         .timer-display {
             display: flex;
             align-items: center;
             gap: var(--space-sm);
         }
-
         .question-card {
             background: var(--gray-800);
             border-radius: var(--radius-lg);
@@ -659,20 +572,17 @@
             margin-bottom: var(--space-lg);
             box-shadow: var(--shadow-card);
         }
-
         .question-header {
             padding: var(--space-lg);
             background: linear-gradient(135deg, var(--gray-700) 0%, var(--gray-800) 100%);
             border-bottom: 1px solid var(--gray-700);
         }
-
         .question-progress {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: var(--space-sm);
         }
-
         .question-category {
             display: flex;
             align-items: center;
@@ -680,7 +590,6 @@
             color: var(--gray-400);
             font-size: 14px;
         }
-
         .question-text {
             padding: var(--space-lg);
             font-size: 20px;
@@ -688,20 +597,17 @@
             text-align: center;
             line-height: 1.4;
         }
-
         .answers-grid {
             padding: var(--space-lg);
             display: grid;
             grid-template-columns: 1fr;
             gap: var(--space-md);
         }
-
         @media (min-width: 640px) {
             .answers-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-
         .answer-option {
             padding: var(--space-lg);
             background: var(--gray-700);
@@ -712,22 +618,18 @@
             align-items: center;
             gap: var(--space-md);
         }
-
         .answer-option:hover {
             background: var(--gray-600);
             transform: translateY(-2px);
         }
-
         .answer-option.selected {
             background: rgba(0, 184, 148, 0.2);
             border: 2px solid var(--green);
         }
-
         .answer-option.incorrect {
             background: rgba(255, 118, 117, 0.2);
             border: 2px solid var(--red);
         }
-
         .answer-letter {
             width: 36px;
             height: 36px;
@@ -740,23 +642,19 @@
             font-size: 16px;
             flex-shrink: 0;
         }
-
         .answer-option.selected .answer-letter {
             background: var(--green);
             color: white;
         }
-
         .answer-option.incorrect .answer-letter {
             background: var(--red);
             color: white;
         }
-
         .game-controls {
             display: flex;
             gap: var(--space-md);
             justify-content: center;
         }
-
         /* ===== SCOREBOARD ===== */
         .scoreboard-container {
             background: var(--gray-800);
@@ -764,7 +662,6 @@
             padding: var(--space-lg);
             margin-bottom: var(--space-lg);
         }
-
         .scoreboard-header {
             display: flex;
             justify-content: space-between;
@@ -773,13 +670,11 @@
             padding-bottom: var(--space-md);
             border-bottom: 1px solid var(--gray-700);
         }
-
         .scoreboard-players {
             display: flex;
             flex-direction: column;
             gap: var(--space-sm);
         }
-
         .scoreboard-player {
             display: flex;
             justify-content: space-between;
@@ -789,23 +684,19 @@
             border-radius: var(--radius-md);
             border-left: 4px solid transparent;
         }
-
         .scoreboard-player.current-turn {
             border-left-color: var(--yellow);
             background: rgba(255, 222, 33, 0.1);
         }
-
         .scoreboard-player.winner {
             border-left-color: var(--green);
             background: rgba(0, 184, 148, 0.1);
         }
-
         .scoreboard-player-info {
             display: flex;
             align-items: center;
             gap: var(--space-md);
         }
-
         .scoreboard-player-rank {
             width: 32px;
             height: 32px;
@@ -817,32 +708,26 @@
             font-weight: 700;
             font-size: 14px;
         }
-
         .scoreboard-player-rank.rank-1 {
             background: var(--yellow);
             color: var(--black);
         }
-
         .scoreboard-player-rank.rank-2 {
             background: var(--gray-400);
             color: var(--black);
         }
-
         .scoreboard-player-rank.rank-3 {
             background: var(--orange);
             color: var(--black);
         }
-
         .scoreboard-player-name {
             font-weight: 600;
         }
-
         .scoreboard-player-stats {
             display: flex;
             gap: var(--space-lg);
             align-items: center;
         }
-
         .scoreboard-score {
             font-size: 18px;
             font-weight: 800;
@@ -850,7 +735,6 @@
             min-width: 60px;
             text-align: right;
         }
-
         .scoreboard-badge {
             background: var(--gray-600);
             padding: 4px 8px;
@@ -858,25 +742,21 @@
             font-size: 12px;
             font-weight: 600;
         }
-
         .scoreboard-badge.buzzer {
             background: rgba(0, 184, 148, 0.2);
             color: var(--green);
         }
-
         /* ===== CATEGORIES SCREEN ===== */
         .categories-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: var(--space-lg);
         }
-
         .category-card {
             position: relative;
             overflow: hidden;
             cursor: pointer;
         }
-
         /* ===== PROFILE SCREEN ===== */
         .profile-header {
             display: flex;
@@ -884,7 +764,6 @@
             gap: var(--space-lg);
             margin-bottom: var(--space-xl);
         }
-
         .profile-avatar-container {
             position: relative;
             width: 100px;
@@ -894,14 +773,12 @@
             cursor: pointer;
             border: 3px solid var(--yellow);
         }
-
         .profile-avatar {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: none;
         }
-
         .profile-avatar-text {
             width: 100%;
             height: 100%;
@@ -913,11 +790,9 @@
             font-weight: 700;
             color: white;
         }
-
         .profile-avatar-container:hover .profile-avatar-text {
             opacity: 0.8;
         }
-
         .profile-avatar-upload {
             position: absolute;
             bottom: 0;
@@ -931,22 +806,18 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-
         .profile-avatar-container:hover .profile-avatar-upload {
             opacity: 1;
         }
-
         .profile-info {
             flex: 1;
         }
-
         .profile-name {
             font-size: 28px;
             font-weight: 800;
             margin-bottom: var(--space-sm);
             cursor: pointer;
         }
-
         /* ===== STATS SCREEN ===== */
         .stats-grid {
             display: grid;
@@ -954,25 +825,21 @@
             gap: var(--space-lg);
             margin-bottom: var(--space-xl);
         }
-
         .stat-card {
             text-align: center;
             padding: var(--space-lg);
         }
-
         .stat-value-lg {
             font-size: 36px;
             font-weight: 800;
             color: var(--yellow);
             margin-bottom: var(--space-sm);
         }
-
         .leaderboard {
             background: var(--gray-800);
             border-radius: var(--radius-lg);
             padding: var(--space-lg);
         }
-
         .leaderboard-item {
             display: flex;
             align-items: center;
@@ -980,11 +847,9 @@
             padding: var(--space-md);
             border-bottom: 1px solid var(--gray-700);
         }
-
         .leaderboard-item:last-child {
             border-bottom: none;
         }
-
         .leaderboard-rank {
             width: 36px;
             height: 36px;
@@ -995,7 +860,6 @@
             justify-content: center;
             font-weight: 700;
         }
-
         /* ===== ONLINE SCREEN ===== */
         .online-actions {
             display: flex;
@@ -1003,19 +867,16 @@
             justify-content: center;
             margin-bottom: var(--space-xl);
         }
-
         .lobby-container {
             background: var(--gray-800);
             border-radius: var(--radius-lg);
             padding: var(--space-lg);
         }
-
         .room-list {
             margin-top: var(--space-lg);
             max-height: 400px;
             overflow-y: auto;
         }
-
         .room-item {
             display: flex;
             justify-content: space-between;
@@ -1027,27 +888,22 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-
         .room-item:hover {
             background: var(--gray-600);
         }
-
         .room-info {
             flex: 1;
         }
-
         .room-name {
             font-weight: 600;
             margin-bottom: 4px;
         }
-
         .room-meta {
             display: flex;
             gap: var(--space-md);
             font-size: 12px;
             color: var(--gray-400);
         }
-
         .room-status {
             background: var(--green);
             color: white;
@@ -1056,20 +912,16 @@
             font-size: 12px;
             font-weight: 600;
         }
-
         .room-status.waiting {
             background: var(--orange);
         }
-
         .room-status.playing {
             background: var(--red);
         }
-
         /* ===== WAITING ROOM ===== */
         .waiting-room {
             text-align: center;
         }
-
         .room-code {
             font-size: 48px;
             font-weight: 900;
@@ -1081,20 +933,17 @@
             border-radius: var(--radius-md);
             border: 2px dashed var(--yellow);
         }
-
         .room-code-small {
             font-size: 24px;
             letter-spacing: 4px;
             margin-top: var(--space-sm);
         }
-
         .share-room {
             display: flex;
             gap: var(--space-sm);
             justify-content: center;
             margin: var(--space-lg) 0;
         }
-
         .share-btn {
             width: 48px;
             height: 48px;
@@ -1108,17 +957,14 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-
         .share-btn:hover {
             background: var(--gray-600);
             transform: translateY(-2px);
         }
-
         /* ===== SETTINGS SCREEN ===== */
         .settings-section {
             margin-bottom: var(--space-xl);
         }
-
         .settings-item {
             display: flex;
             justify-content: space-between;
@@ -1129,23 +975,19 @@
             margin-bottom: var(--space-sm);
             cursor: pointer;
         }
-
         .settings-item:hover {
             background: var(--gray-700);
         }
-
         .toggle-switch {
             position: relative;
             width: 60px;
             height: 30px;
         }
-
         .toggle-switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-
         .toggle-slider {
             position: absolute;
             cursor: pointer;
@@ -1157,7 +999,6 @@
             transition: .4s;
             border-radius: 34px;
         }
-
         .toggle-slider:before {
             position: absolute;
             content: "";
@@ -1169,15 +1010,12 @@
             transition: .4s;
             border-radius: 50%;
         }
-
         input:checked + .toggle-slider {
             background-color: var(--yellow);
         }
-
         input:checked + .toggle-slider:before {
             transform: translateX(30px);
         }
-
         /* ===== MODALS ===== */
         .modal-overlay {
             position: fixed;
@@ -1192,17 +1030,14 @@
             z-index: 200;
             padding: var(--space-md);
         }
-
         .modal-overlay.active {
             display: flex;
             animation: fadeIn 0.3s ease;
         }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
         .modal {
             background: var(--gray-800);
             border-radius: var(--radius-lg);
@@ -1212,19 +1047,16 @@
             overflow-y: auto;
             animation: slideUp 0.3s ease;
         }
-
         @keyframes slideUp {
             from { transform: translateY(20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-
         .modal-header {
             padding: var(--space-xl);
             text-align: center;
             border-bottom: 1px solid var(--gray-700);
             position: relative;
         }
-
         .modal-close {
             position: absolute;
             top: var(--space-lg);
@@ -1235,22 +1067,18 @@
             font-size: 24px;
             cursor: pointer;
         }
-
         .modal-title {
             font-size: 24px;
             font-weight: 800;
             margin-bottom: var(--space-sm);
         }
-
         .modal-subtitle {
             color: var(--gray-400);
             font-size: 14px;
         }
-
         .modal-body {
             padding: var(--space-xl);
         }
-
         .modal-footer {
             padding: var(--space-xl);
             border-top: 1px solid var(--gray-700);
@@ -1258,35 +1086,29 @@
             gap: var(--space-md);
             justify-content: center;
         }
-
         /* ===== HINT MODAL ===== */
         .hint-modal .modal {
             max-width: 400px;
         }
-
         .hint-content {
             text-align: center;
             padding: var(--space-lg);
         }
-
         .hint-icon {
             font-size: 48px;
             color: var(--yellow);
             margin-bottom: var(--space-lg);
         }
-
         .hint-text {
             font-size: 18px;
             margin-bottom: var(--space-lg);
             color: var(--white);
         }
-
         .hint-timer {
             font-size: 14px;
             color: var(--gray-400);
             margin-top: var(--space-md);
         }
-
         /* ===== FORM ELEMENTS ===== */
         .form-input {
             width: 100%;
@@ -1298,22 +1120,18 @@
             font-family: inherit;
             font-size: 16px;
         }
-
         .form-input:focus {
             outline: none;
             border-color: var(--yellow);
         }
-
         .form-group {
             margin-bottom: var(--space-lg);
         }
-
         .form-label {
             display: block;
             margin-bottom: var(--space-sm);
             font-weight: 600;
         }
-
         .select-dropdown {
             width: 100%;
             padding: var(--space-md);
@@ -1330,19 +1148,16 @@
             background-position: right 16px center;
             background-size: 16px;
         }
-
         .select-dropdown:focus {
             outline: none;
             border-color: var(--yellow);
         }
-
         /* ===== NUMBER INPUT STYLING ===== */
         .number-input-group {
             display: flex;
             align-items: center;
             gap: var(--space-sm);
         }
-
         .number-input-btn {
             width: 40px;
             height: 40px;
@@ -1358,19 +1173,16 @@
             justify-content: center;
             transition: all 0.2s;
         }
-
         .number-input-btn:hover {
             background: var(--gray-600);
             border-color: var(--yellow);
         }
-
         .number-input {
             flex: 1;
             text-align: center;
             font-size: 20px;
             font-weight: bold;
         }
-
         /* ===== UTILITY CLASSES ===== */
         .text-center { text-align: center; }
         .text-yellow { color: var(--yellow); }
@@ -1399,7 +1211,6 @@
         .relative { position: relative; }
         .flex-1 { flex: 1; }
         .opacity-50 { opacity: 0.5; }
-
         /* ===== FEEDBACK ANIMATIONS ===== */
         @keyframes fadeInOut {
             0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
@@ -1408,7 +1219,6 @@
             80% { opacity: 1; }
             100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
         }
-
         .feedback-message {
             position: fixed;
             top: 50%;
@@ -1422,17 +1232,14 @@
             animation: fadeInOut 1.5s ease;
             pointer-events: none;
         }
-
         .feedback-correct {
             background: var(--green);
             color: white;
         }
-
         .feedback-incorrect {
             background: var(--red);
             color: white;
         }
-
         .notification {
             position: fixed;
             top: 80px;
@@ -1446,17 +1253,14 @@
             animation: slideInRight 0.3s ease;
             max-width: 350px;
         }
-
         @keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-
         @keyframes slideOutRight {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
         }
-
         /* ===== BUZZER MODE STYLES ===== */
         .buzzer-container {
             display: flex;
@@ -1464,7 +1268,6 @@
             gap: var(--space-lg);
             margin-top: var(--space-xl);
         }
-
         .buzzer-button {
             height: 200px;
             font-size: 48px;
@@ -1479,27 +1282,22 @@
             justify-content: center;
             gap: var(--space-sm);
         }
-
         .buzzer-button:active {
             transform: scale(0.95);
         }
-
         .buzzer-ready {
             background: var(--green);
             color: white;
         }
-
         .buzzer-buzzed {
             background: var(--yellow);
             color: var(--black);
         }
-
         .buzzer-disabled {
             background: var(--gray-700);
             color: var(--gray-400);
             cursor: not-allowed;
         }
-
         .buzzer-status {
             text-align: center;
             padding: var(--space-lg);
@@ -1507,14 +1305,12 @@
             border-radius: var(--radius-lg);
             margin-bottom: var(--space-lg);
         }
-
         .player-buzzed {
             font-size: 24px;
             font-weight: 700;
             color: var(--yellow);
             margin-top: var(--space-sm);
         }
-
         /* ===== CURRENT PLAYER TURN INDICATOR ===== */
         .current-player-indicator {
             position: fixed;
@@ -1529,82 +1325,65 @@
             border-bottom: 1px solid var(--gray-700);
             animation: slideDown 0.3s ease;
         }
-
         @keyframes slideDown {
             from { transform: translateY(-100%); }
             to { transform: translateY(0); }
         }
-
         /* ===== RESPONSIVE ===== */
         @media (max-width: 639px) {
             .hero-actions {
                 flex-direction: column;
             }
-            
             .hero-actions .btn {
                 width: 100%;
             }
-            
             .game-controls {
                 flex-direction: column;
             }
-            
             .game-controls .btn {
                 width: 100%;
             }
-            
             .card-grid, .categories-grid, .stats-grid {
                 grid-template-columns: 1fr;
             }
-
             .profile-header {
                 flex-direction: column;
                 text-align: center;
             }
-
             .online-actions {
                 flex-direction: column;
             }
-
             .modal-footer {
                 flex-direction: column;
             }
-
             .modal-footer .btn {
                 width: 100%;
             }
-
             .room-code {
                 font-size: 32px;
                 letter-spacing: 4px;
             }
-
             .scoreboard-player {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: var(--space-sm);
             }
-
             .scoreboard-player-stats {
                 width: 100%;
                 justify-content: space-between;
             }
         }
-
         /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar {
             width: 8px;
         }
-
         ::-webkit-scrollbar-track {
             background: var(--gray-800);
         }
-
         ::-webkit-scrollbar-thumb {
             background: var(--gray-600);
             border-radius: 4px;
         }
-
         ::-webkit-scrollbar-thumb:hover {
             background: var(--gray-500);
         }
@@ -1619,7 +1398,6 @@
         </div>
         <div class="loading-text" id="loadingText">Initializing...</div>
     </div>
-
     <!-- Authentication Screen -->
     <div id="authScreen" class="active">
         <div class="auth-container">
@@ -1627,70 +1405,55 @@
                 <button class="auth-tab active" id="loginTab">Login</button>
                 <button class="auth-tab" id="registerTab">Register</button>
             </div>
-            
             <!-- Login Form -->
             <div class="auth-form active" id="loginForm">
                 <div class="auth-error" id="loginError"></div>
-                
                 <div class="form-group">
                     <label class="form-label">Email</label>
                     <input type="email" class="form-input" id="loginEmail" placeholder="Enter your email">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Password</label>
                     <input type="password" class="form-input" id="loginPassword" placeholder="Enter your password">
                 </div>
-                
                 <button class="btn btn-primary btn-full" id="loginBtn">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
-                
                 <div class="text-center mt-md">
                     <a href="#" id="forgotPassword" class="text-yellow text-sm">Forgot password?</a>
                 </div>
             </div>
-            
             <!-- Register Form -->
             <div class="auth-form" id="registerForm">
                 <div class="auth-error" id="registerError"></div>
-                
                 <div class="form-group">
                     <label class="form-label">Username</label>
                     <input type="text" class="form-input" id="registerUsername" placeholder="Choose a username" maxlength="20">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Email</label>
                     <input type="email" class="form-input" id="registerEmail" placeholder="Enter your email">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Password</label>
                     <input type="password" class="form-input" id="registerPassword" placeholder="Choose a password (min. 6 characters)">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Confirm Password</label>
                     <input type="password" class="form-input" id="registerConfirmPassword" placeholder="Confirm your password">
                 </div>
-                
                 <button class="btn btn-primary btn-full" id="registerBtn">
                     <i class="fas fa-user-plus"></i> Create Account
                 </button>
             </div>
-            
             <!-- Profile Setup Form -->
             <div class="auth-form" id="profileSetupForm">
                 <div class="auth-error" id="profileSetupError"></div>
-                
                 <h3 class="text-center mb-lg">Complete Your Profile</h3>
-                
                 <div class="form-group">
                     <label class="form-label">Display Name</label>
                     <input type="text" class="form-input" id="profileDisplayName" placeholder="How others will see you" maxlength="20">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Avatar</label>
                     <div class="profile-avatar-container" style="width: 80px; height: 80px; margin: 0 auto;">
@@ -1702,7 +1465,6 @@
                     </div>
                     <input type="file" id="setupAvatarUpload" accept="image/*" style="display: none;">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Select Your Interests</label>
                     <div class="flex flex-wrap gap-sm mt-sm">
@@ -1713,14 +1475,12 @@
                         <button class="btn btn-sm btn-outline category-tag" data-category="sports">Sports</button>
                     </div>
                 </div>
-                
                 <button class="btn btn-primary btn-full" id="completeProfileBtn">
                     <i class="fas fa-check"></i> Complete Setup
                 </button>
             </div>
         </div>
     </div>
-
     <!-- Player HUD -->
     <div class="player-hud hidden">
         <div class="hud-left">
@@ -1734,7 +1494,6 @@
                 </div>
             </div>
         </div>
-        
         <div class="hud-right">
             <div class="hud-item">
                 <div class="hud-icon">
@@ -1747,7 +1506,6 @@
             </div>
         </div>
     </div>
-
     <!-- Scoreboard -->
     <div class="scoreboard-container hidden" id="scoreboard">
         <div class="scoreboard-header">
@@ -1758,7 +1516,6 @@
             <!-- Players will be populated here -->
         </div>
     </div>
-
     <!-- Screens -->
     <main class="hidden">
         <!-- Home Screen -->
@@ -1776,7 +1533,6 @@
                         </button>
                     </div>
                 </section>
-
                 <div class="card-grid">
                     <div class="card" data-screen="modes">
                         <div class="card-icon" style="background: rgba(108, 92, 231, 0.2); color: var(--purple);">
@@ -1785,7 +1541,6 @@
                         <h3 class="card-title">6 Game Modes</h3>
                         <p class="card-description">Classic, Countdown, Ladder, Battle, Buzzer, and Solo challenges with unique rules</p>
                     </div>
-                    
                     <div class="card" data-screen="categories">
                         <div class="card-icon" style="background: rgba(255, 118, 117, 0.2); color: var(--red);">
                             <i class="fas fa-layer-group"></i>
@@ -1793,7 +1548,6 @@
                         <h3 class="card-title">Categories</h3>
                         <p class="card-description">Science, History, Entertainment, Sports, Geography, and more</p>
                     </div>
-                    
                     <div class="card" data-screen="stats">
                         <div class="card-icon" style="background: rgba(253, 203, 110, 0.2); color: var(--orange);">
                             <i class="fas fa-chart-line"></i>
@@ -1801,7 +1555,6 @@
                         <h3 class="card-title">Stats & Rankings</h3>
                         <p class="card-description">Track your progress and compete on global leaderboards</p>
                     </div>
-                    
                     <div class="card" data-screen="profile">
                         <div class="card-icon" style="background: rgba(0, 184, 148, 0.2); color: var(--green);">
                             <i class="fas fa-user-circle"></i>
@@ -1812,7 +1565,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Game Modes Screen -->
         <div class="screen" id="modesScreen">
             <div class="page-content">
@@ -1820,13 +1572,11 @@
                     <h2 class="section-title">Choose Your Mode</h2>
                     <p class="section-subtitle">Each mode has unique rules and challenges. Select one to begin!</p>
                 </div>
-                
                 <div class="card-grid" id="modesGrid">
                     <!-- Modes will be dynamically loaded -->
                 </div>
             </div>
         </div>
-
         <!-- Categories Screen -->
         <div class="screen" id="categoriesScreen">
             <div class="page-content">
@@ -1834,13 +1584,11 @@
                     <h2 class="section-title">Categories</h2>
                     <p class="section-subtitle">Explore different trivia categories</p>
                 </div>
-                
                 <div class="categories-grid" id="categoriesGrid">
                     <!-- Categories will be dynamically loaded -->
                 </div>
             </div>
         </div>
-
         <!-- Stats Screen -->
         <div class="screen" id="statsScreen">
             <div class="page-content">
@@ -1848,7 +1596,6 @@
                     <h2 class="section-title">Stats & Rankings</h2>
                     <p class="section-subtitle">Track your progress and achievements</p>
                 </div>
-
                 <div class="stats-grid mb-xl">
                     <div class="stat-card card">
                         <div class="stat-value-lg" id="totalGamesStat">0</div>
@@ -1867,14 +1614,12 @@
                         <div class="stat-label">Total Points</div>
                     </div>
                 </div>
-
                 <div class="card mb-xl">
                     <h3 class="card-title mb-lg">Achievements</h3>
                     <div id="achievementsList">
                         <!-- Achievements will be loaded here -->
                     </div>
                 </div>
-
                 <div class="card">
                     <h3 class="card-title mb-lg">Global Leaderboard</h3>
                     <div class="leaderboard" id="leaderboard">
@@ -1883,7 +1628,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Profile Screen -->
         <div class="screen" id="profileScreen">
             <div class="page-content">
@@ -1900,7 +1644,6 @@
                         <p class="text-gray-400" id="profileTitle">Trivia Master</p>
                     </div>
                 </div>
-
                 <div class="settings-section">
                     <h3 class="card-title mb-lg">Account Settings</h3>
                     <div class="card">
@@ -1914,7 +1657,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="settings-section">
                     <h3 class="card-title mb-lg">Appearance</h3>
                     <div class="card">
@@ -1931,7 +1673,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="settings-section">
                     <h3 class="card-title mb-lg">Game Settings</h3>
                     <div class="card">
@@ -1947,7 +1688,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Local Play Setup -->
         <div class="screen" id="playScreen">
             <div class="page-content">
@@ -1955,7 +1695,6 @@
                     <h2 class="section-title" id="setupModeTitle">Local Play</h2>
                     <p class="section-subtitle" id="setupModeDescription">Play offline with friends and family</p>
                 </div>
-
                 <div class="setup-stepper">
                     <div class="step active" data-step="1">
                         <div class="step-circle">1</div>
@@ -1970,17 +1709,14 @@
                         <div class="step-label">Start</div>
                     </div>
                 </div>
-
                 <div class="setup-content">
                     <!-- Step 1: Players -->
                     <div class="setup-section active" data-step="1">
                         <h3 class="text-center mb-lg">Add Players</h3>
                         <p class="text-center text-gray-400 mb-lg">Add at least 2 players to start the game</p>
-                        
                         <div class="players-list" id="playersList">
                             <!-- Players will be added here -->
                         </div>
-                        
                         <div class="flex gap-sm mt-lg">
                             <input 
                                 type="text" 
@@ -1993,16 +1729,13 @@
                                 Add
                             </button>
                         </div>
-                        
                         <button class="btn btn-primary btn-full mt-lg" id="nextStepBtn">
                             Continue to Settings
                         </button>
                     </div>
-
                     <!-- Step 2: Game Settings -->
                     <div class="setup-section" data-step="2">
                         <h3 class="text-center mb-lg">Game Settings</h3>
-                        
                         <div class="form-group">
                             <label class="form-label">Number of Questions</label>
                             <div class="number-input-group">
@@ -2012,14 +1745,12 @@
                             </div>
                             <div class="text-sm text-gray-400 mt-sm">Choose between 5 and 50 questions</div>
                         </div>
-
                         <div class="form-group">
                             <label class="form-label">Category</label>
                             <select class="select-dropdown" id="categorySelect">
                                 <!-- Categories will be populated dynamically -->
                             </select>
                         </div>
-
                         <div class="form-group">
                             <label class="form-label">Difficulty</label>
                             <select class="select-dropdown" id="difficultySelect">
@@ -2028,7 +1759,6 @@
                                 <option value="hard">Hard</option>
                             </select>
                         </div>
-                        
                         <div class="flex gap-sm mt-lg">
                             <button class="btn btn-outline flex-1" id="prevStepBtn">
                                 <i class="fas fa-arrow-left"></i> Back
@@ -2038,28 +1768,23 @@
                             </button>
                         </div>
                     </div>
-
                     <!-- Step 3: Start Game -->
                     <div class="setup-section" data-step="3">
                         <h3 class="text-center mb-lg">Ready to Play!</h3>
-                        
                         <div class="card mb-lg">
                             <div class="text-center mb-md">
                                 <div class="text-yellow text-xl font-bold" id="selectedModeName">Classic Mode</div>
                                 <div class="text-sm text-gray-400 mt-sm" id="selectedModeDescription">Traditional question/answer format</div>
                             </div>
-                            
                             <div class="players-list" id="finalPlayersList">
                                 <!-- Final players list -->
                             </div>
-
                             <div class="mt-md text-center text-gray-400">
                                 <div><i class="fas fa-question-circle"></i> <span id="settingsQuestionCount">10</span> Questions</div>
                                 <div><i class="fas fa-tag"></i> <span id="settingsCategory">General Knowledge</span></div>
                                 <div><i class="fas fa-chart-line"></i> <span id="settingsDifficulty">Medium</span> Difficulty</div>
                             </div>
                         </div>
-                        
                         <div class="flex gap-sm">
                             <button class="btn btn-outline flex-1" id="prevStepBtn2">
                                 <i class="fas fa-arrow-left"></i> Back
@@ -2072,7 +1797,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Online Screen -->
         <div class="screen" id="onlineScreen">
             <div class="page-content">
@@ -2080,7 +1804,6 @@
                     <h2 class="section-title">Online Play</h2>
                     <p class="section-subtitle">Play with friends or random players from around the world</p>
                 </div>
-
                 <div class="online-actions">
                     <button class="btn btn-primary btn-lg" id="createRoomBtn">
                         <i class="fas fa-plus-circle"></i> Create Room
@@ -2089,7 +1812,6 @@
                         <i class="fas fa-sign-in-alt"></i> Join Room
                     </button>
                 </div>
-
                 <div class="lobby-container card">
                     <h3 class="card-title mb-lg">Available Rooms</h3>
                     <div class="room-list" id="roomList">
@@ -2101,16 +1823,13 @@
                 </div>
             </div>
         </div>
-
         <!-- Waiting Room Screen -->
         <div class="screen" id="waitingScreen">
             <div class="page-content">
                 <div class="waiting-room">
                     <h2 class="section-title">Waiting Room</h2>
                     <p class="section-subtitle mb-lg">Share the code below with other players to join</p>
-                    
                     <div class="room-code" id="roomCodeDisplay">ABC123</div>
-                    
                     <div class="share-room">
                         <button class="share-btn" onclick="copyRoomCode()" title="Copy Room Code">
                             <i class="fas fa-copy"></i>
@@ -2119,14 +1838,12 @@
                             <i class="fas fa-share-alt"></i>
                         </button>
                     </div>
-                    
                     <div class="card mb-lg">
                         <h3 class="card-title mb-md">Connected Players</h3>
                         <div class="players-list" id="onlinePlayersList">
                             <!-- Online players will be listed here -->
                         </div>
                     </div>
-
                     <div class="game-settings mb-lg">
                         <h3 class="card-title mb-md">Room Settings</h3>
                         <div class="text-center text-gray-400">
@@ -2135,7 +1852,6 @@
                             <div><i class="fas fa-tag"></i> Category: <span id="roomCategory">General</span></div>
                         </div>
                     </div>
-
                     <div class="flex gap-sm">
                         <button class="btn btn-outline flex-1" id="leaveRoomBtn">
                             <i class="fas fa-sign-out-alt"></i> Leave
@@ -2147,7 +1863,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Game Screen -->
         <div class="screen" id="gameScreen">
             <div class="page-content">
@@ -2170,7 +1885,6 @@
                             <div class="stat-label">Bonus</div>
                         </div>
                     </div>
-                    
                     <div class="game-info">
                         <div class="game-mode-badge" id="currentGameMode">
                             <i class="fas fa-gamepad"></i> <span id="modeName">Classic</span>
@@ -2181,7 +1895,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Scoreboard Container -->
                 <div class="scoreboard-container" id="gameScoreboard">
                     <div class="scoreboard-header">
@@ -2192,7 +1905,6 @@
                         <!-- Scoreboard will be populated here -->
                     </div>
                 </div>
-
                 <div class="question-card">
                     <div class="question-header">
                         <div class="question-progress">
@@ -2204,16 +1916,13 @@
                             <span id="questionCategory">General Knowledge</span>
                         </div>
                     </div>
-                    
                     <div class="question-text" id="questionText">
                         Loading question...
                     </div>
-                    
                     <div class="answers-grid" id="answersContainer">
                         <!-- Answers will be populated here -->
                     </div>
                 </div>
-
                 <!-- Buzzer Mode Container (hidden by default) -->
                 <div id="buzzerContainer" class="hidden">
                     <div class="buzzer-status">
@@ -2228,7 +1937,6 @@
                         </button>
                     </div>
                 </div>
-
                 <div class="game-controls" id="gameControls">
                     <button class="btn btn-outline" id="hintBtn">
                         <i class="fas fa-lightbulb"></i> Hint (2 left)
@@ -2240,7 +1948,6 @@
             </div>
         </div>
     </main>
-
     <!-- Bottom Navigation -->
     <div class="bottom-nav hidden">
         <button class="nav-item active" data-screen="home">
@@ -2264,7 +1971,6 @@
             <span>Profile</span>
         </button>
     </div>
-
     <!-- Modals -->
     <div class="modal-overlay" id="gameCompleteModal">
         <div class="modal">
@@ -2277,7 +1983,6 @@
                 <div class="text-center">
                     <div class="text-yellow text-5xl font-bold mb-sm" id="finalScore">0</div>
                     <div class="text-lg mb-lg">Final Score</div>
-                    
                     <div class="card mb-lg">
                         <div class="flex justify-around mb-md">
                             <div class="text-center">
@@ -2293,7 +1998,6 @@
                                 <div class="text-sm text-gray-400">Bonus</div>
                             </div>
                         </div>
-                        
                         <div class="text-center">
                             <div class="text-yellow font-semibold mb-sm">Performance Summary</div>
                             <div class="text-sm text-gray-400" id="performanceSummary">
@@ -2301,7 +2005,6 @@
                             </div>
                         </div>
                     </div>
-                    
                     <div class="text-center mb-lg">
                         <div class="text-yellow font-semibold mb-sm">Winner</div>
                         <div class="text-2xl font-bold" id="winnerName">Player 1</div>
@@ -2318,7 +2021,6 @@
             </div>
         </div>
     </div>
-
     <!-- Create Room Modal -->
     <div class="modal-overlay" id="createRoomModal">
         <div class="modal">
@@ -2332,14 +2034,12 @@
                     <label class="form-label">Room Name</label>
                     <input type="text" class="form-input" id="roomName" placeholder="Enter room name" maxlength="30">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Game Mode</label>
                     <select class="select-dropdown" id="onlineModeSelect">
                         <!-- Modes will be populated -->
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Number of Questions</label>
                     <div class="number-input-group">
@@ -2348,14 +2048,12 @@
                         <button class="number-input-btn" id="onlineQuestionIncrease">+</button>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Category</label>
                     <select class="select-dropdown" id="onlineCategorySelect">
                         <!-- Categories will be populated -->
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Max Players</label>
                     <select class="select-dropdown" id="maxPlayers">
@@ -2376,7 +2074,6 @@
             </div>
         </div>
     </div>
-
     <!-- Join Room Modal -->
     <div class="modal-overlay" id="joinRoomModal">
         <div class="modal">
@@ -2402,7 +2099,6 @@
             </div>
         </div>
     </div>
-
     <!-- Mode Details Modal -->
     <div class="modal-overlay" id="modeDetailsModal">
         <div class="modal">
@@ -2418,7 +2114,6 @@
                         <!-- Rules will be populated -->
                     </div>
                 </div>
-                
                 <div class="card">
                     <h3 class="card-title mb-md">How to Play</h3>
                     <div id="modeInstructions">
@@ -2433,7 +2128,6 @@
             </div>
         </div>
     </div>
-
     <!-- Name Change Modal -->
     <div class="modal-overlay" id="nameModal">
         <div class="modal">
@@ -2458,7 +2152,6 @@
             </div>
         </div>
     </div>
-
     <!-- Hint Modal -->
     <div class="modal-overlay hint-modal" id="hintModal">
         <div class="modal">
@@ -2484,7 +2177,6 @@
             </div>
         </div>
     </div>
-
     <!-- Pause Modal -->
     <div class="modal-overlay" id="pauseModal">
         <div class="modal">
@@ -2508,7 +2200,6 @@
             </div>
         </div>
     </div>
-
     <script>
     // ===== GAME STATE =====
     const gameState = {
@@ -2519,7 +2210,6 @@
         playerAvatarType: 'text',
         playerAvatarPhoto: null,
         playerProfile: null,
-        
         // Player Stats
         totalGames: 0,
         totalCorrectAnswers: 0,
@@ -2528,18 +2218,15 @@
         winStreak: 0,
         totalScore: 0,
         rank: 'Beginner',
-        
         // Navigation
         currentScreen: 'home',
         screenHistory: ['home'],
-        
         // Players
         players: [],
         playerScores: {},
         playerProfiles: {},
         playerTurn: 0,
         currentPlayerIndex: 0,
-        
         // Game Modes
         gameModes: [
             {
@@ -2725,7 +2412,6 @@
                 simultaneous: false
             }
         ],
-        
         // Categories
         categories: [
             {
@@ -2785,7 +2471,6 @@
                 description: 'Computers, programming, internet, and tech innovations'
             }
         ],
-        
         // Current Game State
         isGameActive: false,
         isOnlineGame: false,
@@ -2808,11 +2493,9 @@
         selectedAnswer: null,
         gamePaused: false,
         pauseResolved: false,
-        
         // Hint system
         hintsLeft: 2,
         hintUsed: false,
-        
         // Online State
         roomCode: null,
         roomId: null,
@@ -2822,7 +2505,6 @@
         onlineScores: {},
         currentOnlineQuestion: null,
         buzzedPlayer: null,
-        
         // Achievements
         achievements: [
             { id: 'first_game', name: 'First Timer', description: 'Complete your first game', unlocked: false },
@@ -2840,7 +2522,6 @@
             { id: 'countdown_pro', name: 'Countdown Pro', description: 'Score 1000+ points in Countdown mode', unlocked: false },
             { id: 'solo_legend', name: 'Solo Legend', description: 'Get a perfect score in Solo mode', unlocked: false }
         ],
-        
         // Settings
         settings: {
             darkMode: true,
@@ -2850,7 +2531,6 @@
             achievementNotifications: true
         }
     };
-
     // ===== SOUND EFFECTS =====
     const soundEffects = {
         buzz: null,
@@ -2863,7 +2543,6 @@
         bell: null,
         start: null,
         end: null,
-        
         init() {
             try {
                 // Initialize sound effects with fallback empty sources
@@ -2875,7 +2554,6 @@
                         this.buzz = { play: () => {} };
                     }
                 });
-                
                 this.correct = new Howl({
                     src: ['https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3'],
                     volume: 0.5,
@@ -2884,7 +2562,6 @@
                         this.correct = { play: () => {} };
                     }
                 });
-                
                 this.incorrect = new Howl({
                     src: ['https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3'],
                     volume: 0.5,
@@ -2893,7 +2570,6 @@
                         this.incorrect = { play: () => {} };
                     }
                 });
-                
                 this.timer = new Howl({
                     src: ['https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3'],
                     volume: 0.3,
@@ -2902,7 +2578,6 @@
                         this.timer = { play: () => {} };
                     }
                 });
-                
                 this.win = new Howl({
                     src: ['https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3'],
                     volume: 0.5,
@@ -2911,7 +2586,6 @@
                         this.win = { play: () => {} };
                     }
                 });
-                
                 this.lose = new Howl({
                     src: ['https://assets.mixkit.co/sfx/preview/mixkit-retro-game-over-1947.mp3'],
                     volume: 0.5,
@@ -2920,7 +2594,6 @@
                         this.lose = { play: () => {} };
                     }
                 });
-                
                 this.click = new Howl({
                     src: ['https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3'],
                     volume: 0.2,
@@ -2929,7 +2602,6 @@
                         this.click = { play: () => {} };
                     }
                 });
-                
                 this.bell = new Howl({
                     src: ['https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3'],
                     volume: 0.4,
@@ -2938,7 +2610,6 @@
                         this.bell = { play: () => {} };
                     }
                 });
-                
                 this.start = new Howl({
                     src: ['https://assets.mixkit.co/sfx/preview/mixkit-game-show-intro-331.mp3'],
                     volume: 0.5,
@@ -2947,7 +2618,6 @@
                         this.start = { play: () => {} };
                     }
                 });
-                
                 this.end = new Howl({
                     src: ['https://assets.mixkit.co/sfx/preview/mixkit-winning-trumpet-2018.mp3'],
                     volume: 0.5,
@@ -2966,10 +2636,8 @@
                 });
             }
         },
-        
         play(soundName) {
             if (!gameState.settings.soundEffects) return;
-            
             const sound = this[soundName];
             if (sound && typeof sound.play === 'function') {
                 try {
@@ -2980,7 +2648,6 @@
             }
         }
     };
-
     // ===== DOM ELEMENTS =====
     const elements = {
         // Auth
@@ -3000,27 +2667,24 @@
         registerConfirmPassword: document.getElementById('registerConfirmPassword'),
         registerBtn: document.getElementById('registerBtn'),
         registerError: document.getElementById('registerError'),
+        // ✅ FIXED: ADDED MISSING ELEMENTS BELOW
         profileDisplayName: document.getElementById('profileDisplayName'),
         completeProfileBtn: document.getElementById('completeProfileBtn'),
         profileSetupError: document.getElementById('profileSetupError'),
         setupAvatarImg: document.getElementById('setupAvatarImg'),
         setupAvatarText: document.getElementById('setupAvatarText'),
         setupAvatarUpload: document.getElementById('setupAvatarUpload'),
-        
         // Loading
         loadingScreen: document.getElementById('loadingScreen'),
         loadingProgress: document.getElementById('loadingProgress'),
         loadingText: document.getElementById('loadingText'),
-        
         // Player HUD
         playerHud: document.querySelector('.player-hud'),
         playerName: document.getElementById('playerName'),
         playerScoreHud: document.getElementById('playerScoreHud'),
         bottomNav: document.querySelector('.bottom-nav'),
-        
         // Navigation
         navItems: document.querySelectorAll('.nav-item'),
-        
         // Screens
         screens: {
             home: document.getElementById('homeScreen'),
@@ -3033,7 +2697,6 @@
             waiting: document.getElementById('waitingScreen'),
             game: document.getElementById('gameScreen')
         },
-        
         // Scoreboard
         scoreboard: document.getElementById('scoreboard'),
         gameScoreboard: document.getElementById('gameScoreboard'),
@@ -3041,7 +2704,6 @@
         gameScoreboardRound: document.getElementById('gameScoreboardRound'),
         scoreboardPlayers: document.getElementById('scoreboardPlayers'),
         scoreboardRound: document.getElementById('scoreboardRound'),
-        
         // Setup Screen
         playersList: document.getElementById('playersList'),
         finalPlayersList: document.getElementById('finalPlayersList'),
@@ -3050,14 +2712,12 @@
         modesGrid: document.getElementById('modesGrid'),
         selectedModeName: document.getElementById('selectedModeName'),
         selectedModeDescription: document.getElementById('selectedModeDescription'),
-        
         // Step Navigation
         nextStepBtn: document.getElementById('nextStepBtn'),
         nextStepBtn2: document.getElementById('nextStepBtn2'),
         prevStepBtn: document.getElementById('prevStepBtn'),
         prevStepBtn2: document.getElementById('prevStepBtn2'),
         startGameBtn: document.getElementById('startGameBtn'),
-        
         // Game Settings
         questionCount: document.getElementById('questionCount'),
         questionDecrease: document.getElementById('questionDecrease'),
@@ -3069,7 +2729,6 @@
         settingsDifficulty: document.getElementById('settingsDifficulty'),
         setupModeTitle: document.getElementById('setupModeTitle'),
         setupModeDescription: document.getElementById('setupModeDescription'),
-        
         // Game Screen
         playerScore: document.getElementById('playerScore'),
         currentQuestionNum: document.getElementById('currentQuestionNum'),
@@ -3087,19 +2746,16 @@
         hintBtn: document.getElementById('hintBtn'),
         nextQuestionBtn: document.getElementById('nextQuestionBtn'),
         gameControls: document.getElementById('gameControls'),
-        
         // Buzzer Mode
         buzzerContainer: document.getElementById('buzzerContainer'),
         buzzerButton: document.getElementById('buzzerButton'),
         buzzerInstruction: document.getElementById('buzzerInstruction'),
         playerBuzzed: document.getElementById('playerBuzzed'),
-        
         // Online Screen
         createRoomBtn: document.getElementById('createRoomBtn'),
         joinRoomBtn: document.getElementById('joinRoomBtn'),
         refreshRoomsBtn: document.getElementById('refreshRoomsBtn'),
         roomList: document.getElementById('roomList'),
-        
         // Waiting Room
         roomCodeDisplay: document.getElementById('roomCodeDisplay'),
         onlinePlayersList: document.getElementById('onlinePlayersList'),
@@ -3108,7 +2764,6 @@
         roomCategory: document.getElementById('roomCategory'),
         leaveRoomBtn: document.getElementById('leaveRoomBtn'),
         startOnlineGameBtn: document.getElementById('startOnlineGameBtn'),
-        
         // Stats Screen
         totalGamesStat: document.getElementById('totalGamesStat'),
         accuracyStat: document.getElementById('accuracyStat'),
@@ -3116,16 +2771,13 @@
         totalPointsStat: document.getElementById('totalPointsStat'),
         achievementsList: document.getElementById('achievementsList'),
         leaderboard: document.getElementById('leaderboard'),
-        
         // Profile Screen
         profileAvatarImg: document.getElementById('profileAvatarImg'),
         profileAvatarText: document.getElementById('profileAvatarText'),
         profileName: document.getElementById('profileName'),
         profileTitle: document.getElementById('profileTitle'),
-        
         // Categories Screen
         categoriesGrid: document.getElementById('categoriesGrid'),
-        
         // Modal
         gameCompleteModal: document.getElementById('gameCompleteModal'),
         finalScore: document.getElementById('finalScore'),
@@ -3136,7 +2788,6 @@
         performanceSummary: document.getElementById('performanceSummary'),
         backToMenuBtn: document.getElementById('backToMenuBtn'),
         playAgainBtn: document.getElementById('playAgainBtn'),
-        
         // Create Room Modal
         createRoomModal: document.getElementById('createRoomModal'),
         roomName: document.getElementById('roomName'),
@@ -3147,16 +2798,13 @@
         onlineCategorySelect: document.getElementById('onlineCategorySelect'),
         maxPlayers: document.getElementById('maxPlayers'),
         createRoomConfirmBtn: document.getElementById('createRoomConfirmBtn'),
-        
         // Join Room Modal
         joinRoomModal: document.getElementById('joinRoomModal'),
         joinRoomCode: document.getElementById('joinRoomCode'),
         joinRoomConfirmBtn: document.getElementById('joinRoomConfirmBtn'),
-        
         // Settings Toggles
         darkModeToggle: document.getElementById('darkModeToggle')
     };
-
     // ===== INITIALIZATION =====
     document.addEventListener('DOMContentLoaded', async () => {
         console.log('DOM loaded, initializing app...');
@@ -3165,13 +2813,10 @@
         simulateLoading();
         soundEffects.init();
     });
-
     async function initializeApp() {
         console.log('Initializing app...');
-        
         // Load saved data
         loadSavedData();
-        
         // Update UI
         updateHUD();
         populateGameData();
@@ -3179,66 +2824,52 @@
         setupStepNavigation();
         populateOnlineSelectors();
         initializeSettings();
-        
         // Add sample players for demo
         addPlayer('Player 1');
         addPlayer('Player 2');
-        
         // Setup auth event listeners
         setupAuthListeners();
     }
-
     // ===== AUTHENTICATION FUNCTIONS =====
     async function handleLogin() {
         console.log('Login button clicked');
         const email = elements.loginEmail.value.trim();
         const password = elements.loginPassword.value;
-        
         console.log('Email:', email, 'Password length:', password.length);
-        
         if (!email || !password) {
             showAuthError('loginError', 'Please enter both email and password');
             return;
         }
-        
         // For demo purposes, auto-login with any credentials
         gameState.playerName = email.split('@')[0] || 'Player';
         gameState.playerAvatar = gameState.playerName.charAt(0).toUpperCase();
-        
         // Show main app
         showMainApp();
         showNotification('Welcome to Too Turned Trivia!');
     }
-
     async function handleRegister() {
         console.log('Register button clicked');
         const username = elements.registerUsername.value.trim();
         const email = elements.registerEmail.value.trim();
         const password = elements.registerPassword.value;
         const confirmPassword = elements.registerConfirmPassword.value;
-        
         console.log('Registration attempt:', { username, email });
-        
         // Validation
         if (!username || !email || !password || !confirmPassword) {
             showAuthError('registerError', 'Please fill in all fields');
             return;
         }
-        
         if (password.length < 6) {
             showAuthError('registerError', 'Password must be at least 6 characters');
             return;
         }
-        
         if (password !== confirmPassword) {
             showAuthError('registerError', 'Passwords do not match');
             return;
         }
-        
         // For demo purposes, auto-register
         gameState.playerName = username;
         gameState.playerAvatar = username.charAt(0).toUpperCase();
-        
         // Show profile setup
         if (elements.profileDisplayName) {
             elements.profileDisplayName.value = username;
@@ -3246,20 +2877,16 @@
         if (elements.setupAvatarText) {
             elements.setupAvatarText.textContent = username.charAt(0).toUpperCase();
         }
-        
         showAuthTab('profileSetupForm');
         showNotification('Account created! Complete your profile.');
     }
-
     async function handleCompleteProfile() {
         console.log('Complete profile button clicked');
         const displayName = elements.profileDisplayName.value.trim();
-        
         if (!displayName) {
             showAuthError('profileSetupError', 'Please enter a display name');
             return;
         }
-        
         // For demo purposes, skip database
         gameState.playerProfile = {
             id: Date.now().toString(),
@@ -3267,55 +2894,45 @@
             avatar_type: 'text',
             avatar_emoji: displayName.charAt(0).toUpperCase()
         };
-        
         gameState.playerName = displayName;
         gameState.playerAvatar = displayName.charAt(0).toUpperCase();
-        
         // Show main app
         showMainApp();
         showNotification('Welcome to Too Turned Trivia!');
     }
-
     function showAuthError(elementId, message) {
         const element = document.getElementById(elementId);
         if (element) {
             element.textContent = message;
             element.style.display = 'block';
-            
             setTimeout(() => {
                 element.style.display = 'none';
             }, 5000);
         }
     }
-
     function showAuthTab(tabId) {
         console.log('Switching to tab:', tabId);
         // Hide all forms
         if (elements.loginForm) elements.loginForm.classList.remove('active');
         if (elements.registerForm) elements.registerForm.classList.remove('active');
         if (elements.profileSetupForm) elements.profileSetupForm.classList.remove('active');
-        
         // Show selected form
         const targetForm = document.getElementById(tabId);
         if (targetForm) {
             targetForm.classList.add('active');
         }
-        
         // Update tabs
         if (elements.loginTab) elements.loginTab.classList.remove('active');
         if (elements.registerTab) elements.registerTab.classList.remove('active');
-        
         if (tabId === 'loginForm') {
             if (elements.loginTab) elements.loginTab.classList.add('active');
         } else if (tabId === 'registerForm') {
             if (elements.registerTab) elements.registerTab.classList.add('active');
         }
     }
-
     // ===== AUTH EVENT LISTENERS SETUP =====
     function setupAuthListeners() {
         console.log('Setting up auth listeners...');
-        
         // Auth tab switching
         if (elements.loginTab) {
             elements.loginTab.addEventListener('click', () => {
@@ -3326,7 +2943,6 @@
         } else {
             console.error('✗ Login tab not found');
         }
-        
         if (elements.registerTab) {
             elements.registerTab.addEventListener('click', () => {
                 console.log('Register tab clicked');
@@ -3336,7 +2952,6 @@
         } else {
             console.error('✗ Register tab not found');
         }
-        
         // Login button
         if (elements.loginBtn) {
             elements.loginBtn.addEventListener('click', (e) => {
@@ -3348,7 +2963,6 @@
         } else {
             console.error('✗ Login button not found');
         }
-        
         // Register button
         if (elements.registerBtn) {
             elements.registerBtn.addEventListener('click', (e) => {
@@ -3360,7 +2974,6 @@
         } else {
             console.error('✗ Register button not found');
         }
-        
         // Complete profile button
         if (elements.completeProfileBtn) {
             elements.completeProfileBtn.addEventListener('click', (e) => {
@@ -3372,16 +2985,13 @@
         } else {
             console.error('✗ Complete profile button not found');
         }
-        
         // Setup avatar upload
         const setupAvatarUpload = document.getElementById('setupAvatarUpload');
         const setupAvatarContainer = document.querySelector('#profileSetupForm .profile-avatar-container');
-        
         if (setupAvatarUpload && setupAvatarContainer) {
             setupAvatarContainer.addEventListener('click', function() {
                 setupAvatarUpload.click();
             });
-            
             setupAvatarUpload.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
@@ -3399,7 +3009,6 @@
                 }
             });
         }
-        
         // Forgot password link
         const forgotPassword = document.getElementById('forgotPassword');
         if (forgotPassword) {
@@ -3408,7 +3017,6 @@
                 alert('Password reset functionality would be implemented here.');
             });
         }
-        
         // Category tags in profile setup
         const categoryTags = document.querySelectorAll('.category-tag');
         categoryTags.forEach(tag => {
@@ -3417,14 +3025,11 @@
                 this.classList.toggle('btn-outline');
             });
         });
-        
         console.log('Auth listeners setup complete');
     }
-
     // ===== EVENT LISTENERS SETUP =====
     function setupEventListeners() {
         console.log('Setting up event listeners...');
-        
         // Bottom navigation
         elements.navItems.forEach(item => {
             item.addEventListener('click', function(e) {
@@ -3433,7 +3038,6 @@
                 updateNavigation(screen);
             });
         });
-        
         // Quick navigation buttons
         document.addEventListener('click', function(e) {
             if (e.target.closest('[data-screen]') && !e.target.closest('.nav-item')) {
@@ -3442,93 +3046,76 @@
                 updateNavigation(screen);
             }
         });
-        
         // Mode selection buttons
         document.addEventListener('click', function(e) {
             // Play mode button
             if (e.target.closest('.play-mode-btn')) {
                 const btn = e.target.closest('.play-mode-btn');
                 gameState.currentGameMode = btn.dataset.mode;
-                
                 gameState.players = [];
                 gameState.playerScores = {};
                 updatePlayersList();
                 updateScoreboard();
-                
                 updateNavigation('play');
                 navigateToStep(1);
             }
-            
             // View mode details button
             if (e.target.closest('.view-mode-btn')) {
                 const btn = e.target.closest('.view-mode-btn');
                 const modeId = btn.dataset.mode;
                 const mode = gameState.gameModes.find(m => m.id === modeId);
-                
                 if (mode) {
                     document.getElementById('modeDetailsTitle').textContent = mode.name;
                     document.getElementById('modeDetailsSubtitle').textContent = mode.description;
-                    
                     document.getElementById('modeRules').innerHTML = mode.rules.map(rule => `
                         <div class="flex items-start gap-sm mb-sm">
                             <i class="fas fa-check text-green mt-1"></i>
                             <span>${rule}</span>
                         </div>
                     `).join('');
-                    
                     document.getElementById('modeInstructions').innerHTML = mode.instructions.map(instruction => `
                         <div class="flex items-start gap-sm mb-sm">
                             <i class="fas fa-play text-yellow mt-1"></i>
                             <span>${instruction}</span>
                         </div>
                     `).join('');
-                    
                     document.getElementById('playThisModeBtn').onclick = () => {
                         gameState.currentGameMode = modeId;
                         closeModal('modeDetailsModal');
                         updateNavigation('play');
                         navigateToStep(1);
                     };
-                    
                     openModal('modeDetailsModal');
                 }
             }
-            
             // Play category button
             if (e.target.closest('.play-category-btn')) {
                 const btn = e.target.closest('.play-category-btn');
                 const categoryId = btn.dataset.category;
-                
                 gameState.currentGameMode = 'classic';
-                
                 const category = gameState.categories.find(c => c.id === categoryId);
                 if (category) {
                     gameState.players = [];
                     gameState.playerScores = {};
                     updatePlayersList();
                     updateScoreboard();
-                    
                     updateNavigation('play');
                     navigateToStep(1);
-                    
                     setTimeout(() => {
                         elements.categorySelect.value = categoryId;
                     }, 100);
                 }
             }
         });
-        
         // Player management
         elements.addPlayerBtn.addEventListener('click', () => {
             addPlayer(elements.playerNameInput.value);
         });
-        
         elements.playerNameInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 addPlayer(elements.playerNameInput.value);
             }
         });
-        
         // Remove player buttons
         document.addEventListener('click', function(e) {
             if (e.target.closest('.remove-player-btn')) {
@@ -3537,7 +3124,6 @@
                 removePlayer(playerName);
             }
         });
-        
         // Setup step navigation
         elements.nextStepBtn.addEventListener('click', () => {
             if (gameState.players.length >= 1) {
@@ -3546,21 +3132,16 @@
                 alert('Add at least 1 player to continue');
             }
         });
-        
         elements.prevStepBtn.addEventListener('click', () => {
             navigateToStep(1);
         });
-        
         elements.nextStepBtn2.addEventListener('click', () => {
             navigateToStep(3);
         });
-        
         elements.prevStepBtn2.addEventListener('click', () => {
             navigateToStep(2);
         });
-        
         elements.startGameBtn.addEventListener('click', startGame);
-        
         // Question count controls
         elements.questionDecrease.addEventListener('click', () => {
             const current = parseInt(elements.questionCount.value);
@@ -3568,38 +3149,30 @@
                 elements.questionCount.value = current - 1;
             }
         });
-        
         elements.questionIncrease.addEventListener('click', () => {
             const current = parseInt(elements.questionCount.value);
             if (current < 50) {
                 elements.questionCount.value = current + 1;
             }
         });
-        
         elements.questionCount.addEventListener('change', () => {
             let value = parseInt(elements.questionCount.value);
             if (value < 5) value = 5;
             if (value > 50) value = 50;
             elements.questionCount.value = value;
         });
-        
         // Game controls
         elements.nextQuestionBtn.addEventListener('click', nextQuestion);
-        
         elements.hintBtn.addEventListener('click', showHint);
-        
         // Buzzer button
         elements.buzzerButton.addEventListener('click', buzzIn);
-        
         // Game complete modal
         document.getElementById('backToMenuBtn').addEventListener('click', () => {
             closeModal('gameCompleteModal');
             updateNavigation('home');
         });
-        
         document.getElementById('playAgainBtn').addEventListener('click', () => {
             closeModal('gameCompleteModal');
-            
             if (gameState.isOnlineGame) {
                 updateNavigation('waiting');
             } else {
@@ -3607,48 +3180,38 @@
                 navigateToStep(1);
             }
         });
-        
         // Online play buttons
         elements.createRoomBtn.addEventListener('click', () => {
             openModal('createRoomModal');
         });
-        
         elements.joinRoomBtn.addEventListener('click', () => {
             openModal('joinRoomModal');
         });
-        
         elements.refreshRoomsBtn.addEventListener('click', async () => {
             await refreshRoomsList();
         });
-        
         // Create room confirmation
         elements.createRoomConfirmBtn.addEventListener('click', createRoom);
-        
         // Join room confirmation
         elements.joinRoomConfirmBtn.addEventListener('click', joinRoom);
-        
         // Waiting room buttons
         elements.leaveRoomBtn.addEventListener('click', leaveRoom);
         elements.startOnlineGameBtn.addEventListener('click', startOnlineGame);
-        
         // Room code input formatting
         elements.joinRoomCode.addEventListener('input', function(e) {
             this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         });
-        
         // Save username
         document.getElementById('saveUsernameBtn').addEventListener('click', async () => {
             const newName = document.getElementById('newUsername').value.trim();
             if (newName && newName.length > 0) {
                 gameState.playerName = newName.substring(0, 20);
-                
                 updateHUD();
                 updateProfile();
                 closeModal('nameModal');
                 showNotification('Username updated successfully!');
             }
         });
-        
         // Settings toggles
         elements.darkModeToggle.addEventListener('change', function() {
             gameState.settings.darkMode = this.checked;
@@ -3659,7 +3222,6 @@
             }
             localStorage.setItem('settings', JSON.stringify(gameState.settings));
         });
-        
         // Escape key to close modal
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -3668,7 +3230,6 @@
                 });
             }
         });
-        
         // Pause game on window blur
         window.addEventListener('blur', () => {
             if (gameState.isGameActive && !gameState.gamePaused && !gameState.pauseResolved) {
@@ -3680,7 +3241,6 @@
                 }, 100);
             }
         });
-        
         // Handle page visibility change
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && gameState.isGameActive && !gameState.gamePaused && !gameState.pauseResolved) {
@@ -3689,14 +3249,12 @@
             }
         });
     }
-
     function loadSavedData() {
         // Load settings
         const savedSettings = localStorage.getItem('settings');
         if (savedSettings) {
             gameState.settings = JSON.parse(savedSettings);
         }
-        
         // Load game stats
         const savedStats = localStorage.getItem('gameStats');
         if (savedStats) {
@@ -3709,7 +3267,6 @@
             gameState.winStreak = stats.winStreak || 0;
         }
     }
-
     function showMainApp() {
         console.log('Showing main app...');
         elements.authScreen.classList.remove('active');
@@ -3717,45 +3274,36 @@
         elements.bottomNav.classList.remove('hidden');
         document.querySelector('main').classList.remove('hidden');
         updateNavigation('home');
-        
         // Update HUD with user info
         updateHUD();
         updateProfile();
         populateStats();
         populateAchievements();
     }
-
     // ===== PLAYER MANAGEMENT =====
     function addPlayer(name) {
         if (!name.trim()) return;
-        
         const playerName = name.trim().substring(0, 20);
-        
         if (!gameState.players.includes(playerName)) {
             gameState.players.push(playerName);
             gameState.playerScores[playerName] = 0;
             updatePlayersList();
             updateScoreboard();
         }
-        
         elements.playerNameInput.value = '';
         elements.playerNameInput.focus();
     }
-
     function removePlayer(name) {
         gameState.players = gameState.players.filter(p => p !== name);
         delete gameState.playerScores[name];
         updatePlayersList();
         updateScoreboard();
     }
-
     // ===== SCOREBOARD FUNCTIONS =====
     function updateScoreboard() {
         const scoreboardPlayers = elements.scoreboardPlayers;
         const gameScoreboardPlayers = elements.gameScoreboardPlayers;
-        
         if (!scoreboardPlayers || !gameScoreboardPlayers) return;
-        
         // Create player data with scores
         const playerData = gameState.players.map(player => ({
             name: player,
@@ -3763,15 +3311,12 @@
             isCurrentTurn: player === gameState.players[gameState.currentPlayerIndex],
             isWinner: false
         }));
-        
         // Sort by score
         playerData.sort((a, b) => b.score - a.score);
-        
         // Update rank for top 3
         playerData.forEach((player, index) => {
             player.rank = index + 1;
         });
-        
         const scoreboardHTML = playerData.map(player => `
             <div class="scoreboard-player ${player.isCurrentTurn ? 'current-turn' : ''} ${player.isWinner ? 'winner' : ''}">
                 <div class="scoreboard-player-info">
@@ -3787,25 +3332,20 @@
                 </div>
             </div>
         `).join('');
-        
         scoreboardPlayers.innerHTML = scoreboardHTML;
         gameScoreboardPlayers.innerHTML = scoreboardHTML;
-        
         // Update round info
         if (gameState.isGameActive) {
             elements.gameScoreboardRound.textContent = `Question ${gameState.currentQuestionIndex + 1}`;
         }
     }
-
     // ===== GAME FUNCTIONS =====
     async function startGame() {
         if (!gameState.currentGameMode) {
             alert('Please select a game mode');
             return;
         }
-        
         const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
-        
         // Reset game state
         gameState.isGameActive = true;
         gameState.gamePaused = false;
@@ -3815,12 +3355,10 @@
         gameState.currentPlayerIndex = 0;
         gameState.hintsLeft = 2;
         gameState.hintUsed = false;
-        
         // Initialize player scores
         gameState.players.forEach(player => {
             gameState.playerScores[player] = 0;
         });
-        
         gameState.score = 0;
         gameState.lives = mode.lives;
         gameState.timeBonus = 0;
@@ -3829,12 +3367,10 @@
         gameState.currentStreak = 0;
         gameState.maxStreak = 0;
         gameState.gameStartTime = Date.now();
-        
         // Get game settings
         gameState.totalQuestions = parseInt(elements.questionCount.value);
         gameState.selectedCategory = elements.categorySelect.value;
         gameState.selectedDifficulty = elements.difficultySelect.value;
-        
         // Update UI
         elements.modeName.textContent = mode.name;
         elements.currentGameMode.innerHTML = `<i class="fas fa-${mode.icon}"></i> <span>${mode.name}</span>`;
@@ -3844,11 +3380,9 @@
         elements.timeBonus.textContent = '0';
         elements.currentQuestionNum.textContent = `1/${gameState.totalQuestions}`;
         elements.totalQuestions.textContent = gameState.totalQuestions;
-        
         // Show scoreboard
         elements.gameScoreboard.classList.remove('hidden');
         updateScoreboard();
-        
         // Show/hide buzzer container
         if (mode.buzzer) {
             elements.buzzerContainer.classList.remove('hidden');
@@ -3857,31 +3391,24 @@
             elements.buzzerContainer.classList.add('hidden');
             elements.gameControls.classList.remove('hidden');
         }
-        
         // Update hint button
         elements.hintBtn.innerHTML = `<i class="fas fa-lightbulb"></i> Hint (${gameState.hintsLeft} left)`;
         elements.hintBtn.disabled = false;
-        
         // Navigate to game screen
         updateNavigation('game');
-        
         // Play start sound
         soundEffects.play('start');
-        
         // Fetch and load first question
         await loadQuestion();
     }
-
     async function loadQuestion() {
         if (gameState.currentQuestionIndex >= gameState.totalQuestions) {
             endGame();
             return;
         }
-        
         // Show loading state
         elements.questionText.textContent = 'Loading question...';
         elements.answersContainer.innerHTML = '<div class="text-center py-8">Loading...</div>';
-        
         try {
             // Fetch questions
             const questions = await fetchQuestions(
@@ -3889,37 +3416,28 @@
                 gameState.selectedDifficulty,
                 gameState.totalQuestions
             );
-            
             if (!questions || questions.length === 0) {
                 throw new Error('No questions available');
             }
-            
             const question = questions[gameState.currentQuestionIndex];
             gameState.currentQuestion = question;
-            
             // Update UI
             elements.currentQuestion.textContent = gameState.currentQuestionIndex + 1;
             elements.currentQuestionNum.textContent = `${gameState.currentQuestionIndex + 1}/${gameState.totalQuestions}`;
-            
             const category = gameState.categories.find(c => c.id === gameState.selectedCategory);
             elements.questionCategory.textContent = category ? category.name : 'General Knowledge';
-            
             elements.difficultyLabel.textContent = question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1);
             elements.questionText.textContent = question.question;
-            
             // Clear and populate answers
             elements.answersContainer.innerHTML = '';
             const letters = ['A', 'B', 'C', 'D'];
-            
             // Make sure we have exactly 4 answers
             const answers = [...question.answers];
             while (answers.length < 4) {
                 answers.push({ text: `Answer ${answers.length + 1}`, correct: false });
             }
-            
             // Shuffle answers
             const shuffledAnswers = answers.sort(() => Math.random() - 0.5);
-            
             shuffledAnswers.forEach((answer, index) => {
                 const answerElement = document.createElement('div');
                 answerElement.className = 'answer-option';
@@ -3930,13 +3448,11 @@
                 answerElement.onclick = () => selectAnswer(answer.correct, answerElement, question.difficulty);
                 elements.answersContainer.appendChild(answerElement);
             });
-            
             // Reset controls
             elements.nextQuestionBtn.disabled = true;
             elements.hintBtn.disabled = false;
             elements.hintBtn.innerHTML = `<i class="fas fa-lightbulb"></i> Hint (${gameState.hintsLeft} left)`;
             gameState.hintUsed = false;
-            
             // Reset buzzer if in buzzer mode
             const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
             if (mode.buzzer) {
@@ -3949,46 +3465,36 @@
                     opt.style.pointerEvents = 'none';
                 });
             }
-            
             // Start timer with mode-specific settings
             if (!mode.buzzer && gameState.timer > 0) {
                 startQuestionTimer();
             }
-            
         } catch (error) {
             console.error('Error loading question:', error);
             showFeedback('Error loading question. Please try again.', 'incorrect');
-            
             setTimeout(() => loadQuestion(), 2000);
         }
     }
-
     function selectAnswer(isCorrect, element, difficulty) {
         if (!gameState.isGameActive || gameState.gamePaused) return;
-        
         soundEffects.play(isCorrect ? 'correct' : 'incorrect');
-        
         // Disable all answers
         document.querySelectorAll('.answer-option').forEach(opt => {
             opt.style.pointerEvents = 'none';
         });
-        
         // Calculate score
         let baseScore = 100;
         if (difficulty === 'medium') baseScore = 150;
         if (difficulty === 'hard') baseScore = 200;
-        
         let pointsEarned = baseScore;
         const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
         const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-        
         // Apply mode-specific scoring
         switch (gameState.currentGameMode) {
             case 'classic':
                 const difficultyBonus = Math.floor(gameState.currentQuestionIndex / 3) * 25;
                 pointsEarned += difficultyBonus;
                 break;
-                
             case 'countdown':
                 const timeRemaining = parseInt(elements.gameTimer.textContent);
                 const timeBonus = Math.max(0, Math.floor((gameState.timer - timeRemaining) / 3) * 5);
@@ -3996,25 +3502,20 @@
                 gameState.timeBonus += timeBonus;
                 elements.timeBonus.textContent = gameState.timeBonus;
                 break;
-                
             case 'ladder':
                 pointsEarned *= (gameState.currentStreak + 1);
                 break;
-                
             case 'battle':
                 pointsEarned += gameState.players.length * 20;
                 break;
-                
             case 'buzzer':
                 pointsEarned += 50;
                 break;
-                
             case 'solo':
                 const accuracyBonus = Math.floor((gameState.correctAnswers / (gameState.currentQuestionIndex + 1)) * 50);
                 pointsEarned += accuracyBonus;
                 break;
         }
-        
         // Update streak
         if (isCorrect) {
             gameState.currentStreak++;
@@ -4022,24 +3523,20 @@
         } else {
             gameState.currentStreak = 0;
         }
-        
         // Mark correct/incorrect
         if (isCorrect) {
             element.classList.add('selected');
             gameState.score += pointsEarned;
             gameState.playerScores[currentPlayer] += pointsEarned;
             gameState.correctAnswers++;
-            
             // Update score display
             elements.playerScore.textContent = gameState.score;
             elements.playerScoreHud.textContent = gameState.score;
-            
             showFeedback(`+${pointsEarned} points!`, 'correct');
         } else {
             element.classList.add('incorrect');
             gameState.lives--;
             elements.playerLives.textContent = gameState.lives;
-            
             // Mark correct answer
             const correctAnswer = gameState.currentQuestion.answers.find(a => a.correct);
             if (correctAnswer) {
@@ -4050,39 +3547,30 @@
                     }
                 });
             }
-            
             showFeedback(`-1 life`, 'incorrect');
         }
-        
         // Stop timer
         clearInterval(gameState.timerInterval);
-        
         // Enable next button
         elements.nextQuestionBtn.disabled = false;
-        
         // Update scoreboard
         updateScoreboard();
-        
         // Check if game over
         if (gameState.lives <= 0) {
             setTimeout(() => endGame(), 1500);
         }
     }
-
     function endGame() {
         gameState.isGameActive = false;
         gameState.gamePaused = false;
         clearInterval(gameState.timerInterval);
-        
         // Calculate final stats
         const timePlayed = Math.floor((Date.now() - gameState.gameStartTime) / 1000);
         const accuracy = gameState.totalQuestions > 0 ? 
             Math.round((gameState.correctAnswers / gameState.totalQuestions) * 100) : 0;
-        
         // Determine winner
         let winner = gameState.playerName;
         let highestScore = gameState.score;
-        
         // Find player with highest score
         for (const [player, score] of Object.entries(gameState.playerScores)) {
             if (score > highestScore) {
@@ -4090,24 +3578,20 @@
                 winner = player;
             }
         }
-        
         // Update player stats
         gameState.totalGames++;
         gameState.totalCorrectAnswers += gameState.correctAnswers;
         gameState.totalQuestions += gameState.totalQuestions;
         gameState.totalScore += gameState.score;
-        
         if (gameState.maxStreak > gameState.highestStreak) {
             gameState.highestStreak = gameState.maxStreak;
         }
-        
         // Update win streak
         if (winner === gameState.playerName || (gameState.players.length === 0 && gameState.score > 0)) {
             gameState.winStreak++;
         } else {
             gameState.winStreak = 0;
         }
-        
         // Save stats
         localStorage.setItem('gameStats', JSON.stringify({
             totalGames: gameState.totalGames,
@@ -4117,7 +3601,6 @@
             highestStreak: gameState.highestStreak,
             winStreak: gameState.winStreak
         }));
-        
         // Update modal
         elements.finalScore.textContent = gameState.score.toLocaleString();
         elements.correctAnswersModal.textContent = `${gameState.correctAnswers}/${gameState.totalQuestions}`;
@@ -4126,22 +3609,18 @@
         elements.winnerName.textContent = winner;
         elements.performanceSummary.textContent = 
             `Accuracy: ${accuracy}% | Longest Streak: ${gameState.maxStreak}`;
-        
         // Update HUD
         updateHUD();
         populateStats();
-        
         // Play win/lose sound
         if (winner === gameState.playerName) {
             soundEffects.play('win');
         } else {
             soundEffects.play('lose');
         }
-        
         // Show modal
         openModal('gameCompleteModal');
     }
-
     // ===== HELPER FUNCTIONS =====
     function simulateLoading() {
         let progress = 0;
@@ -4158,7 +3637,6 @@
                 }, 500);
             }
             elements.loadingProgress.style.width = `${progress}%`;
-            
             if (progress < 30) {
                 elements.loadingText.textContent = 'Initializing...';
             } else if (progress < 60) {
@@ -4170,12 +3648,10 @@
             }
         }, 100);
     }
-
     function updateHUD() {
         elements.playerName.textContent = gameState.playerName;
         elements.playerScoreHud.textContent = gameState.totalScore;
     }
-
     function populateGameData() {
         // Populate game modes grid
         const modesGrid = elements.modesGrid;
@@ -4198,23 +3674,19 @@
                 </div>
             `).join('');
         }
-        
         // Populate categories dropdown
         const categorySelect = elements.categorySelect;
         const onlineCategorySelect = elements.onlineCategorySelect;
-        
         if (categorySelect) {
             categorySelect.innerHTML = gameState.categories.map(cat => `
                 <option value="${cat.id}">${cat.name}</option>
             `).join('');
         }
-        
         if (onlineCategorySelect) {
             onlineCategorySelect.innerHTML = gameState.categories.map(cat => `
                 <option value="${cat.id}">${cat.name}</option>
             `).join('');
         }
-        
         // Populate online mode select
         const onlineModeSelect = elements.onlineModeSelect;
         if (onlineModeSelect) {
@@ -4223,11 +3695,9 @@
             `).join('');
         }
     }
-
     function populateCategoriesScreen() {
         const categoriesGrid = elements.categoriesGrid;
         if (!categoriesGrid) return;
-        
         categoriesGrid.innerHTML = gameState.categories.map(cat => `
             <div class="category-card card">
                 <div class="card-icon" style="background: ${cat.color}20; color: ${cat.color};">
@@ -4241,15 +3711,12 @@
             </div>
         `).join('');
     }
-
     function setupStepNavigation() {
         // Navigation is handled by event listeners
     }
-
     function populateOnlineSelectors() {
         // Already handled in populateGameData
     }
-
     function initializeSettings() {
         // Set dark mode toggle
         if (elements.darkModeToggle) {
@@ -4259,11 +3726,9 @@
             }
         }
     }
-
     function updatePlayersList() {
         const playersList = elements.playersList;
         const finalPlayersList = elements.finalPlayersList;
-        
         if (playersList) {
             playersList.innerHTML = gameState.players.map(player => `
                 <div class="player-item">
@@ -4279,7 +3744,6 @@
                 </div>
             `).join('');
         }
-        
         if (finalPlayersList) {
             finalPlayersList.innerHTML = gameState.players.map(player => `
                 <div class="player-item">
@@ -4294,11 +3758,9 @@
             `).join('');
         }
     }
-
     function updateProfilePicture() {
         const profileAvatarImg = elements.profileAvatarImg;
         const profileAvatarText = elements.profileAvatarText;
-        
         if (gameState.playerAvatarPhoto) {
             profileAvatarImg.src = gameState.playerAvatarPhoto;
             profileAvatarImg.style.display = 'block';
@@ -4309,22 +3771,17 @@
             profileAvatarText.textContent = gameState.playerAvatar;
         }
     }
-
     function populateStats() {
         elements.totalGamesStat.textContent = gameState.totalGames;
-        
         const accuracy = gameState.totalQuestions > 0 ? 
             Math.round((gameState.totalCorrectAnswers / gameState.totalQuestions) * 100) : 0;
         elements.accuracyStat.textContent = `${accuracy}%`;
-        
         elements.winStreakStat.textContent = gameState.winStreak;
         elements.totalPointsStat.textContent = gameState.totalScore.toLocaleString();
     }
-
     function populateAchievements() {
         const achievementsList = elements.achievementsList;
         if (!achievementsList) return;
-        
         achievementsList.innerHTML = gameState.achievements.map(ach => `
             <div class="leaderboard-item ${ach.unlocked ? 'opacity-100' : 'opacity-50'}">
                 <div class="flex items-center gap-md">
@@ -4340,13 +3797,11 @@
             </div>
         `).join('');
     }
-
     function updateProfile() {
         elements.profileName.textContent = gameState.playerName;
         elements.profileTitle.textContent = gameState.rank;
         updateProfilePicture();
     }
-
     function navigateToStep(step) {
         // Update stepper
         document.querySelectorAll('.step').forEach(stepEl => {
@@ -4356,7 +3811,6 @@
         if (stepElement) {
             stepElement.classList.add('active');
         }
-        
         // Update sections
         document.querySelectorAll('.setup-section').forEach(section => {
             section.classList.remove('active');
@@ -4365,7 +3819,6 @@
         if (sectionElement) {
             sectionElement.classList.add('active');
         }
-        
         // Update mode info if we're on step 3
         if (step === 3) {
             const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
@@ -4373,7 +3826,6 @@
                 elements.selectedModeName.textContent = mode.name;
                 elements.selectedModeDescription.textContent = mode.description;
             }
-            
             // Update settings display
             if (elements.settingsQuestionCount) {
                 elements.settingsQuestionCount.textContent = elements.questionCount.value;
@@ -4387,26 +3839,22 @@
             }
         }
     }
-
     function updateNavigation(screen) {
         // Update screen history
         if (gameState.currentScreen !== screen) {
             gameState.screenHistory.push(screen);
             gameState.currentScreen = screen;
         }
-        
         // Hide all screens
         Object.values(elements.screens).forEach(screenEl => {
             if (screenEl) {
                 screenEl.classList.remove('active');
             }
         });
-        
         // Show current screen
         if (elements.screens[screen]) {
             elements.screens[screen].classList.add('active');
         }
-        
         // Update bottom navigation
         elements.navItems.forEach(item => {
             item.classList.remove('active');
@@ -4414,7 +3862,6 @@
                 item.classList.add('active');
             }
         });
-        
         // Update HUD visibility
         if (screen === 'home' || screen === 'modes' || screen === 'categories' || screen === 'stats' || screen === 'profile') {
             if (elements.playerHud) elements.playerHud.classList.remove('hidden');
@@ -4427,7 +3874,6 @@
             if (elements.bottomNav) elements.bottomNav.classList.add('hidden');
         }
     }
-
     function goBack() {
         if (gameState.screenHistory.length > 1) {
             gameState.screenHistory.pop(); // Remove current
@@ -4435,7 +3881,6 @@
             updateNavigation(previousScreen);
         }
     }
-
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -4443,7 +3888,6 @@
             document.body.style.overflow = 'hidden';
         }
     }
-
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -4451,7 +3895,6 @@
             document.body.style.overflow = '';
         }
     }
-
     async function fetchQuestions(category, difficulty, limit) {
         try {
             // Mock questions for demo
@@ -4512,62 +3955,48 @@
                     category: category
                 }
             ];
-            
             return mockQuestions.slice(0, limit);
-            
         } catch (error) {
             console.error('Error fetching questions:', error);
             return [];
         }
     }
-
     function startQuestionTimer() {
         clearInterval(gameState.timerInterval);
-        
         const mode = gameState.gameModes.find(m => m.id === gameState.currentGameMode);
         if (mode) {
             gameState.timer = mode.timePerQuestion;
         }
-        
         if (elements.gameTimer) {
             elements.gameTimer.textContent = `${gameState.timer}s`;
         }
-        
         gameState.timerInterval = setInterval(() => {
             gameState.timer--;
-            
             if (elements.gameTimer) {
                 elements.gameTimer.textContent = `${gameState.timer}s`;
             }
-            
             // Play timer sound when time is low
             if (gameState.timer === 5) {
                 soundEffects.play('timer');
             }
-            
             if (gameState.timer <= 0) {
                 clearInterval(gameState.timerInterval);
                 timeUp();
             }
         }, 1000);
     }
-
     function timeUp() {
         if (!gameState.isGameActive || gameState.gamePaused) return;
-        
         // Time's up - mark as incorrect
         soundEffects.play('incorrect');
         gameState.lives--;
-        
         if (elements.playerLives) {
             elements.playerLives.textContent = gameState.lives;
         }
-        
         // Disable all answers
         document.querySelectorAll('.answer-option').forEach(opt => {
             opt.style.pointerEvents = 'none';
         });
-        
         // Mark correct answer
         if (gameState.currentQuestion) {
             const correctAnswer = gameState.currentQuestion.answers.find(a => a.correct);
@@ -4580,20 +4009,16 @@
                 });
             }
         }
-        
         showFeedback('Time\'s up!', 'incorrect');
-        
         // Enable next button
         if (elements.nextQuestionBtn) {
             elements.nextQuestionBtn.disabled = false;
         }
-        
         // Check if game over
         if (gameState.lives <= 0) {
             setTimeout(() => endGame(), 1500);
         }
     }
-
     function nextQuestion() {
         gameState.currentQuestionIndex++;
         if (gameState.players.length > 0) {
@@ -4601,56 +4026,43 @@
         }
         loadQuestion();
     }
-
     function showHint() {
         if (gameState.hintsLeft <= 0 || gameState.hintUsed || !elements.hintBtn) return;
-        
         gameState.hintsLeft--;
         gameState.hintUsed = true;
-        
         elements.hintBtn.innerHTML = `<i class="fas fa-lightbulb"></i> Hint (${gameState.hintsLeft} left)`;
         elements.hintBtn.disabled = true;
-        
         // Show hint modal
         const hintText = gameState.currentQuestion ? 
             `Hint: The answer starts with "${gameState.currentQuestion.answers.find(a => a.correct)?.text?.charAt(0)}"` :
             "Try to eliminate obviously wrong answers first.";
-        
         const hintTextElement = document.getElementById('hintText');
         if (hintTextElement) {
             hintTextElement.textContent = hintText;
         }
-        
         openModal('hintModal');
-        
         // Auto-close after 5 seconds
         let timer = 5;
         const hintTimerElement = document.getElementById('hintTimer');
         if (hintTimerElement) {
             hintTimerElement.textContent = `Closing in ${timer} seconds...`;
         }
-        
         const hintTimerInterval = setInterval(() => {
             timer--;
             if (hintTimerElement) {
                 hintTimerElement.textContent = `Closing in ${timer} seconds...`;
             }
-            
             if (timer <= 0) {
                 clearInterval(hintTimerInterval);
                 closeModal('hintModal');
             }
         }, 1000);
     }
-
     function buzzIn() {
         if (!gameState.isGameActive || gameState.buzzedPlayer) return;
-        
         soundEffects.play('buzz');
-        
         // Player buzzed in
         gameState.buzzedPlayer = gameState.playerName;
-        
         // Update UI
         if (elements.buzzerButton) {
             elements.buzzerButton.className = 'buzzer-button buzzer-buzzed';
@@ -4661,7 +4073,6 @@
         if (elements.playerBuzzed) {
             elements.playerBuzzed.textContent = `${gameState.playerName} buzzed in!`;
         }
-        
         // Enable answers
         if (elements.answersContainer) {
             elements.answersContainer.style.opacity = '1';
@@ -4670,22 +4081,17 @@
             opt.style.pointerEvents = 'auto';
         });
     }
-
     function showFeedback(message, type) {
         const feedback = document.createElement('div');
         feedback.className = `feedback-message feedback-${type}`;
         feedback.textContent = message;
-        
         document.body.appendChild(feedback);
-        
         setTimeout(() => {
             feedback.remove();
         }, 1500);
     }
-
     function showNotification(message, type = 'info') {
         if (!gameState.settings.notifications) return;
-        
         const notification = document.createElement('div');
         notification.className = 'notification';
         notification.innerHTML = `
@@ -4697,9 +4103,7 @@
                 </div>
             </div>
         `;
-        
         document.body.appendChild(notification);
-        
         setTimeout(() => {
             notification.style.animation = 'slideOutRight 0.3s ease';
             setTimeout(() => {
@@ -4707,17 +4111,14 @@
             }, 300);
         }, 3000);
     }
-
     // ===== ONLINE MULTIPLAYER (SIMPLIFIED) =====
     async function createRoom() {
         const roomName = elements.roomName ? elements.roomName.value.trim() : `${gameState.playerName}'s Room`;
         const modeId = elements.onlineModeSelect ? elements.onlineModeSelect.value : 'classic';
         const questions = elements.onlineQuestionCount ? elements.onlineQuestionCount.value : '10';
         const categoryId = elements.onlineCategorySelect ? elements.onlineCategorySelect.value : 'general';
-        
         // Generate room code
         const roomCode = generateRoomCode();
-        
         gameState.roomCode = roomCode;
         gameState.roomName = roomName;
         gameState.currentGameMode = modeId;
@@ -4725,7 +4126,6 @@
         gameState.selectedCategory = categoryId;
         gameState.isHost = true;
         gameState.isOnlineGame = true;
-        
         // Update waiting room
         if (elements.roomCodeDisplay) {
             elements.roomCodeDisplay.textContent = roomCode;
@@ -4741,22 +4141,17 @@
         if (elements.roomCategory) {
             elements.roomCategory.textContent = category ? category.name : 'General Knowledge';
         }
-        
         // Close modal and go to waiting room
         closeModal('createRoomModal');
         updateNavigation('waiting');
-        
         showNotification('Room created! Share the code with friends.');
     }
-
     async function joinRoom() {
         const roomCode = elements.joinRoomCode ? elements.joinRoomCode.value.trim().toUpperCase() : '';
-        
         if (!roomCode || roomCode.length !== 6) {
             alert('Please enter a valid 6-digit room code');
             return;
         }
-        
         // For demo, accept any code
         gameState.roomCode = roomCode;
         gameState.roomName = `Room ${roomCode}`;
@@ -4765,7 +4160,6 @@
         gameState.selectedCategory = 'general';
         gameState.isHost = false;
         gameState.isOnlineGame = true;
-        
         // Update waiting room
         if (elements.roomCodeDisplay) {
             elements.roomCodeDisplay.textContent = roomCode;
@@ -4779,14 +4173,11 @@
         if (elements.roomCategory) {
             elements.roomCategory.textContent = 'General Knowledge';
         }
-        
         // Close modal and go to waiting room
         closeModal('joinRoomModal');
         updateNavigation('waiting');
-        
         showNotification('Joined room successfully!');
     }
-
     function generateRoomCode() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let code = '';
@@ -4795,7 +4186,6 @@
         }
         return code;
     }
-
     function copyRoomCode() {
         if (gameState.roomCode) {
             navigator.clipboard.writeText(gameState.roomCode).then(() => {
@@ -4812,7 +4202,6 @@
             });
         }
     }
-
     function shareRoomLink() {
         if (navigator.share) {
             navigator.share({
@@ -4824,7 +4213,6 @@
             copyRoomCode();
         }
     }
-
     async function refreshRoomsList() {
         // For demo, show mock rooms
         if (elements.roomList) {
@@ -4857,44 +4245,36 @@
                 </div>
             `;
         }
-        
         showNotification('Rooms refreshed!');
     }
-
     function joinRoomByCode(code) {
         if (elements.joinRoomCode) {
             elements.joinRoomCode.value = code;
             openModal('joinRoomModal');
         }
     }
-
     function leaveRoom() {
         if (confirm('Leave this room?')) {
             gameState.isOnlineGame = false;
             gameState.roomId = null;
             gameState.roomCode = null;
-            
             updateNavigation('online');
             showNotification('Left the room');
         }
     }
-
     function startOnlineGame() {
         // Start the game
         startGame();
     }
-
     function resumeGame() {
         gameState.gamePaused = false;
         gameState.pauseResolved = true;
         closeModal('pauseModal');
-        
         // Restart timer if game is active
         if (gameState.isGameActive && gameState.timerInterval) {
             startQuestionTimer();
         }
     }
-
     function quitGame() {
         if (confirm('Are you sure you want to quit? Your progress will be lost.')) {
             gameState.isGameActive = false;
@@ -4904,7 +4284,6 @@
             updateNavigation('home');
         }
     }
-
     // Make functions globally accessible
     window.removePlayer = removePlayer;
     window.addPlayer = addPlayer;
